@@ -1,0 +1,5 @@
+Generated with the built-in OpenAI Imagegen tool on 2026-10-13.
+Source reference: public/images/demo/specialist.jpg (an existing fictional AI portrait).
+Output: host-portrait.png, 1122 × 1402. No claim that this is the actual owner.
+
+Use case: identity-preserve. Asset type: clearly labeled demo portrait for a private bathhouse rental website. Edit this existing fictional AI portrait. Preserve exactly the same adult woman's face, hairstyle, welcoming expression, ivory blouse, posture, hands and natural proportions. Change ONLY the background to a simple welcoming residential wooden veranda with pale timber walls, a window overlooking a leafy garden and linen curtain. Remove all traces of beauty studio, cosmetic bottles, treatment bed, medical equipment. Warm natural daylight, realistic everyday home, sage and warm cream colors. Portrait 4:5 composition, no arch or frame inside the image, no text, no watermark. This is an illustrative placeholder, not a real photo of Victoria.

@@ -1,0 +1,345 @@
+@use 'sass:map';
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap');
+
+// Bootstrap owns layout, forms and utility classes; only the shared visual theme lives here.
+$primary: #526344;
+$secondary: #7c684a;
+$body-color: #30382b;
+$body-bg: #f7f4e9;
+$font-family-sans-serif: 'Manrope', Arial, sans-serif;
+$border-color: #dddbc9;
+$card-border-radius: 1rem;
+$card-bg: #fff;
+$input-bg: #fff;
+$input-padding-y: 0.8rem;
+$input-padding-x: 0.8rem;
+$input-border-radius: 0.625rem;
+$form-select-padding-y: 0.8rem;
+$form-select-border-radius: 0.625rem;
+$enable-cssgrid: true;
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+// Responsive column counts for Bootstrap's native CSS grid.
+$utilities: map.merge(
+  $utilities,
+  (
+    'grid-columns': (
+      property: --bs-columns,
+      class: grid-cols,
+      responsive: true,
+      values: (
+        1: 1,
+        2: 2,
+        3: 3,
+        4: 4,
+        5: 5,
+        7: 7,
+      ),
+    ),
+  )
+);
+@layer bootstrap, theme;
+@layer bootstrap {
+  @import 'bootstrap/scss/bootstrap';
+}
+@layer theme {
+  :root {
+    --ink: #30382b;
+    --brand: #526344;
+    --accent: #7c684a;
+    --cream: #f7f4e9;
+    --muted: #646b58;
+    --line: #dddbc9;
+    --display: 'Playfair Display', Georgia, serif;
+    --surface-raised: linear-gradient(145deg, #fffdf5, #ececdf);
+    --shadow-soft: 0 12px 28px -18px #414d3260, 0 3px 7px #4752390b;
+    --shadow-raised: 0 24px 40px -24px #414d3280, 0 5px 12px #47523910;
+    --bs-body-font-family: 'Manrope', Arial, sans-serif;
+    --bs-body-color: var(--ink);
+    --bs-body-bg: var(--cream);
+    --bs-border-color: var(--line);
+    --bs-secondary-color: var(--muted);
+    --bs-link-color: var(--brand);
+    --bs-link-color-rgb: 82, 99, 68;
+    --bs-link-hover-color: #35452c;
+    --bs-link-hover-color-rgb: 53, 69, 44;
+    --section-space: 95px;
+  }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 105px;
+  }
+  body {
+    -webkit-font-smoothing: antialiased;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  input,
+  textarea,
+  [contenteditable='true'],
+  [contenteditable='true'] * {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+  ::selection {
+    color: #30382b;
+    background: #d8dec3;
+  }
+  button,
+  a,
+  input,
+  select {
+    touch-action: manipulation;
+  }
+  button {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: default;
+  }
+  :is(button, a, input, select, textarea, summary):focus-visible {
+    outline: 3px solid #90734a;
+    outline-offset: 4px;
+  }
+  main:focus {
+    outline: none;
+  }
+  section[tabindex='-1']:focus {
+    outline: none;
+  }
+  .container {
+    --bs-gutter-x: 3rem;
+    max-width: 1280px;
+  }
+  .btn {
+    --bs-btn-font-size: 0.9375rem;
+    --bs-btn-font-weight: 600;
+    --bs-btn-padding-x: 1.5rem;
+    --bs-btn-padding-y: 1rem;
+    --bs-btn-border-radius: 100px;
+    min-height: 48px;
+    transition:
+      background-color 0.25s,
+      color 0.25s,
+      border-color 0.25s,
+      transform 0.25s,
+      box-shadow 0.25s;
+  }
+  .btn-primary {
+    --bs-btn-bg: var(--brand);
+    --bs-btn-border-color: #6d7a59;
+    --bs-btn-hover-bg: #445638;
+    --bs-btn-hover-border-color: #6d7a59;
+    --bs-btn-active-bg: #35452c;
+    --bs-btn-active-border-color: transparent;
+    --bs-btn-disabled-bg: #969e87;
+    --bs-btn-disabled-border-color: transparent;
+    --bs-btn-focus-shadow-rgb: 82, 99, 68;
+    background-image: linear-gradient(115deg, #687a52, #485d3a, #687a52);
+    background-size: 200% 100%;
+    box-shadow:
+      0 8px 22px #52634426,
+      inset 0 1px 1px #ffffff60;
+    transition:
+      background-position 600ms ease,
+      background-color 350ms ease,
+      color 350ms ease,
+      border-color 350ms ease,
+      transform 450ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 450ms ease;
+  }
+  .btn-primary:hover {
+    background-position: 100% 0;
+    transform: translateY(-2px);
+    box-shadow:
+      0 12px 26px #52634438,
+      inset 0 1px 1px #ffffff60;
+  }
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow:
+      0 4px 12px #52634426,
+      inset 0 1px 1px #ffffff40;
+  }
+  .display-number {
+    display: block;
+    flex-shrink: 0;
+    font-family: var(--display);
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -0.035em;
+    color: #84916d;
+    text-shadow:
+      0 1px 0 #fffcef,
+      0 4px 10px #52634424;
+  }
+  .btn-primary:disabled {
+    background-image: none;
+  }
+  .btn-outline-primary {
+    --bs-btn-color: var(--brand);
+    --bs-btn-border-color: #a9b08f;
+    --bs-btn-hover-bg: var(--brand);
+    --bs-btn-hover-border-color: var(--brand);
+    --bs-btn-active-bg: var(--brand);
+    --bs-btn-active-border-color: var(--brand);
+    --bs-btn-disabled-color: #8b927c;
+    --bs-btn-disabled-border-color: #cdd2bb;
+  }
+  .btn-link {
+    --bs-btn-color: var(--brand);
+    --bs-btn-hover-color: #35452c;
+    --bs-btn-padding-x: 0.3rem;
+  }
+  .brand-mark {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border: 1px solid #afb591;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fff, #e8ebd8);
+    font-style: italic;
+    padding-right: 4px;
+  }
+  .section-heading__kicker {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    margin-bottom: 22px;
+    line-height: 1.7;
+  }
+  .practice-notice {
+    background: #eeebdc;
+    border-color: #dbd6be;
+    color: #746849;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  @keyframes arrive {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @media (max-width: 767.98px) {
+    html {
+      scroll-padding-top: 90px;
+    }
+    .container {
+      --bs-gutter-x: 2.5rem;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation: none !important;
+      transition: none !important;
+    }
+  }
+  .content-section {
+    padding-block: var(--section-space);
+    scroll-margin-top: 15px;
+  }
+  .section-heading {
+    margin-bottom: 40px;
+  }
+  .section-heading__title {
+    font-family: var(--display);
+    font-size: clamp(36px, 3.8vw, 54px);
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    line-height: 1.2;
+    margin-bottom: 0;
+  }
+  .section-heading__accent {
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .section-heading__intro {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.85;
+    margin-bottom: 0;
+  }
+  @media (max-width: 991.98px) {
+    :root {
+      --section-space: 72px;
+    }
+  }
+  @media (max-width: 767.98px) {
+    :root {
+      --section-space: 42px;
+    }
+    .section-heading {
+      margin-bottom: 28px;
+    }
+    .section-heading__title {
+      font-size: clamp(32px, 8.5vw, 43px);
+    }
+    .section-heading__kicker {
+      font-size: 11px;
+    }
+    .section-heading__intro {
+      font-size: 15px;
+    }
+  }
+  html:has(.contact-request[open], .media-dialog[open]) {
+    overflow: hidden;
+  }
+  .section-button {
+    --action-arrow-shift: translate(0);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    min-height: 56px;
+    padding: 10px 12px 10px 24px;
+  }
+  .section-button:hover {
+    --action-arrow-shift: translate(2px, -2px);
+    --action-arrow-bg: #fffcec26;
+  }
+  .section-button--down:hover {
+    --action-arrow-shift: translateY(2px);
+  }
+
+  .grid {
+    --bs-columns: 1;
+  }
+  .display-font {
+    font-family: var(--display);
+  }
+  .display-title {
+    font-family: var(--display);
+    font-size: clamp(2.25rem, 4vw, 3.375rem);
+    line-height: 1.15;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+  }
+  .display-subtitle {
+    font-family: var(--display);
+    font-size: 1.75rem;
+    line-height: 1.25;
+    font-weight: 400;
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "created": "2026-10-07",
+  "generator": "OpenAI imagegen",
+  "purpose": "Демонстрационные изображения для прототипа, не фото Ольги, не её кабинет и не реальные результаты процедур.",
+  "delivery": "JPEG quality 85, full original dimensions, no cropping or semantic edits. Generated PNG originals retained in Codex generated_images.",
+  "assets": [
+    {
+      "file": "specialist.jpg",
+      "prompt": "Use case: photorealistic-natural. Asset type: placeholder portrait for a cosmetologist website, later replaced by the real owner's photo and clearly labeled demo. Fictional woman around 35 with shoulder-length dark blonde hair, warm natural expression, looking into camera, simple elegant ivory blouse, photographed from waist up in a softly lit beige skincare studio. Natural human skin texture, subtle makeup, welcoming professional presence. Warm neutral ivory and soft blush colors, portrait 4:5 image, generous room around head and shoulders so face stays visible in a wide crop. No text, no diploma, no badge, no claims of medical qualification, no watermark."
+    },
+    {
+      "file": "studio.jpg",
+      "prompt": "Use case: photorealistic-natural. Asset type: clearly labeled demo interior photograph for an independent cosmetologist website. Generate a refined realistic modest skincare treatment room, not a hospital, landscape 3:2 composition. A cream treatment bed with neatly folded white towels, small simple white trolley, sink and closed cabinets, light linen curtains, natural daylight, a small muted rose ceramic vase. Warm ivory, beige and dusty blush palette. Tidy inviting real small-business space, realistic materials, no people, no lettering, no certificates, no logos, no watermark. No needles or invasive treatment imagery."
+    },
+    {
+      "file": "comparison-1.jpg",
+      "prompt": "Use case: photorealistic-natural. Asset type: explicitly labeled illustrative demo of a before-and-after comparison card, not a real treatment outcome. Single landscape 3:2 image, a precise diptych of TWO photographs with identical proportions side by side, no margin or separator. The SAME fictional adult woman aged about 30 in both halves, shoulders and face, face looking slightly right, hair tied back, plain warm light-gray studio background. Exactly matching light, angle, size and neutral expression. Natural skin texture in both halves. Left skin looks subtly less hydrated, right appears subtly refreshed, no dramatic transformation, no disease or acne claims. High quality honest editorial photography aesthetic, no makeup change, no retouching look. No text labels, no arrows, no logo or watermark; website adds labels outside the image."
+    },
+    {
+      "file": "comparison-2.jpg",
+      "prompt": "Use case: photorealistic-natural. Asset type: explicitly labeled illustrative demo of a before-and-after comparison card, not a real treatment outcome. Single landscape 3:2 image, a precise diptych of TWO photographs with identical proportions side by side, no margin or separator. The SAME fictional adult woman aged about 45 with short chestnut hair in both halves, shoulders and face, face looking slightly right, hair tucked behind the ears, plain warm light-gray studio background. Exactly matching light, angle, size and neutral expression. Natural skin texture in both halves. Left skin looks subtly less hydrated, right appears subtly refreshed, no dramatic transformation, no disease or acne claims. High quality honest editorial photography aesthetic, no makeup change, no retouching look. No text labels, no arrows, no logo or watermark; website adds labels outside the image."
+    },
+    {
+      "file": "comparison-3.jpg",
+      "prompt": "Use case: photorealistic-natural. Asset type: explicitly labeled illustrative demo of a before-and-after comparison card, not a real treatment outcome. Single landscape 3:2 image, a precise diptych of TWO photographs with identical proportions side by side, no margin or separator. The SAME fictional adult woman aged about 27 with dark curly hair and olive skin in both halves, shoulders and face, face looking slightly left, hair tied back, plain warm light-gray studio background. Exactly matching light, angle, size and neutral expression. Natural skin texture in both halves. Left skin looks subtly less hydrated, right appears subtly refreshed, no dramatic transformation, no disease or acne claims. High quality honest editorial photography aesthetic, no makeup change, no retouching look. No text labels, no arrows, no logo or watermark; website adds labels outside the image."
+    }
+  ]
+}

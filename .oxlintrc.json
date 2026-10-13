@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "browser": true
+  },
+  "ignorePatterns": ["dist/**", "node_modules/**", ".sites-runtime/**", ".pnpm-store/**"],
+  "overrides": [
+    {
+      "files": ["eslint*.js", "vite.config.ts", "tests/**/*.{ts,js}"],
+      "env": {
+        "browser": false,
+        "node": true
+      }
+    }
+  ]
+}

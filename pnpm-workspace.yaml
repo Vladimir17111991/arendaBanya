@@ -1,2 +1,5 @@
+nodeLinker: hoisted
 allowBuilds:
+  # Sass uses the platform's prebuilt watcher; a source build is unnecessary.
+  '@parcel/watcher': false
   esbuild: true
