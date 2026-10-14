@@ -82,5 +82,8 @@ test('bathhouse gallery accepts a single photo and allows removal', () => {
 test('sample contact cannot call a real person and keeps selected rental details', () => {
   assert.equal(phone.href, null);
   assert.equal(phone.isDemo, true);
-  assert.match(contactMessage('2 суток, 10 января, 12:00'), /Виктория.*2 суток, 10 января, 12:00/);
+  assert.match(
+    contactMessage('2 суток, 10 января, 12:00'),
+    /Здравствуйте!.*2 суток, 10 января, 12:00/,
+  );
 });

@@ -189,7 +189,7 @@
               {{ daily ? 'сут.' : 'ч.' }}
             </p>
             <p class="availability__price-note">
-              Тестовый тариф за каждого гостя. Условия и количество мест уточните у Виктории.
+              Тестовый тариф за каждого гостя. Условия и количество мест уточните по телефону.
             </p>
           </div>
           <template v-if="daily">
@@ -215,9 +215,7 @@
                   : 'Выберите дату заезда, затем дату выезда. Количество суток и стоимость рассчитаются автоматически.'
               }}
             </p>
-            <p class="availability__hint">
-              Время заезда и выезда согласуйте с Викторией по телефону.
-            </p>
+            <p class="availability__hint">Время заезда и выезда согласуйте по телефону.</p>
           </template>
           <h3 v-else class="availability__date">
             {{ selectedDate ? fullDate(selectedDate) : 'Когда приедете?' }}
@@ -226,7 +224,7 @@
             <button type="button" class="availability__reset" @click="timeSheet = true">
               Посмотреть свободное время
             </button>
-            <p class="availability__hint">Время начала согласуйте с Викторией при звонке.</p>
+            <p class="availability__hint">Время начала уточните при звонке.</p>
           </template>
           <p v-else-if="!daily" class="availability__hint">
             Выберите отмеченную дату в календаре. Здесь появится доступное время с учётом
@@ -252,13 +250,13 @@
           <ContactLink
             class="btn btn-primary section-button availability__call"
             :service-name="requestDetails"
-            >Позвонить Виктории <ActionArrow
+            >Позвонить <ActionArrow
           /></ContactLink>
-          <p class="availability__confirmation">Бронь подтверждается Викторией по телефону.</p>
+          <p class="availability__confirmation">Бронь подтверждается по телефону.</p>
         </div>
       </div>
       <p v-else class="availability__intro">
-        Расписание появится после добавления вариантов аренды. Уточните доступные даты у Виктории.
+        Расписание появится после добавления вариантов аренды. Уточните доступные даты по телефону.
       </p>
     </div>
     <MediaDialog

@@ -20,8 +20,8 @@
 
     <div v-if="!services.length" class="price-list__empty">
       <h3 class="price-list__empty-title">Условия аренды обновляются</h3>
-      <p>Виктория расскажет о доступных вариантах и свободных датах по телефону.</p>
-      <ContactLink class="price-list__contact">Обсудить с Викторией</ContactLink>
+      <p>Уточните доступные варианты отдыха и свободные даты по телефону.</p>
+      <ContactLink class="price-list__contact">Связаться</ContactLink>
     </div>
 
     <TransitionGroup v-else name="rental-card" tag="div" class="price-list__cards">
@@ -46,7 +46,7 @@
           <p v-if="service.price > 0" class="price-list__unit">
             за одного гостя / {{ service.rentalUnit === 'day' ? 'сутки' : 'час' }}
           </p>
-          <p v-else class="price-list__unit">Уточните стоимость у Виктории</p>
+          <p v-else class="price-list__unit">Уточните стоимость по телефону</p>
         </div>
 
         <div class="price-list__information">

@@ -9,16 +9,15 @@
       <div class="row align-items-center gy-3">
         <div class="col-lg-6">
           <h2 id="contacts-title" class="contact-section__title">
-            До встречи <em class="contact-section__accent">у Виктории.</em>
+            До встречи <em class="contact-section__accent">в бане.</em>
           </h2>
           <p class="contact-section__intro">
-            Позвоните Виктории, чтобы договориться об отдыхе: на несколько часов или на сутки со
-            спальней.
+            Позвоните, чтобы договориться об отдыхе: на несколько часов или на сутки со спальней.
           </p>
         </div>
         <div class="col-lg-5 offset-lg-1">
           <ContactLink class="btn section-button contact-section__instagram w-100"
-            >Позвонить Виктории <ActionArrow
+            >Позвонить <ActionArrow
           /></ContactLink>
           <p class="contact-section__handle">{{ phone.label }}</p>
         </div>

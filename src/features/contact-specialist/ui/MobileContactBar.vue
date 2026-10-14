@@ -6,7 +6,7 @@
           :service-name="serviceName"
           class="btn btn-primary section-button flex-grow-1 mobile-contact__button"
         >
-          Позвонить Виктории <ActionArrow />
+          Позвонить <ActionArrow />
         </ContactLink>
       </div>
     </div>

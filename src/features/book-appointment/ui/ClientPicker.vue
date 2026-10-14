@@ -107,8 +107,11 @@
           Этот телефон уже есть у клиента <strong>{{ duplicate.name }}</strong
           >.
         </p>
-        <BaseButton variant="text" class="ps-0 text-start" @click="selectExisting(duplicate)"
-          >Выбрать существующего клиента</BaseButton
+        <BaseButton
+          variant="secondary"
+          class="client-picker__duplicate-action"
+          @click="selectExisting(duplicate)"
+          >Выбрать клиента</BaseButton
         >
       </div>
     </template>
@@ -177,6 +180,20 @@ function selectExisting(client: Client) {
 </script>
 
 <style scoped>
+.client-picker__duplicate-action {
+  margin-top: 12px;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 12px 20px;
+  text-align: center;
+  white-space: normal;
+}
+@media (max-width: 575.98px) {
+  .client-picker__duplicate-action {
+    width: 100%;
+  }
+}
+
 .client-picker__group {
   min-width: 0;
 }

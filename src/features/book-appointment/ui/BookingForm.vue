@@ -2,7 +2,8 @@
   <section v-if="!isAdmin" class="card p-4 mt-5">
     <h1 class="display-subtitle">Бронирование по телефону</h1>
     <p class="my-3 text-body-secondary">
-      Позвоните Виктории, чтобы согласовать часы или дни отдыха. Она внесёт бронь в расписание.
+      Позвоните, чтобы согласовать часы или дни отдыха. После подтверждения бронь появится в
+      расписании.
     </p>
     <BaseButton @click="emit('back')">На сайт</BaseButton>
   </section>

@@ -17,9 +17,9 @@
         ×
       </button>
       <span class="contact-request__preview-label d-block">Тестовый контакт</span>
-      <h2 id="contact-request-title" class="contact-request__title">Позвонить Виктории</h2>
+      <h2 id="contact-request-title" class="contact-request__title">Позвонить</h2>
       <p class="contact-request__text">
-        {{ phone.label }} — пример номера. Настоящий телефон Виктории появится здесь позже.
+        {{ phone.label }} — пример номера. Контактный телефон появится здесь позже.
       </p>
       <p id="contact-request-label" class="contact-request__label fw-semibold">Детали для звонка</p>
       <p
@@ -37,7 +37,7 @@
         создаётся.
       </p>
       <p class="contact-request__confirmation contact-request__text">
-        Виктория подтвердит дату, время и стоимость аренды лично по телефону.
+        Дату, время и стоимость аренды можно уточнить по телефону.
       </p>
       <p class="contact-request__status contact-request__text" role="status">{{ feedback }}</p>
     </div>

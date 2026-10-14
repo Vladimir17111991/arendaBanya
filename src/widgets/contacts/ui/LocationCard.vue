@@ -30,7 +30,7 @@
     >
       <p class="route-dialog__note">
         Макет фотомаршрута: фото и адрес тестовые. Реальные ориентиры добавим позже; пока уточните
-        дорогу у Виктории.
+        дорогу по телефону.
       </p>
       <div class="route-collage">
         <figure v-for="(step, index) in routeSteps" :key="step.title" class="route-step">
@@ -71,7 +71,7 @@ const routeSteps = [
     title: 'Место встречи',
     image: './images/bathhouse/pexels-15857059.jpg',
     alt: 'Тестовое фото террасы у бани',
-    description: 'Добавим фото ворот и покажем, где оставить машину и встретиться с Викторией.',
+    description: 'Добавим фото ворот и покажем, где оставить машину перед входом.',
   },
   {
     title: 'Вход в баню',

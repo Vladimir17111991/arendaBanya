@@ -123,7 +123,7 @@ function chooseRental(id: number) {
   grid-template-areas: 'heading visual' 'copy visual';
   align-items: center;
   column-gap: 64px;
-  padding-block: 72px 80px;
+  padding-block: 56px 48px;
 }
 .hero__heading {
   grid-area: heading;
