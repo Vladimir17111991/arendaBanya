@@ -195,4 +195,9 @@ function submit() {
     gap: 6px;
   }
 }
+@media (max-width: 359.98px) {
+  .schedule-panel__week {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 </style>
