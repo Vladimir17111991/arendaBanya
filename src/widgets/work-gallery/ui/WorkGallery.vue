@@ -133,7 +133,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { usePractice } from '../../../entities/practice/index.ts';
 import { MediaDialog } from '../../../shared/ui/index.ts';
 
@@ -212,9 +212,20 @@ watch(
   },
   { flush: 'sync' },
 );
+let resizeObserver: ResizeObserver | undefined;
+onMounted(() => {
+  resizeObserver = new ResizeObserver(() => {
+    const element = swiper.value;
+    if (element?.clientWidth && selectedIndex.value >= 0)
+      element.scrollTo({ left: selectedIndex.value * element.clientWidth, behavior: 'instant' });
+  });
+  if (swiper.value) resizeObserver.observe(swiper.value);
+});
+onUnmounted(() => resizeObserver?.disconnect());
 async function openPhoto(id: string) {
   selectedId.value = id;
   await nextTick();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
   swiper.value?.scrollTo({
     left: selectedIndex.value * swiper.value.clientWidth,
     behavior: 'instant',
