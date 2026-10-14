@@ -246,3 +246,144 @@ body:has(.services-page) {
     }
   }
 }
+
+// Shared public action shape, including text links promoted to buttons.
+body:has(.services-page) .btn-primary {
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  min-height: 50px;
+}
+body:has(.services-page) .hero__contact,
+body:has(.services-page) .first-visit__link {
+  color: white;
+  text-decoration: none;
+  border: 1px solid #c578df;
+}
+body:has(.services-page) .action-arrow {
+  border: 0;
+  background: transparent;
+}
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+body:has(.practice-demo__admin) {
+  --brand: #713a8e;
+  --accent: #aa468b;
+  --ink: #30203b;
+  --muted: #74617f;
+  --cream: #f6f1fa;
+  --line: #dfcfe9;
+  --surface: #fff;
+  --surface-soft: #f0e7f6;
+  background: #f6f1fa;
+  color: var(--ink);
+  .btn-primary {
+    --bs-btn-bg: #753b92;
+    --bs-btn-border-color: #753b92;
+    --bs-btn-hover-bg: #8745a4;
+    --bs-btn-hover-border-color: #8745a4;
+    border-radius: 14px;
+    min-height: 48px;
+  }
+  .btn-outline-primary {
+    --bs-btn-color: #713a8e;
+    --bs-btn-border-color: #c6a8d6;
+    --bs-btn-hover-bg: #753b92;
+    --bs-btn-hover-border-color: #753b92;
+    border-radius: 14px;
+    min-height: 44px;
+  }
+  .form-control,
+  .form-select {
+    min-height: 46px;
+    font-size: 16px;
+    border-radius: 12px;
+    border-color: #d9c4e5;
+  }
+  .small,
+  small,
+  .form-label {
+    font-size: 14px;
+  }
+  .practice-demo__notice {
+    background: #eee5f5;
+    border-color: #dcc7e8;
+    color: #60466e;
+    font-size: 14px;
+  }
+  .cabinet-dashboard__summary {
+    border-radius: 20px;
+    background: #ede0f5;
+    padding: 18px;
+  }
+  .cabinet-dashboard__calendar,
+  .cabinet-dashboard__clients,
+  .cabinet-dashboard__agenda {
+    border-radius: 20px;
+  }
+}
+
+body:has(.practice-demo__admin) {
+  .card,
+  .appointment-calendar {
+    background: #fff;
+    border-color: #dfcfe9;
+    border-radius: 20px;
+    box-shadow: 0 8px 24px #44215d08;
+  }
+  .appointment-card__actions {
+    background: #f4ecf8;
+    border-color: #dfcfe9;
+  }
+  .appointment-card__phone,
+  .appointment-card__end,
+  .appointment-card__date,
+  .appointment-card__status,
+  .appointment-card__action,
+  .appointment-card__visit {
+    font-size: 14px;
+  }
+  .appointment-card__action {
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+  .appointment-calendar__day {
+    min-height: 44px;
+    font-size: 16px;
+    border-radius: 12px;
+  }
+  .appointment-calendar__weekday,
+  .appointment-calendar__legend,
+  .appointment-calendar__today {
+    font-size: 14px;
+  }
+  .appointment-calendar__arrow {
+    background: #f0e7f6;
+    border: 1px solid #d9c4e5;
+    border-radius: 12px;
+    min-width: 44px;
+    min-height: 44px;
+    color: #713a8e;
+  }
+  .appointment-calendar__day:hover {
+    background: #eee1f5;
+  }
+  .appointment-calendar__day--selected,
+  .appointment-calendar__day--selected:hover {
+    background: #753b92;
+    color: white;
+  }
+  .cabinet-dashboard__summary {
+    background: linear-gradient(120deg, #ede0f5, #f7e8f3);
+    border-color: #dfcfe9;
+  }
+  .cabinet-dashboard__next {
+    background: #f0e7f6;
+    border-color: #d9c4e5;
+  }
+  .cabinet-dashboard__next:hover {
+    background: #e6d4ef;
+  }
+}

@@ -1,29 +1,29 @@
 <template>
   <figure class="hero-visual position-relative">
     <div class="hero-visual__halo" aria-hidden="true"></div>
-    <img
-      v-if="image"
-      class="hero-visual__image d-block w-100"
-      :src="image.url"
-      :alt="image.isDemo ? 'Демонстрационный портрет хозяйки бани' : 'Виктория — хозяйка бани'"
-      :width="image.width"
-      :height="image.height"
-      fetchpriority="high"
-      decoding="async"
-    />
-    <div
-      v-else
-      class="hero-visual__placeholder d-flex flex-column align-items-center justify-content-center"
-    >
-      <span class="hero-visual__branch" aria-hidden="true"></span>
-      <span class="hero-visual__monogram" aria-hidden="true">В.</span>
-      <span class="hero-visual__placeholder-title">Здесь будет фото Виктории</span>
-      <span class="hero-visual__placeholder-note">Хозяйки этого места</span>
+    <div class="hero-visual__frame">
+      <img
+        v-if="image"
+        class="hero-visual__image d-block w-100"
+        :src="image.url"
+        :alt="image.isDemo ? 'Демонстрационный портрет хозяйки бани' : 'Виктория — хозяйка бани'"
+        :width="image.width"
+        :height="image.height"
+        fetchpriority="high"
+        decoding="async"
+      />
+      <div
+        v-else
+        class="hero-visual__placeholder d-flex flex-column align-items-center justify-content-center"
+      >
+        <span class="hero-visual__branch" aria-hidden="true"></span>
+        <span class="hero-visual__monogram" aria-hidden="true">В.</span>
+        <span class="hero-visual__placeholder-title">Здесь будет фото Виктории</span>
+        <span class="hero-visual__placeholder-note">Хозяйки этого места</span>
+      </div>
     </div>
     <figcaption class="hero-visual__caption">
       <span class="hero-visual__name">Виктория</span>
-      <span class="hero-visual__role">Будем знакомы. Я хозяйка бани.</span>
-      <span v-if="image?.isDemo" class="hero-visual__demo">Демонстрационный портрет</span>
     </figcaption>
   </figure>
 </template>
@@ -37,19 +37,22 @@ defineProps<{ image?: SiteImage | null }>();
 .hero-visual {
   width: min(100%, 435px);
   margin: 0 auto;
-  padding: 8px 16px 20px 0;
+  padding: 0;
   isolation: isolate;
 }
-.hero-visual::before {
+.hero-visual__frame {
+  position: relative;
+  margin: 0 8px 8px 0;
+  isolation: isolate;
+}
+.hero-visual__frame::before {
   content: '';
   position: absolute;
-  inset: 25px 2px 90px 18px;
-  border: 1px solid #ed99e46b;
-  border-radius: 28px;
-  transform: rotate(3deg);
-  z-index: -1;
+  inset: 8px -8px -8px 8px;
+  border: 1px solid #c878c985;
+  border-radius: 24px;
   background: linear-gradient(145deg, #6e3694, #311644 70%, #852964);
-  box-shadow: 0 22px 60px -24px #bb43c65c;
+  z-index: -1;
 }
 .hero-visual__halo {
   position: absolute;

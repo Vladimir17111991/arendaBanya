@@ -8,7 +8,6 @@
     <div class="container">
       <div class="availability__heading">
         <div>
-          <p class="section-eyebrow">ПЛАНЫ НА ОТДЫХ</p>
           <h2 id="availability-title" class="availability__title">Выберите <em>свой день.</em></h2>
         </div>
         <p class="availability__intro">
@@ -127,7 +126,17 @@
                   aria-label="Предыдущий месяц"
                   @click="changeMonth(-1)"
                 >
-                  ←
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="m14 6-6 6 6 6" />
+                  </svg>
                 </button>
                 <h3 class="availability__month" aria-live="polite">
                   <span>{{ monthName }}</span>
@@ -140,11 +149,30 @@
                   aria-label="Следующий месяц"
                   @click="changeMonth(1)"
                 >
-                  →
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    aria-hidden="true"
+                  >
+                    <path d="m10 6 6 6-6 6" />
+                  </svg>
                 </button>
               </div>
             </template>
-            <div class="availability__grid" @pointerleave="clearHover">
+            <div
+              class="availability__grid"
+              :class="{ 'availability__grid--daily': daily }"
+              @pointerdown="beginDrag"
+              @pointermove="moveDrag"
+              @pointerup="endDrag"
+              @pointercancel="cancelDrag"
+              @lostpointercapture="cancelDrag"
+              @pointerleave="!drag.active && clearHover()"
+            >
               <span
                 v-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']"
                 :key="day"
@@ -173,7 +201,7 @@
                 @pointerenter="hoverDateAt(day.date)"
                 @focus="hoverDateAt(day.date)"
                 @blur="clearHover"
-                @click="selectDate(day.date)"
+                @click="chooseDate(day.date, $event)"
               >
                 <span class="availability__day-number">{{ Number(day.date.slice(-2)) }}</span
                 ><span
@@ -188,7 +216,7 @@
             <span class="availability__legend-dot"></span>
             {{
               daily
-                ? 'Доступные даты · заезд и выезд выбираются двумя нажатиями'
+                ? 'Проведите от заезда до выезда или нажмите две даты'
                 : 'Есть свободное время для выбранного срока'
             }}
           </div>
@@ -325,6 +353,42 @@
         }}
       </p>
     </div>
+    <MediaDialog
+      :open="timeSheet"
+      class="time-sheet"
+      title="Выберите время начала"
+      @close="timeSheet = false"
+    >
+      <p class="time-sheet__date">{{ selectedDate ? fullDate(selectedDate) : '' }}</p>
+      <p>{{ quantity }} ч. · {{ guestCount }} гостей · {{ money(totalPrice ?? 0) }}</p>
+      <div class="availability__slots">
+        <button
+          v-for="time in slots"
+          :key="time"
+          type="button"
+          class="availability__slot"
+          :class="{ 'availability__slot--selected': selectedTime === time }"
+          :aria-pressed="selectedTime === time"
+          @click="selectedTime = time"
+        >
+          {{ time }}
+        </button>
+      </div>
+      <p v-if="!slots.length" role="status">
+        Свободного времени на эту дату нет. Выберите другую дату.
+      </p>
+      <p class="time-sheet__selection" aria-live="polite">
+        {{ selectedTime ? 'С ' + selectedTime + ' до ' + endLabel : 'Выберите удобное время' }}
+      </p>
+      <button
+        type="button"
+        class="btn btn-primary w-100"
+        :disabled="!selectedTime"
+        @click="timeSheet = false"
+      >
+        Готово
+      </button>
+    </MediaDialog>
   </section>
 </template>
 
@@ -332,10 +396,11 @@
 import { computed, ref, watch } from 'vue';
 import { MAX_GUESTS, rentalPrice, usePractice } from '../../../entities/practice/index.ts';
 import { ContactLink } from '../../../features/contact-specialist/index.ts';
-import { ActionArrow, NumberStepper } from '../../../shared/ui/index.ts';
+import { ActionArrow, NumberStepper, MediaDialog } from '../../../shared/ui/index.ts';
 import { fullDate, shortDate, money } from '../../../shared/lib/format/index.ts';
 import { usePublicAvailability } from '../model/usePublicAvailability.ts';
 import CalendarStage from './CalendarStage.vue';
+import { createDateDrag } from '../model/dateDrag.ts';
 
 const {
   services,
@@ -371,6 +436,41 @@ const {
   clearSelection,
 } = usePublicAvailability(usePractice());
 
+const timeSheet = ref(false);
+const drag = createDateDrag({ clearSelection, selectDate, hoverDateAt, clearHover });
+function dateButton(target: EventTarget | null) {
+  return target instanceof Element
+    ? target.closest<HTMLButtonElement>('button[data-date]:not(:disabled)')
+    : null;
+}
+function beginDrag(event: PointerEvent) {
+  if (!daily.value || !event.isPrimary || event.button !== 0) return;
+  const date = dateButton(event.target)?.dataset.date;
+  if (!date) return;
+  drag.begin({ id: event.pointerId, x: event.clientX, y: event.clientY }, date);
+  (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+}
+function moveDrag(event: PointerEvent) {
+  if (!drag.active) return;
+  const date =
+    dateButton(document.elementFromPoint(event.clientX, event.clientY))?.dataset.date ?? '';
+  drag.move({ id: event.pointerId, x: event.clientX, y: event.clientY }, date);
+}
+function endDrag(event: PointerEvent) {
+  drag.end(event.pointerId);
+}
+function cancelDrag() {
+  drag.cancel();
+}
+function chooseDate(date: string, event: MouseEvent) {
+  if (drag.ignoreClick(event.detail)) return;
+  selectDate(date);
+  if (!daily.value && selectedDate.value === date) timeSheet.value = true;
+}
+watch(serviceId, () => {
+  cancelDrag();
+  timeSheet.value = false;
+});
 const monthDirection = ref(1);
 const monthName = computed(() =>
   new Date(`${month.value}-01T12:00:00Z`).toLocaleDateString('ru-RU', {
@@ -410,10 +510,10 @@ function dayWord(value: number) {
 const rangeHint = computed(() => {
   if (previewValid.value)
     return `${previewQuantity.value} ${dayWord(previewQuantity.value)} · нажмите на дату, чтобы выбрать период`;
-  if (choosingEnd.value) return 'Выберите дату выезда. Наведите курсор, чтобы увидеть весь период.';
+  if (choosingEnd.value) return 'Выберите выезд или проведите пальцем по датам.';
   if (checkoutDate.value)
     return `${quantity.value} ${dayWord(quantity.value)} · новый клик начнёт выбор заново`;
-  return 'Сначала выберите дату заезда, затем дату выезда.';
+  return 'Проведите от заезда до выезда или нажмите две даты.';
 });
 const displayedQuantity = computed(() =>
   daily.value && previewValid.value ? previewQuantity.value : quantity.value,
@@ -582,15 +682,21 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__format-check {
   position: absolute;
-  right: 12px;
-  top: 15px;
+  right: 16px;
+  top: 18px;
   width: 22px;
   height: 22px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--line, #5b3b71);
+  border: 2px solid var(--muted);
   border-radius: 50%;
-  font-size: 14px;
+  color: transparent;
+  font-size: 0;
+}
+.availability__format--selected .availability__format-check::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: white;
 }
 .availability__format--selected .availability__format-check {
   color: var(--selected-text, #fff);
@@ -723,7 +829,6 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 10px 0;
-  transform-style: preserve-3d;
 }
 .availability__weekday {
   text-align: center;
@@ -758,7 +863,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   color: var(--ink, #fcf5ff);
   background: linear-gradient(145deg, #513165, #34203f);
   border-color: #b084ca45;
-  transform: translateZ(5px);
+  transform: none;
   box-shadow:
     inset 0 1px 0 #f5d5ff25,
     0 4px 0 #160c21,
@@ -773,7 +878,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
     0 0 18px #eb55bf35;
 }
 .availability__day--available:active {
-  transform: translateZ(1px) translateY(2px);
+  transform: none;
   box-shadow:
     inset 0 1px 0 #ffe6ff70,
     0 1px 0 #160c21;
@@ -785,7 +890,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   background: linear-gradient(180deg, #66338a, #4e245f);
   border-inline-color: transparent;
   border-block-color: #c177d177;
-  transform: translateZ(5px);
+  transform: none;
   box-shadow:
     inset 0 1px 0 #f3b0ed30,
     0 4px 0 #291237;
@@ -806,7 +911,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   color: var(--selected-text, #fff);
   background: linear-gradient(145deg, #a557d6, #8d327f);
   border-color: #ffb1e4;
-  transform: translateZ(9px);
+  transform: none;
   box-shadow:
     inset 0 1px 0 #ffe0fbb0,
     0 5px 0 #451c53,
@@ -1167,6 +1272,68 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   .availability__day--range,
   .availability__day--selected {
     transform: none;
+  }
+}
+
+.availability__grid--daily .availability__day:not(:disabled) {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.availability__day--available,
+.availability__day--available:hover,
+.availability__day--available:active,
+.availability__day--range,
+.availability__day--selected {
+  box-shadow: none;
+  transform: none;
+}
+.availability__arrow {
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--control-bg);
+  box-shadow: none;
+}
+.availability__arrow:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+  background: var(--selected-bg);
+}
+.time-sheet__date {
+  font-size: 22px;
+  color: var(--ink);
+}
+.time-sheet__selection {
+  margin: 24px 0;
+}
+.time-sheet {
+  max-width: 520px;
+}
+@media (max-width: 767.98px) {
+  .time-sheet {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: none;
+    max-height: 85dvh;
+    border-radius: 24px 24px 0 0;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .time-sheet[open] {
+    animation: sheet-in 260ms ease-out;
+  }
+}
+@keyframes sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .time-sheet[open] {
+    animation: none;
   }
 }
 </style>

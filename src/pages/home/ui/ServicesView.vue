@@ -4,7 +4,6 @@
     <section id="home" class="hero" tabindex="-1" aria-labelledby="home-title">
       <div class="container hero__layout">
         <div class="hero__heading">
-          <p class="section-heading__kicker hero__kicker">СОЛИГОРСК · БАНЯ И ОТДЫХ СО СПАЛЬНЕЙ</p>
           <h1 id="home-title" class="hero__title fw-normal">
             Баня у Виктории.<br /><em class="hero__accent">Время выдохнуть.</em>
           </h1>
@@ -33,14 +32,11 @@
               >
             </button>
           </div>
-          <p v-if="services.length" class="hero__tariff-note">
-            Тестовые тарифы · расчёт для вашей компании — в календаре
-          </p>
           <div id="hero-contact" class="hero__actions d-flex flex-wrap align-items-center gap-3">
             <SectionLink to="availability" class="btn btn-primary section-button hero__action">
               Свободные даты <ActionArrow />
             </SectionLink>
-            <ContactLink class="hero__contact"
+            <ContactLink class="btn btn-primary section-button hero__contact"
               >Позвонить Виктории <span aria-hidden="true">↗</span></ContactLink
             >
           </div>

@@ -8,7 +8,6 @@
     <div class="container">
       <div class="section-heading row align-items-end gy-3">
         <div class="col-md-7">
-          <p class="section-heading__kicker">ЗНАКОМСТВО С МЕСТОМ</p>
           <h2 id="works-title" class="section-heading__title">
             Загляните <em class="section-heading__accent">в нашу баню.</em>
           </h2>
@@ -67,7 +66,6 @@
               loading="lazy"
               decoding="async"
             />
-            <span class="work-gallery__zoom" aria-hidden="true">↗</span>
           </button>
           <figcaption class="work-gallery__caption">{{ photo.title }}</figcaption>
         </figure>

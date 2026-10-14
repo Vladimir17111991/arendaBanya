@@ -2,9 +2,6 @@
   <Transition name="mobile-contact">
     <div v-if="visible" class="mobile-contact" aria-label="Быстрая связь">
       <div class="container d-flex align-items-center gap-2">
-        <SectionLink to="availability" class="mobile-contact__dates"
-          >Свободные<br />даты</SectionLink
-        >
         <ContactLink
           :service-name="serviceName"
           class="btn btn-primary section-button flex-grow-1 mobile-contact__button"
@@ -18,7 +15,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { ActionArrow, SectionLink } from '../../../shared/ui/index.ts';
+import { ActionArrow } from '../../../shared/ui/index.ts';
 import ContactLink from './ContactLink.vue';
 defineProps<{ serviceName?: string }>();
 const visible = ref(false);

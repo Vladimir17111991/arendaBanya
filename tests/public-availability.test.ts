@@ -1,3 +1,4 @@
+import { createDateDrag } from '../src/widgets/public-availability/model/dateDrag.ts';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { effectScope, nextTick } from 'vue';
@@ -314,6 +315,76 @@ test('calendar respects a format chosen before mount and follows catalog fallbac
     assert.equal(model.serviceId.value, restored.id);
     assert.equal(currentService()?.id, restored.id);
     assert.ok(model.slotsFor('2030-05-06').length);
+  } finally {
+    scope.stop();
+  }
+});
+
+test('drag previews a stay, commits on release and ignores the generated click', () => {
+  const { scope, model, daily } = setup();
+  try {
+    daily();
+    const drag = createDateDrag(model, () => 1000);
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-06');
+    drag.move({ id: 1, x: 50, y: 0 }, '2030-05-09');
+    assert.equal(model.previewQuantity.value, 3);
+    assert.equal(model.checkoutDate.value, '');
+    drag.end(1);
+    assert.equal(model.checkoutDate.value, '2030-05-09');
+    assert.equal(model.totalPrice.value, 960);
+    assert.equal(drag.ignoreClick(1), true);
+    assert.equal(drag.ignoreClick(0), false);
+    drag.cancel();
+    assert.equal(model.checkoutDate.value, '2030-05-09');
+  } finally {
+    scope.stop();
+  }
+});
+
+test('taps, reverse drag, cancellation and other pointers preserve range rules', () => {
+  const { scope, model, daily } = setup();
+  try {
+    daily();
+    const drag = createDateDrag(model);
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-06');
+    drag.move({ id: 2, x: 80, y: 0 }, '2030-05-09');
+    drag.end(2);
+    assert.equal(drag.active, true);
+    drag.end(1);
+    assert.equal(model.selectedDate.value, '2030-05-06');
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-09');
+    drag.end(1);
+    assert.equal(model.checkoutDate.value, '2030-05-09');
+    drag.begin({ id: 1, x: 80, y: 0 }, '2030-05-10');
+    drag.move({ id: 1, x: 0, y: 0 }, '2030-05-07');
+    drag.end(1);
+    assert.equal(model.selectedDate.value, '2030-05-07');
+    assert.equal(model.checkoutDate.value, '2030-05-10');
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-12');
+    drag.move({ id: 1, x: 90, y: 0 }, '2030-05-15');
+    drag.cancel();
+    assert.equal(model.selectedDate.value, '');
+    assert.equal(model.checkoutDate.value, '');
+  } finally {
+    scope.stop();
+  }
+});
+
+test('drag cannot reserve across an occupied date or release outside the dates', () => {
+  const { scope, model, daily, reserve } = setup();
+  try {
+    reserve('2030-05-08');
+    daily();
+    const drag = createDateDrag(model);
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-06');
+    drag.move({ id: 1, x: 90, y: 0 }, '2030-05-10');
+    drag.end(1);
+    assert.equal(model.checkoutDate.value, '');
+    assert.ok(model.rangeError.value);
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-12');
+    drag.move({ id: 1, x: 90, y: 0 }, '');
+    drag.end(1);
+    assert.equal(model.checkoutDate.value, '');
   } finally {
     scope.stop();
   }

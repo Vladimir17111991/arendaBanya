@@ -85,19 +85,9 @@
           >
             Выбрать даты <ActionArrow />
           </button>
-          <ContactLink
-            :service-name="service.name"
-            class="price-list__contact"
-            :aria-label="'Обсудить с Викторией: ' + service.name"
-            >Обсудить с Викторией</ContactLink
-          >
         </div>
       </article>
     </TransitionGroup>
-
-    <p v-if="services.length" class="price-list__footnote">
-      Тестовые тарифы · итоговую стоимость и бронь подтвердит Виктория.
-    </p>
   </section>
 </template>
 

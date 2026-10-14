@@ -1,7 +1,6 @@
 <template>
   <section class="studio" aria-labelledby="studio-title">
     <div class="container studio__layout">
-      <p class="section-heading__kicker studio__kicker">НЕБОЛЬШАЯ ПАУЗА ДЛЯ СЕБЯ</p>
       <h2 id="studio-title" class="studio__title">
         На несколько часов.<br /><em>Или без спешки — на сутки.</em>
       </h2>

@@ -2,14 +2,13 @@
   <section class="first-visit content-section container" aria-labelledby="first-visit-title">
     <div class="row gy-4 gx-lg-5">
       <div class="col-lg-5">
-        <p class="section-heading__kicker">ПЕРЕД ОТДЫХОМ</p>
         <h2 id="first-visit-title" class="section-heading__title mb-3">
           Договоримся<br /><em class="section-heading__accent">обо всём.</em>
         </h2>
         <p class="first-visit__intro">
           Несколько ответов перед бронированием. Остальные вопросы можно задать Виктории лично.
         </p>
-        <ContactLink class="first-visit__link"
+        <ContactLink class="btn btn-primary section-button first-visit__link"
           >Позвонить Виктории <span aria-hidden="true">↗</span></ContactLink
         >
       </div>

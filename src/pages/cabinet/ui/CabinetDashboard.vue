@@ -1,28 +1,25 @@
 <template>
   <div class="cabinet-dashboard">
+    <div class="cabinet-dashboard__summary mb-3 mb-lg-4">
+      <div>
+        <span class="small text-muted">Брони</span><strong>{{ planned }}</strong>
+      </div>
+      <div>
+        <span class="small text-muted">Завершено</span><strong>{{ completed }}</strong>
+      </div>
+      <div>
+        <span class="small text-muted">Доступность</span
+        ><strong class="cabinet-dashboard__hours">{{ closed ? 'Закрыто' : 'Открыто' }}</strong>
+      </div>
+    </div>
+
     <div class="cabinet-dashboard__calendar">
       <AppointmentCalendar v-model="date" />
-      <button
-        type="button"
-        class="btn btn-link w-100 mt-1 d-none d-lg-block"
-        @click="emit('schedule')"
-      >
-        Выходные и отпуск ↗
+      <button type="button" class="btn btn-link w-100 mt-1" @click="emit('schedule')">
+        Закрытые даты и перерывы ↗
       </button>
     </div>
     <section class="cabinet-dashboard__agenda">
-      <div class="cabinet-dashboard__summary mb-3 mb-lg-4">
-        <div>
-          <span class="small text-muted">Запланировано</span><strong>{{ planned }}</strong>
-        </div>
-        <div>
-          <span class="small text-muted">Состоялось</span><strong>{{ completed }}</strong>
-        </div>
-        <div>
-          <span class="small text-muted">Доступность</span
-          ><strong class="cabinet-dashboard__hours">{{ closed ? 'Выходной' : '10–19' }}</strong>
-        </div>
-      </div>
       <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
         <p class="small text-muted mb-0">
           {{ date === today ? 'Сегодня' : dayName(date) }} · время UTC+3
@@ -132,7 +129,7 @@ const next = computed(
 .cabinet-dashboard {
   display: grid;
   gap: 24px;
-  grid-template-areas: 'calendar' 'agenda' 'clients';
+  grid-template-areas: 'summary' 'calendar' 'agenda' 'clients';
 }
 .cabinet-dashboard__calendar {
   grid-area: calendar;
@@ -147,6 +144,7 @@ const next = computed(
   min-width: 0;
 }
 .cabinet-dashboard__summary {
+  grid-area: summary;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
@@ -187,7 +185,7 @@ const next = computed(
   .cabinet-dashboard {
     grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1.65fr);
     grid-template-rows: auto 1fr;
-    grid-template-areas: 'calendar agenda' 'clients agenda';
+    grid-template-areas: 'summary summary' 'calendar agenda' 'clients agenda';
     gap: 24px 32px;
     align-items: start;
   }

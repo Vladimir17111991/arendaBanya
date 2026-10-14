@@ -3,14 +3,13 @@
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
       <div>
         <p class="cabinet__eyebrow mb-2 d-none d-sm-block">ЛИЧНЫЙ КАБИНЕТ</p>
-        <h1 class="cabinet__title mb-1">Ваш день, Виктория</h1>
+        <h1 class="cabinet__title mb-1">Управление баней</h1>
         <p class="small text-muted mb-0 d-none d-sm-block">
           Клиенты, брони и фотографии бани — всё под рукой.
         </p>
       </div>
       <BaseButton class="cabinet__create" aria-label="Добавить бронь" @click="startBooking()"
-        ><span aria-hidden="true">＋</span
-        ><span class="d-none d-sm-inline"> Добавить бронь</span></BaseButton
+        ><span aria-hidden="true">＋</span><span> Добавить бронь</span></BaseButton
       >
     </div>
     <nav class="cabinet__tabs mb-4" aria-label="Раздел кабинета">
@@ -25,21 +24,6 @@
       >
         {{ item.label }}
       </button>
-      <div class="cabinet__site">
-        <label for="cabinet-content" class="visually-hidden">Наполнение сайта</label>
-        <select
-          id="cabinet-content"
-          :value="contentTab ? tab : ''"
-          class="form-select cabinet__select"
-          :class="{ 'cabinet__select--active': contentTab }"
-          @change="changeContent"
-        >
-          <option value="" disabled>Сайт</option>
-          <option value="price">Аренда</option>
-          <option value="photos">Галерея бани</option>
-          <option value="site-photos">Фото сайта</option>
-        </select>
-      </div>
     </nav>
     <p class="small text-muted mb-4">
       Демо-кабинет Виктории: данные и фотографии сохраняются до обновления вкладки.
@@ -64,7 +48,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
 import { usePractice } from '../../../entities/practice/index.ts';
 import { BaseButton } from '../../../shared/ui/index.ts';
 import { AppointmentsPanel } from '../../../features/manage-appointments/index.ts';
@@ -88,15 +71,13 @@ function startBooking(prefill?: BookingPrefill) {
   });
 }
 const mainTabs = [
-  { id: 'overview', label: 'Мой день' },
+  { id: 'overview', label: 'Бронирования' },
   { id: 'clients', label: 'Клиенты' },
-  { id: 'schedule', label: 'Расписание' },
+  { id: 'schedule', label: 'Доступность' },
+  { id: 'price', label: 'Тарифы' },
+  { id: 'photos', label: 'Галерея' },
+  { id: 'site-photos', label: 'Фото сайта' },
 ] satisfies { id: CabinetTab; label: string }[];
-const contentTab = computed(() => ['price', 'photos', 'site-photos'].includes(tab.value));
-function changeContent(event: Event) {
-  const value = (event.target as HTMLSelectElement).value;
-  if (value === 'price' || value === 'photos' || value === 'site-photos') tab.value = value;
-}
 </script>
 
 <style scoped>
@@ -184,6 +165,47 @@ function changeContent(event: Event) {
 @media (max-width: 359.98px) {
   .cabinet__title {
     font-size: 23px;
+  }
+}
+
+.cabinet {
+  padding-bottom: 32px;
+}
+.cabinet__tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  background: #eee5f5;
+  border: 1px solid #d9c4e5;
+}
+.cabinet__tab {
+  padding: 12px 8px;
+  font-size: 15px;
+  color: #594165;
+}
+.cabinet__tab--active {
+  background: #753b92;
+  color: white;
+  box-shadow: 0 4px 14px #753b9225;
+}
+.cabinet__tab--active:hover {
+  background: #84479e;
+}
+.cabinet__create {
+  width: auto;
+  min-height: 48px;
+  height: auto;
+  padding: 12px 18px;
+  font-size: 16px;
+  border-radius: 14px;
+}
+@media (max-width: 767.98px) {
+  .cabinet__tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .cabinet__title {
+    font-size: 30px;
   }
 }
 </style>
