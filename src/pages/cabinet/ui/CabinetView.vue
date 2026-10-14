@@ -25,9 +25,6 @@
         {{ item.label }}
       </button>
     </nav>
-    <p class="small text-muted mb-4">
-      Демо-кабинет Виктории: данные и фотографии сохраняются до обновления вкладки.
-    </p>
     <p
       v-if="feedback && (tab === 'schedule' || tab === 'overview')"
       class="alert practice-notice mb-4"
@@ -71,7 +68,7 @@ function startBooking(prefill?: BookingPrefill) {
   });
 }
 const mainTabs = [
-  { id: 'overview', label: 'Бронирования' },
+  { id: 'overview', label: 'Брони' },
   { id: 'clients', label: 'Клиенты' },
   { id: 'schedule', label: 'Доступность' },
   { id: 'price', label: 'Тарифы' },

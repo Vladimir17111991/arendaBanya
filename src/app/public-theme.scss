@@ -387,3 +387,22 @@ body:has(.practice-demo__admin) {
     background: #e6d4ef;
   }
 }
+
+body:has(.practice-demo__admin) {
+  .btn-primary {
+    background: linear-gradient(115deg, #7135ad, #983680);
+    color: white;
+    border-color: #a874bf;
+  }
+  .app-header {
+    background: #faf6fd;
+    border-color: #dfcfe9;
+  }
+  .cabinet__tab {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .cabinet-dashboard__summary .small {
+    font-size: 14px;
+  }
+}
