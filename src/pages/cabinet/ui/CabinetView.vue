@@ -70,7 +70,7 @@ function startBooking(prefill?: BookingPrefill) {
 const mainTabs = [
   { id: 'overview', label: 'Брони' },
   { id: 'clients', label: 'Клиенты' },
-  { id: 'schedule', label: 'Доступность' },
+  { id: 'schedule', label: 'Даты' },
   { id: 'price', label: 'Тарифы' },
   { id: 'photos', label: 'Галерея' },
   { id: 'site-photos', label: 'Фото сайта' },
