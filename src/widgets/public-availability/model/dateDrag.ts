@@ -17,7 +17,7 @@ export function createDateDrag(selection: Selection, now = Date.now) {
     begin(point: Point, date: string) {
       if (!drag) drag = { ...point, start: date, end: date, moved: false };
     },
-    move(point: Point, date: string) {
+    move(point: Point, date: string | undefined) {
       if (!drag || drag.id !== point.id) return;
       if (!drag.moved && Math.hypot(point.x - drag.x, point.y - drag.y) < 8) return;
       if (!drag.moved) {
@@ -25,6 +25,7 @@ export function createDateDrag(selection: Selection, now = Date.now) {
         selection.clearSelection();
         selection.selectDate(drag.start);
       }
+      if (date === undefined) return;
       drag.end = date;
       if (date) selection.hoverDateAt(date);
       else selection.clearHover();

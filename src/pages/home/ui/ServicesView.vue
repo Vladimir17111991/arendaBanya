@@ -11,34 +11,13 @@
         <div class="hero__visual"><HeroVisual :image="siteImages.hero" /></div>
         <div class="hero__copy">
           <p class="hero__description">
-            Приглашаю в свою баню рядом с домом. На несколько часов или на целые сутки со спальней —
-            выберите день для отдыха и позвоните мне, чтобы договориться о деталях.
+            Тёплая парная и спокойный отдых в Солигорске. Приезжайте на несколько часов или
+            оставайтесь со спальней на сутки — выберите формат и посмотрите свободные даты.
           </p>
-          <div v-if="services.length" class="hero__formats" aria-label="Варианты отдыха">
-            <button
-              v-for="service in services"
-              :key="service.id"
-              type="button"
-              class="hero__format"
-              :aria-label="`Выбрать даты: ${service.name}`"
-              @click="chooseRental(service.id)"
-            >
-              <span>{{ service.name }}</span>
-              <strong
-                >{{ money(service.price)
-                }}<small v-if="service.price > 0">
-                  / гостя / {{ service.rentalUnit === 'day' ? 'сутки' : 'час' }}</small
-                ></strong
-              >
-            </button>
-          </div>
           <div id="hero-contact" class="hero__actions d-flex flex-wrap align-items-center gap-3">
             <SectionLink to="availability" class="btn btn-primary section-button hero__action">
-              Свободные даты <ActionArrow />
+              Выбрать отдых <ActionArrow />
             </SectionLink>
-            <ContactLink class="btn btn-primary section-button hero__contact"
-              >Позвонить Виктории <span aria-hidden="true">↗</span></ContactLink
-            >
           </div>
           <p class="hero__hint">
             Почасовая и посуточная аренда. Бронь подтверждает Виктория лично.
@@ -49,12 +28,18 @@
         </div>
       </div>
     </section>
-    <div class="section-reveal"><StudioSection /></div>
     <div class="section-reveal"><WorkGallery /></div>
-    <div class="section-reveal"><PriceList @choose="chooseRental" /></div>
-    <div class="section-reveal">
-      <PublicAvailability @selection-details="contactDetails = $event" />
+    <div id="availability" class="section-reveal" tabindex="-1">
+      <PriceList @choose="chooseRental" />
     </div>
+    <MediaDialog
+      :open="calendarOpen"
+      :title="calendarTitle"
+      class="rental-sheet"
+      @close="calendarOpen = false"
+    >
+      <PublicAvailability @selection-details="contactDetails = $event" />
+    </MediaDialog>
     <div class="section-reveal"><FirstVisit /></div>
     <div class="section-reveal"><ContactSection /></div>
     <MobileContactBar :service-name="contactDetails" />
@@ -67,29 +52,54 @@ import { PriceList } from '../../../widgets/price-list/index.ts';
 import { WorkGallery } from '../../../widgets/work-gallery/index.ts';
 import { ContactSection } from '../../../widgets/contacts/index.ts';
 import { FirstVisit } from '../../../widgets/first-visit/index.ts';
-import { StudioSection } from '../../../widgets/studio/index.ts';
 import { PublicAvailability } from '../../../widgets/public-availability/index.ts';
 import HeroVisual from './HeroVisual.vue';
-import { ContactLink, MobileContactBar } from '../../../features/contact-specialist/index.ts';
-import { SectionLink, ActionArrow } from '../../../shared/ui/index.ts';
+import { MobileContactBar } from '../../../features/contact-specialist/index.ts';
+import { SectionLink, ActionArrow, MediaDialog } from '../../../shared/ui/index.ts';
 import { usePractice } from '../../../entities/practice/index.ts';
 import ScrollAtmosphere from './ScrollAtmosphere.vue';
 import { useReveal } from '../../../shared/lib/reveal/index.ts';
-import { useSiteNavigation } from '../../../shared/routing/index.ts';
-import { money } from '../../../shared/lib/format/index.ts';
 useReveal();
 const contactDetails = ref('');
 const { siteImages, services, selectService } = usePractice();
-const { navigateToSection } = useSiteNavigation();
+const calendarOpen = ref(false);
+const calendarTitle = ref('Выберите даты');
 function chooseRental(id: number) {
   const service = services.value.find((item) => item.id === id);
   if (!service) return;
   selectService(service);
-  navigateToSection('availability');
+  calendarTitle.value = service.name;
+  calendarOpen.value = true;
 }
 </script>
 
 <style scoped>
+.rental-sheet {
+  inset: auto 0 0;
+  margin: auto auto 0;
+  width: min(1120px, 100%);
+  max-height: 92dvh;
+  border-radius: 28px 28px 0 0;
+}
+.rental-sheet[open] {
+  animation: rental-rise 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes rental-rise {
+  from {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rental-sheet[open] {
+    animation: none;
+  }
+}
+
 .services-page {
   isolation: isolate;
   color: var(--ink);
@@ -114,7 +124,7 @@ function chooseRental(id: number) {
 }
 .hero__layout {
   display: grid;
-  grid-template-columns: 1.2fr 0.85fr;
+  grid-template-columns: 1fr 1.2fr;
   grid-template-areas: 'heading visual' 'copy visual';
   align-items: center;
   column-gap: 64px;

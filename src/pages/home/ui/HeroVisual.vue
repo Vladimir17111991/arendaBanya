@@ -6,7 +6,7 @@
         v-if="image"
         class="hero-visual__image d-block w-100"
         :src="image.url"
-        :alt="image.isDemo ? 'Демонстрационный портрет хозяйки бани' : 'Виктория — хозяйка бани'"
+        :alt="image.isDemo ? 'Пример интерьера бани' : 'Баня у Виктории'"
         :width="image.width"
         :height="image.height"
         fetchpriority="high"
@@ -18,12 +18,12 @@
       >
         <span class="hero-visual__branch" aria-hidden="true"></span>
         <span class="hero-visual__monogram" aria-hidden="true">В.</span>
-        <span class="hero-visual__placeholder-title">Здесь будет фото Виктории</span>
-        <span class="hero-visual__placeholder-note">Хозяйки этого места</span>
+        <span class="hero-visual__placeholder-title">Здесь будет фото бани</span>
+        <span class="hero-visual__placeholder-note">Парная и место для отдыха</span>
       </div>
     </div>
     <figcaption class="hero-visual__caption">
-      <span class="hero-visual__name">Виктория</span>
+      <span class="hero-visual__name">Тепло, ради которого стоит замедлиться.</span>
     </figcaption>
   </figure>
 </template>
@@ -35,7 +35,7 @@ defineProps<{ image?: SiteImage | null }>();
 
 <style scoped>
 .hero-visual {
-  width: min(100%, 435px);
+  width: 100%;
   margin: 0 auto;
   padding: 0;
   isolation: isolate;
@@ -156,7 +156,7 @@ defineProps<{ image?: SiteImage | null }>();
 }
 @media (max-width: 575.98px) {
   .hero-visual {
-    width: min(100%, 330px);
+    width: 100%;
   }
   .hero-visual__placeholder {
     aspect-ratio: 1.1;

@@ -389,3 +389,20 @@ test('drag cannot reserve across an occupied date or release outside the dates',
     scope.stop();
   }
 });
+
+test('drag keeps the preview and last date while crossing gaps between cells', () => {
+  const { scope, model, daily } = setup();
+  try {
+    daily();
+    const drag = createDateDrag(model);
+    drag.begin({ id: 1, x: 0, y: 0 }, '2030-05-06');
+    drag.move({ id: 1, x: 50, y: 0 }, '2030-05-09');
+    drag.move({ id: 1, x: 55, y: 0 }, undefined);
+    assert.equal(model.previewQuantity.value, 3);
+    assert.equal(model.rangeEnd.value, '2030-05-09');
+    drag.end(1);
+    assert.equal(model.checkoutDate.value, '2030-05-09');
+  } finally {
+    scope.stop();
+  }
+});

@@ -8,9 +8,6 @@
         <p class="first-visit__intro">
           Несколько ответов перед бронированием. Остальные вопросы можно задать Виктории лично.
         </p>
-        <ContactLink class="btn btn-primary section-button first-visit__link"
-          >Позвонить Виктории <span aria-hidden="true">↗</span></ContactLink
-        >
       </div>
       <div class="col-lg-7">
         <details v-for="item in questions" :key="item.question" class="first-visit__item">
@@ -25,12 +22,11 @@
 </template>
 
 <script setup lang="ts">
-import { ContactLink } from '../../../features/contact-specialist/index.ts';
 const questions = [
   {
     question: 'Как забронировать баню?',
     answer:
-      'Выберите формат отдыха, число гостей и даты в календаре, затем позвоните Виктории. Для почасовой аренды укажите время начала. Бронь считается согласованной после её личного подтверждения.',
+      'Выберите формат отдыха, число гостей и даты в календаре, затем позвоните Виктории. Доступное время можно посмотреть по нажатию на дату, а точное начало согласовать по телефону. Бронь считается согласованной после её личного подтверждения.',
   },
   {
     question: 'Можно остаться на сутки?',

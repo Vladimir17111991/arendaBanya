@@ -23,7 +23,10 @@ let frame = 0;
 function update() {
   frame = 0;
   const anchor = document.getElementById('hero-contact');
-  visible.value = !!anchor && anchor.getBoundingClientRect().bottom < 82;
+  const contacts = document.getElementById('contacts');
+  const contactsVisible =
+    contacts && contacts.getBoundingClientRect().top < window.innerHeight - 80;
+  visible.value = !!anchor && anchor.getBoundingClientRect().bottom < 82 && !contactsVisible;
 }
 function queueUpdate() {
   if (!frame) frame = requestAnimationFrame(update);

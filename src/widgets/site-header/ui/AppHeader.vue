@@ -84,13 +84,6 @@
               </svg>
               Кабинет
             </button>
-            <ContactLink
-              class="btn btn-primary section-button app-header__contact"
-              @click="open = false"
-            >
-              Позвонить
-              <ActionArrow />
-            </ContactLink>
           </template>
         </div>
       </div>
@@ -102,8 +95,7 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { type View, type SiteSection } from '../../../shared/routing/index.ts';
 
-import { SectionLink, ActionArrow } from '../../../shared/ui/index.ts';
-import { ContactLink } from '../../../features/contact-specialist/index.ts';
+import { SectionLink } from '../../../shared/ui/index.ts';
 
 import SectionNavigation from './SectionNavigation.vue';
 const props = defineProps<{
@@ -322,3 +314,4 @@ watch(
   }
 }
 </style>
+

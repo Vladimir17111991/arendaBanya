@@ -1,76 +1,10 @@
 <template>
-  <section
-    id="availability"
-    class="availability content-section"
-    tabindex="-1"
-    aria-labelledby="availability-title"
-  >
+  <section class="availability" tabindex="-1" aria-labelledby="availability-title">
     <div class="container">
-      <div class="availability__heading">
-        <div>
-          <h2 id="availability-title" class="availability__title">Выберите <em>свой день.</em></h2>
-        </div>
-        <p class="availability__intro">
-          Посмотрите свободное время и позвоните Виктории. Она уточнит детали и подтвердит вашу
-          бронь.
-        </p>
-      </div>
-      <ol v-if="services.length" class="availability__steps" aria-label="Как забронировать отдых">
-        <li>
-          <span aria-hidden="true">01</span>
-          <div>
-            <strong>Выберите отдых</strong>
-            <p>На несколько часов или со спальней на сутки.</p>
-          </div>
-        </li>
-        <li>
-          <span aria-hidden="true">02</span>
-          <div>
-            <strong>Укажите даты и гостей</strong>
-            <p>Посмотрите свободный период и расчёт стоимости.</p>
-          </div>
-        </li>
-        <li>
-          <span aria-hidden="true">03</span>
-          <div>
-            <strong>Позвоните Виктории</strong>
-            <p>Обсудите детали и получите подтверждение брони.</p>
-          </div>
-        </li>
-      </ol>
+      <h2 id="availability-title" class="visually-hidden">Свободные даты и расчёт стоимости</h2>
       <div v-if="services.length" class="availability__layout">
         <div class="availability__calendar">
           <div class="availability__settings">
-            <fieldset class="availability__rental-setting">
-              <legend class="availability__rental-label">Как хотите отдохнуть?</legend>
-              <div class="availability__formats">
-                <label
-                  v-for="item in services"
-                  :key="item.id"
-                  class="availability__format"
-                  :class="{ 'availability__format--selected': serviceId === item.id }"
-                >
-                  <input
-                    v-model.number="serviceId"
-                    class="visually-hidden"
-                    type="radio"
-                    name="public-rental"
-                    :value="item.id"
-                    :aria-label="item.name"
-                  />
-                  <span class="availability__format-check" aria-hidden="true">{{
-                    serviceId === item.id ? '✓' : ''
-                  }}</span>
-                  <strong>{{ item.name }}</strong>
-                  <span
-                    >{{ money(item.price)
-                    }}<template v-if="item.price > 0">
-                      за гостя / {{ item.rentalUnit === 'day' ? 'сутки' : 'час' }}</template
-                    ></span
-                  >
-                </label>
-              </div>
-            </fieldset>
             <NumberStepper
               v-if="!daily"
               id="public-quantity"
@@ -289,29 +223,10 @@
             {{ selectedDate ? fullDate(selectedDate) : 'Когда приедете?' }}
           </h3>
           <template v-if="!daily && selectedDate && slots.length">
-            <p class="availability__detail-label">
-              {{ daily ? 'Свободное время заезда' : 'Свободное время начала' }}
-            </p>
-            <div class="availability__slots">
-              <button
-                v-for="time in slots"
-                :key="time"
-                type="button"
-                class="availability__slot"
-                :class="{ 'availability__slot--selected': selectedTime === time }"
-                :aria-pressed="selectedTime === time"
-                @click="selectedTime = time"
-              >
-                {{ time }}
-              </button>
-            </div>
-            <p v-if="selectedTime" class="availability__selection">
-              {{ quantity }} {{ daily ? 'сут.' : 'ч.' }} · с {{ selectedTime }}<br />До
-              {{ endLabel }}
-            </p>
-            <p v-else class="availability__hint">
-              Выберите время начала, чтобы уточнить его при звонке.
-            </p>
+            <button type="button" class="availability__reset" @click="timeSheet = true">
+              Посмотреть свободное время
+            </button>
+            <p class="availability__hint">Время начала согласуйте с Викторией при звонке.</p>
           </template>
           <p v-else-if="!daily" class="availability__hint">
             Выберите отмеченную дату в календаре. Здесь появится доступное время с учётом
@@ -356,38 +271,23 @@
     <MediaDialog
       :open="timeSheet"
       class="time-sheet"
-      title="Выберите время начала"
+      title="Доступное время"
       @close="timeSheet = false"
     >
       <p class="time-sheet__date">{{ selectedDate ? fullDate(selectedDate) : '' }}</p>
       <p>{{ quantity }} ч. · {{ guestCount }} гостей · {{ money(totalPrice ?? 0) }}</p>
       <div class="availability__slots">
-        <button
-          v-for="time in slots"
-          :key="time"
-          type="button"
-          class="availability__slot"
-          :class="{ 'availability__slot--selected': selectedTime === time }"
-          :aria-pressed="selectedTime === time"
-          @click="selectedTime = time"
+        <span v-for="time in slots" :key="time" class="availability__slot"
+          >{{ time }}–{{ slotEnd(time) }}</span
         >
-          {{ time }}
-        </button>
       </div>
       <p v-if="!slots.length" role="status">
         Свободного времени на эту дату нет. Выберите другую дату.
       </p>
       <p class="time-sheet__selection" aria-live="polite">
-        {{ selectedTime ? 'С ' + selectedTime + ' до ' + endLabel : 'Выберите удобное время' }}
+        Свободные варианты для выбранной длительности. Точное время согласуйте по телефону.
       </p>
-      <button
-        type="button"
-        class="btn btn-primary w-100"
-        :disabled="!selectedTime"
-        @click="timeSheet = false"
-      >
-        Готово
-      </button>
+      <button type="button" class="btn btn-primary w-100" @click="timeSheet = false">Готово</button>
     </MediaDialog>
   </section>
 </template>
@@ -417,10 +317,8 @@ const {
   month,
   lastDate,
   selectedDate,
-  selectedTime,
   calendar,
   slots,
-  endLabel,
   requestDetails,
   selectDate,
   moveMonth,
@@ -436,6 +334,12 @@ const {
   clearSelection,
 } = usePublicAvailability(usePractice());
 
+function slotEnd(time: string) {
+  const [hours, minutes] = time.split(':').map(Number);
+  return (
+    String((hours! + quantity.value) % 24).padStart(2, '0') + ':' + String(minutes).padStart(2, '0')
+  );
+}
 const timeSheet = ref(false);
 const drag = createDateDrag({ clearSelection, selectDate, hoverDateAt, clearHover });
 function dateButton(target: EventTarget | null) {
@@ -452,8 +356,13 @@ function beginDrag(event: PointerEvent) {
 }
 function moveDrag(event: PointerEvent) {
   if (!drag.active) return;
+  const target = document.elementFromPoint(event.clientX, event.clientY);
   const date =
-    dateButton(document.elementFromPoint(event.clientX, event.clientY))?.dataset.date ?? '';
+    dateButton(target)?.dataset.date ??
+    (target?.closest('.availability__grid') === event.currentTarget &&
+    !target?.closest('button[data-date]')
+      ? undefined
+      : '');
   drag.move({ id: event.pointerId, x: event.clientX, y: event.clientY }, date);
 }
 function endDrag(event: PointerEvent) {
@@ -490,7 +399,7 @@ const completeSelection = computed(
   () =>
     validGuests.value &&
     validQuantity.value &&
-    (daily.value ? !!checkoutDate.value : !!selectedDate.value && !!selectedTime.value),
+    (daily.value ? !!checkoutDate.value : !!selectedDate.value),
 );
 watch(requestDetails, () => {
   copyFeedback.value = '';
@@ -540,6 +449,10 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 </script>
 
 <style scoped>
+.availability > .container {
+  padding: 0;
+}
+
 .availability {
   background: transparent;
   color: var(--ink, #fcf5ff);

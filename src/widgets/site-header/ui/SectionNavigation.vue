@@ -26,9 +26,8 @@ import { SectionLink } from '../../../shared/ui/index.ts';
 const props = defineProps<{ activeSection?: SiteSection }>();
 const emit = defineEmits<{ follow: [] }>();
 const links: { section: SiteSection; label: string }[] = [
-  { section: 'price-list', label: 'Цены и аренда' },
+  { section: 'price-list', label: 'Цены и даты' },
   { section: 'work-gallery', label: 'Фото бани' },
-  { section: 'availability', label: 'Свободные даты' },
   { section: 'contacts', label: 'Контакты' },
 ];
 const container = ref<HTMLElement | null>(null);
