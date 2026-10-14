@@ -178,7 +178,21 @@ function submit() {
     gap: 16px;
   }
   .schedule-panel__week {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1200px) {
+  .schedule-panel__week {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+  }
+}
+@media (max-width: 575.98px) {
+  .schedule-panel__day small {
+    font-size: 12px;
+  }
+  .schedule-panel__week {
+    gap: 6px;
   }
 }
 </style>

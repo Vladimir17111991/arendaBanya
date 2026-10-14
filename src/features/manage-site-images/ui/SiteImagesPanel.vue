@@ -2,8 +2,8 @@
   <section aria-labelledby="site-images-title">
     <h2 id="site-images-title" class="display-subtitle">Фотографии сайта</h2>
     <p class="text-secondary mt-3 mb-4">
-      Главное фото бани. Можно выбрать вертикальный или горизонтальный снимок прямо из галереи
-      телефона — он будет виден целиком.
+      Главное фото и обложка галереи. Можно выбрать вертикальный или горизонтальный снимок прямо из
+      галереи телефона — он будет виден целиком.
     </p>
     <div class="row g-4 align-items-start">
       <div class="col-md-6">
@@ -11,6 +11,13 @@
           slot-name="hero"
           title="Главное фото"
           description="Баня или парная на первом экране."
+        />
+      </div>
+      <div class="col-md-6">
+        <SiteImageEditor
+          slot-name="studio"
+          title="Обложка галереи"
+          description="Первое фото в разделе «Фото бани»."
         />
       </div>
     </div>

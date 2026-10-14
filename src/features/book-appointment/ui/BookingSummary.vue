@@ -1,6 +1,6 @@
 <template>
   <div :class="{ 'booking-summary--admin': isAdmin }">
-    <BaseButton v-if="isAdmin" variant="text" class="mb-4 ps-0" @click="$emit('back')"
+    <BaseButton v-if="isAdmin" variant="secondary" class="mb-4" @click="$emit('back')"
       >Вернуться в расписание</BaseButton
     >
     <p v-if="!isAdmin" class="section-heading__kicker">АРЕНДА БАНИ</p>

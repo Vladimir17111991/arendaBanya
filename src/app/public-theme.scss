@@ -418,31 +418,31 @@ body:has(.practice-demo__admin) {
   .cabinet .row > * {
     min-width: 0;
   }
-  .cabinet .btn {
+  .btn {
     min-height: 44px;
     padding: 10px 16px;
     font-size: 15px;
     line-height: 1.4;
     white-space: normal;
   }
-  .cabinet .btn-link {
+  .btn-link {
     color: #673783;
     background: #f4edf8;
     border: 1px solid #cfb6dd;
     border-radius: 12px;
     text-decoration: none;
   }
-  .cabinet .btn-link:hover {
+  .btn-link:hover {
     color: #502663;
     background: #eaddf2;
     border-color: #ad83c2;
   }
-  .cabinet .btn:focus-visible,
+  .btn:focus-visible,
   .cabinet summary:focus-visible {
     outline: 3px solid #b58bc9;
     outline-offset: 3px;
   }
-  .cabinet .btn:disabled {
+  .btn:disabled {
     opacity: 0.5;
   }
   .cabinet input,
@@ -470,13 +470,14 @@ body:has(.practice-demo__admin) {
     min-height: 48px;
     font-weight: 500;
   }
-  .cabinet .form-control:focus,
-  .cabinet .form-select:focus {
+  .form-control:focus,
+  .form-select:focus {
     border-color: #a778be;
     box-shadow: 0 0 0 3px #753b921c;
   }
   @media (max-width: 575.98px) {
-    .cabinet .card.p-4 {
+    .cabinet .card.p-4,
+    .booking-view__layout .card.p-4 {
       padding: 18px !important;
     }
     .cabinet .cabinet__create {
@@ -489,7 +490,7 @@ body:has(.practice-demo__admin) {
     .cabinet .cabinet__tab {
       font-size: 14px;
     }
-    .cabinet .form-control[type='file'] {
+    .form-control[type='file'] {
       font-size: 14px;
     }
   }

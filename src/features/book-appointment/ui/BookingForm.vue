@@ -8,7 +8,7 @@
   </section>
   <section v-else-if="!service" class="card p-4 mt-5">
     <h1 class="display-subtitle">Пока нет вариантов аренды</h1>
-    <p class="my-3 text-body-secondary">Добавьте вариант аренды в разделе «Аренда» кабинета.</p>
+    <p class="my-3 text-body-secondary">Добавьте вариант аренды в разделе «Тарифы» кабинета.</p>
     <BaseButton @click="emit('back')">В кабинет</BaseButton>
   </section>
   <section v-else class="grid align-items-start gap-4 pt-4 booking-view__layout">
@@ -49,7 +49,7 @@
       <p class="small text-body-secondary mt-2">
         {{
           service.rentalUnit === 'day'
-            ? 'Баня и спальня. Сутки — 24 часа от времени заезда.'
+            ? 'Сутки — 24 часа от согласованного времени заезда.'
             : `Тестовое расписание: 10:00–19:00, до ${maxQuantity} часов.`
         }}
       </p>
