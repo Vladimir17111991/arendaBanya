@@ -1249,4 +1249,25 @@ function dateLabel(day: (typeof calendar.value)[number]) {
     animation: none;
   }
 }
+@media (max-width: 575.98px) {
+  .availability__calendar {
+    padding: 8px;
+    border: 0;
+    background: transparent;
+  }
+  .availability__period {
+    margin-top: 18px;
+    padding-top: 18px;
+  }
+  .availability__period-dates > div {
+    padding: 10px;
+  }
+  .availability__period-dates strong {
+    font-size: 16px;
+  }
+  .availability :deep(.calendar-stage) {
+    padding: 14px 2px;
+    margin-top: 18px;
+  }
+}
 </style>

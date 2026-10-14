@@ -74,7 +74,7 @@ function chooseRental(id: number) {
 </script>
 
 <style scoped>
-.rental-sheet {
+.services-page .rental-sheet {
   inset: auto 0 0;
   margin: auto auto 0;
   width: min(1120px, 100%);
@@ -311,6 +311,15 @@ function chooseRental(id: number) {
   .section-reveal--pending {
     opacity: 1;
     transform: none;
+  }
+}
+@media (max-width: 575.98px) {
+  .services-page .rental-sheet {
+    width: 100%;
+    max-width: 100%;
+  }
+  .rental-sheet :deep(.media-dialog__content) {
+    padding: 12px 8px;
   }
 }
 </style>
