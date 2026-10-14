@@ -15,8 +15,8 @@
 
     <div class="cabinet-dashboard__calendar">
       <AppointmentCalendar v-model="date" />
-      <button type="button" class="btn btn-link w-100 mt-1" @click="emit('schedule')">
-        Закрытые даты и перерывы ↗
+      <button type="button" class="btn btn-outline-primary w-100 mt-3" @click="emit('schedule')">
+        Закрытые даты и перерывы
       </button>
     </div>
     <section class="cabinet-dashboard__agenda">

@@ -37,9 +37,9 @@
     <PriceEditor v-else-if="tab === 'price'" />
     <PhotosPanel v-else-if="tab === 'photos'" @open-price="tab = 'price'" />
     <SiteImagesPanel v-else-if="tab === 'site-photos'" />
-    <div v-else class="row gy-5">
-      <div class="col-lg-5 order-lg-2"><SchedulePanel /></div>
-      <div class="col-lg-7 order-lg-1"><AppointmentsPanel @book="startBooking" /></div>
+    <div v-else class="cabinet__schedule">
+      <SchedulePanel />
+      <section class="card p-3 p-sm-4 mt-4"><AppointmentsPanel @book="startBooking" /></section>
     </div>
   </section>
 </template>

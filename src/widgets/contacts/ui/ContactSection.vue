@@ -21,9 +21,6 @@
             >Позвонить Виктории <ActionArrow
           /></ContactLink>
           <p class="contact-section__handle">{{ phone.label }}</p>
-          <p v-if="phone.isDemo" class="contact-section__demo-note">
-            Тестовый номер · настоящий телефон будет добавлен позже.
-          </p>
         </div>
       </div>
       <LocationCard />

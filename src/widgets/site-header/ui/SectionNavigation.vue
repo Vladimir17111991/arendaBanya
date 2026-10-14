@@ -156,4 +156,15 @@ onUnmounted(() => {
     font-size: 13px;
   }
 }
+@media (min-width: 992px) {
+  .section-navigation {
+    gap: 8px;
+    padding: 6px;
+  }
+  .section-navigation__link {
+    min-width: 124px;
+    padding: 12px 24px;
+    font-size: 15px;
+  }
+}
 </style>

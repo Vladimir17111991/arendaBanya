@@ -50,7 +50,7 @@
           ></textarea>
         </div>
       </details>
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-sm-2 gap-3">
         <div>
           <label :for="`price-${fieldId}`" class="form-label mt-4 mb-2 d-block small fw-semibold">{{
             rentalUnit === 'day' ? 'BYN за гостя за сутки' : 'BYN за гостя за час'
@@ -75,7 +75,7 @@
           >
           <select :id="`rental-unit-${fieldId}`" v-model="rentalUnit" class="form-select">
             <option value="hour">По часам</option>
-            <option value="day">По суткам · со спальней</option>
+            <option value="day">По суткам</option>
           </select>
         </div>
       </div>

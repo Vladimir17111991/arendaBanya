@@ -1,21 +1,18 @@
 <template>
-  <aside class="grid gap-4 grid-cols-md-2 grid-cols-lg-1">
+  <aside class="schedule-panel">
     <section class="card p-4">
-      <p class="section-heading__kicker mb-3 small">ДОСТУПНОСТЬ БАНИ</p>
       <h2 class="mb-3 fs-4 fw-semibold">Дни для аренды</h2>
       <p class="mb-3 small text-body-secondary">
-        Начало аренды с 10:00 до 19:00 (UTC+3). Отметьте дни, когда баня недоступна.
+        Часы работы: 10:00–19:00, время Беларуси. Нажмите на день недели, чтобы открыть или закрыть
+        его для аренды.
       </p>
-      <div class="grid grid-cols-4 grid-cols-sm-7 grid-cols-md-4 grid-cols-xl-7 gap-1">
+      <div class="schedule-panel__week">
         <button
           v-for="day in weekdays"
           :key="day.id"
-          class="btn rounded-2 border px-1 py-2 small"
-          :class="
-            daysOff.includes(day.id)
-              ? 'border-warning-subtle bg-warning-subtle text-warning-emphasis'
-              : 'bg-light text-success-emphasis'
-          "
+          type="button"
+          class="schedule-panel__day"
+          :class="{ 'schedule-panel__day--closed': daysOff.includes(day.id) }"
           :aria-pressed="daysOff.includes(day.id)"
           :aria-label="`${day.name}: ${daysOff.includes(day.id) ? 'выходной' : 'рабочий день'}`"
           @click="toggleDayOff(day.id)"
@@ -39,7 +36,8 @@
         </select>
         <div class="grid grid-cols-sm-2 gap-2">
           <div>
-            <label for="break-start" class="form-label mt-4 mb-2 d-block small fw-semibold">С</label
+            <label for="break-start" class="form-label mt-4 mb-2 d-block small fw-semibold"
+              >Первый день</label
             ><input
               id="break-start"
               v-model="start"
@@ -50,7 +48,8 @@
             />
           </div>
           <div>
-            <label for="break-end" class="form-label mt-4 mb-2 d-block small fw-semibold">По</label
+            <label for="break-end" class="form-label mt-4 mb-2 d-block small fw-semibold"
+              >Последний день</label
             ><input
               id="break-end"
               v-model="end"
@@ -72,7 +71,7 @@
         </ul>
       </div>
     </section>
-    <section class="card p-4 g-col-md-2 g-col-lg-1">
+    <section class="card p-4 schedule-panel__periods">
       <h2 class="mb-3 fs-4 fw-semibold">Закрытые периоды</h2>
       <p v-if="!breaks.length" class="small text-body-secondary">
         Пока действуют только регулярные выходные.
@@ -84,8 +83,7 @@
           }}<template v-if="item.end !== item.start"> — {{ fullDate(item.end) }}</template>
         </p>
         <BaseButton
-          variant="text"
-          class="ps-0"
+          variant="secondary"
           :aria-label="`Открыть даты: ${fullDate(item.start)}`"
           @click="removeBreak(item.id)"
           >Открыть даты</BaseButton
@@ -122,3 +120,65 @@ function submit() {
   addBreak({ start: start.value, end: end.value, kind: kind.value });
 }
 </script>
+<style scoped>
+.schedule-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+.schedule-panel > * {
+  min-width: 0;
+}
+.schedule-panel__week {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(82px, 1fr));
+  gap: 10px;
+}
+.schedule-panel__day {
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px 6px;
+  border: 1px solid #c6a8d6;
+  border-radius: 14px;
+  background: #f3ecf8;
+  color: #59336d;
+  font-size: 16px;
+  font-weight: 600;
+  transition:
+    background 160ms,
+    border-color 160ms;
+}
+.schedule-panel__day small {
+  font-weight: 400;
+  font-size: 13px;
+}
+.schedule-panel__day:hover {
+  background: #e9d9f2;
+  border-color: #753b92;
+}
+.schedule-panel__day--closed {
+  background: #f9e9ed;
+  color: #8b354d;
+  border-color: #dfafbd;
+}
+.schedule-panel__day--closed:hover {
+  background: #f2d7df;
+}
+.schedule-panel__day:focus-visible {
+  outline: 3px solid #a778be;
+  outline-offset: 3px;
+}
+.schedule-panel__periods {
+  grid-column: 1 / -1;
+}
+@media (max-width: 767.98px) {
+  .schedule-panel {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .schedule-panel__week {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+</style>

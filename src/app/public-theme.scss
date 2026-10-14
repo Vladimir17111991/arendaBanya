@@ -406,3 +406,91 @@ body:has(.practice-demo__admin) {
     font-size: 14px;
   }
 }
+
+// Consistent controls and resilient containers throughout the owner workspace.
+body:has(.practice-demo__admin) {
+  .cabinet {
+    min-width: 0;
+  }
+  .cabinet .card,
+  .cabinet form,
+  .cabinet .grid > *,
+  .cabinet .row > * {
+    min-width: 0;
+  }
+  .cabinet .btn {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 15px;
+    line-height: 1.4;
+    white-space: normal;
+  }
+  .cabinet .btn-link {
+    color: #673783;
+    background: #f4edf8;
+    border: 1px solid #cfb6dd;
+    border-radius: 12px;
+    text-decoration: none;
+  }
+  .cabinet .btn-link:hover {
+    color: #502663;
+    background: #eaddf2;
+    border-color: #ad83c2;
+  }
+  .cabinet .btn:focus-visible,
+  .cabinet summary:focus-visible {
+    outline: 3px solid #b58bc9;
+    outline-offset: 3px;
+  }
+  .cabinet .btn:disabled {
+    opacity: 0.5;
+  }
+  .cabinet input,
+  .cabinet select,
+  .cabinet textarea {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .cabinet textarea {
+    resize: vertical;
+  }
+  .cabinet summary {
+    padding: 12px 14px;
+    border: 1px solid #dfcfe9;
+    border-radius: 12px;
+    background: #f7f1fa;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .cabinet .appointments-panel__empty {
+    background: #f5eef9;
+    border-color: #dfcfe9 !important;
+  }
+  .cabinet .cabinet__tab {
+    min-height: 48px;
+    font-weight: 500;
+  }
+  .cabinet .form-control:focus,
+  .cabinet .form-select:focus {
+    border-color: #a778be;
+    box-shadow: 0 0 0 3px #753b921c;
+  }
+  @media (max-width: 575.98px) {
+    .cabinet .card.p-4 {
+      padding: 18px !important;
+    }
+    .cabinet .cabinet__create {
+      width: 100%;
+    }
+    .cabinet .cabinet__tabs {
+      gap: 5px;
+      padding: 5px;
+    }
+    .cabinet .cabinet__tab {
+      font-size: 14px;
+    }
+    .cabinet .form-control[type='file'] {
+      font-size: 14px;
+    }
+  }
+}

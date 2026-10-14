@@ -5,13 +5,13 @@
     tabindex="-1"
     aria-labelledby="price-title"
   >
-    <div class="section-heading row align-items-end gy-3">
-      <div class="col-md-7">
+    <div class="section-heading row gy-3">
+      <div class="col-12">
         <h2 id="price-title" class="section-heading__title">
           Отдых <em class="section-heading__accent">в вашем ритме.</em>
         </h2>
       </div>
-      <div class="col-md-5">
+      <div class="col-12">
         <p class="section-heading__intro">
           Выберите свой вариант отдыха — стоимость рассчитывается за каждого гостя.
         </p>
@@ -325,5 +325,9 @@ const detailFields = [
   .rental-card-leave-active {
     transition: none;
   }
+}
+.section-heading__intro {
+  max-width: 720px;
+  margin: 0;
 }
 </style>

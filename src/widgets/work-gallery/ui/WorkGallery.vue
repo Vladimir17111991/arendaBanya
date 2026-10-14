@@ -6,21 +6,19 @@
     aria-labelledby="works-title"
   >
     <div class="container">
-      <div class="section-heading row align-items-end gy-3">
-        <div class="col-md-7">
+      <div class="section-heading row gy-3">
+        <div class="col-12">
           <h2 id="works-title" class="section-heading__title">
             Загляните <em class="section-heading__accent">в нашу баню.</em>
           </h2>
         </div>
-        <div class="col-md-5">
+        <div class="col-12">
           <p class="section-heading__intro">
             Баня, спальня и детали пространства — фотографии помогут представить ваш отдых.
           </p>
         </div>
       </div>
-      <p v-if="galleryPhotos.some((photo) => photo.isDemo)" class="work-gallery__demo-note">
-        Демонстрационная галерея: примеры интерьеров и отдыха, не фотографии бани Виктории.
-      </p>
+
       <div v-if="galleryPhotos.length" class="work-gallery__toolbar">
         <div class="work-gallery__filters" role="group" aria-label="Выбор фотографий">
           <button
@@ -791,5 +789,9 @@ async function showMore() {
   .work-gallery__dialog--swipe-close .photo-swiper {
     animation: none;
   }
+}
+.section-heading__intro {
+  max-width: 720px;
+  margin: 0;
 }
 </style>
