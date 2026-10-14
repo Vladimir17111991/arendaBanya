@@ -11,17 +11,14 @@
         <div class="hero__visual"><HeroVisual :image="siteImages.hero" /></div>
         <div class="hero__copy">
           <p class="hero__description">
-            Тёплая парная и спокойный отдых в Солигорске. Приезжайте на несколько часов или
-            оставайтесь со спальней на сутки — выберите формат и посмотрите свободные даты.
+            Тёплая парная и спокойный отдых в Солигорске. Выберите подходящий вариант отдыха в
+            прайсе и посмотрите свободные даты.
           </p>
           <div id="hero-contact" class="hero__actions d-flex flex-wrap align-items-center gap-3">
             <SectionLink to="availability" class="btn btn-primary section-button hero__action">
               Выбрать отдых <ActionArrow />
             </SectionLink>
           </div>
-          <p class="hero__hint">
-            Почасовая и посуточная аренда. Бронь подтверждает Виктория лично.
-          </p>
         </div>
       </div>
     </section>

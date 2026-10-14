@@ -119,12 +119,20 @@
         aria-label="Фотографии бани — листайте влево или вправо"
         tabindex="0"
         @scroll="onSwipe"
+        @pointerdown="startDismiss"
+        @pointerup="endDismiss"
+        @pointercancel="dismissGesture = null"
       >
-        <div v-for="photo in filteredPhotos" :key="photo.id" class="photo-swiper__slide">
+        <div
+          v-for="photo in filteredPhotos"
+          :key="photo.id"
+          class="photo-swiper__slide"
+          @click.self="selectedId = null"
+        >
           <img :src="photo.url" :alt="photo.title" draggable="false" class="photo-swiper__image" />
         </div>
       </div>
-      <div class="photo-swiper__footer">
+      <div class="photo-swiper__footer" @click.self="selectedId = null">
         <p aria-live="polite">{{ selectedIndex + 1 }} / {{ filteredPhotos.length }}</p>
         <p>Листайте влево или вправо <span class="photo-swiper__keyboard">· клавиши ← →</span></p>
       </div>
@@ -141,6 +149,23 @@ type PhotoFilter = 'all' | 'bath' | 'bedroom';
 const { photos, siteImages, services } = usePractice();
 const content = ref<HTMLElement | null>(null);
 const swiper = ref<HTMLElement | null>(null);
+let dismissGesture: { id: number; x: number; y: number } | null = null;
+function startDismiss(event: PointerEvent) {
+  if (!event.isPrimary) {
+    dismissGesture = null;
+    return;
+  }
+  if (event.button !== 0) return;
+  dismissGesture = { id: event.pointerId, x: event.clientX, y: event.clientY };
+}
+function endDismiss(event: PointerEvent) {
+  const start = dismissGesture;
+  dismissGesture = null;
+  if (!start || start.id !== event.pointerId) return;
+  const dx = event.clientX - start.x;
+  const dy = event.clientY - start.y;
+  if (dy < -70 && Math.abs(dy) > Math.abs(dx) * 1.4) selectedId.value = null;
+}
 const visibleCount = ref(5);
 const activeFilter = ref<PhotoFilter>('all');
 const selectedId = ref<string | null>(null);
@@ -653,6 +678,7 @@ async function showMore() {
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
+  touch-action: pan-x pinch-zoom;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
 }
@@ -663,13 +689,18 @@ async function showMore() {
   flex: 0 0 100%;
   min-width: 0;
   height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   scroll-snap-align: center;
   scroll-snap-stop: always;
 }
 .photo-swiper__image {
   display: block;
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   user-select: none;
 }

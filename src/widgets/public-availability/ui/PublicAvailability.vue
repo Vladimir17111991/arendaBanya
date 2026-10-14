@@ -173,7 +173,7 @@
           </p>
         </div>
         <div class="availability__details" aria-live="polite">
-          <span class="availability__tag">{{ daily ? 'Баня и спальня' : 'Почасовая аренда' }}</span>
+          <span class="availability__tag">{{ service?.name }}</span>
           <div class="availability__price">
             <p class="availability__price-label">
               {{ previewValid ? 'Стоимость этого периода' : 'Ваш расчёт' }}
@@ -259,13 +259,6 @@
       </div>
       <p v-else class="availability__intro">
         Расписание появится после добавления вариантов аренды. Уточните доступные даты у Виктории.
-      </p>
-      <p class="availability__demo">
-        {{
-          daily
-            ? 'Посуточная аренда — со спальней. Выезд в выбранную дату; точное время согласуйте по телефону.'
-            : 'Тестовое расписание: 10:00–19:00 · время местное, Беларусь (UTC+3).'
-        }}
       </p>
     </div>
     <MediaDialog
@@ -1295,6 +1288,84 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   }
   .availability__settings :deep(.number-stepper__input) {
     font-size: 22px;
+  }
+}
+
+.availability__settings {
+  gap: 16px;
+}
+.availability__settings :deep(.number-stepper) {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.availability__settings :deep(.number-stepper__heading) {
+  padding: 0 4px;
+  margin: 0 0 10px;
+}
+.availability__settings :deep(.number-stepper__label) {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.availability__settings :deep(.number-stepper__range) {
+  display: none;
+}
+.availability__settings :deep(.number-stepper__controls) {
+  width: 100%;
+  padding: 5px;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  gap: 0;
+  border: 1px solid #b992d33b;
+  border-radius: 100px;
+  background: linear-gradient(120deg, #32213e, #24172e);
+  box-shadow: inset 0 1px 0 #ffffff09;
+}
+.availability__settings :deep(.number-stepper__button) {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff09;
+  color: #f8eaff;
+  font-size: 26px;
+}
+.availability__settings :deep(.number-stepper__button--increase) {
+  background: #b98ad526;
+  color: #f8eaff;
+}
+.availability__settings :deep(.number-stepper__button:disabled) {
+  opacity: 0.35;
+}
+.availability__settings :deep(.number-stepper__input) {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--ink);
+  min-height: 44px;
+}
+.availability__settings :deep(.number-stepper__suffix) {
+  display: none;
+}
+.availability__settings .availability__guests--single {
+  display: block;
+  max-width: 320px;
+  width: 100%;
+}
+@media (max-width: 575.98px) {
+  .availability__settings {
+    gap: 10px;
+  }
+  .availability__settings :deep(.number-stepper__controls) {
+    padding: 3px;
+  }
+  .availability__settings :deep(.number-stepper__input) {
+    font-size: 22px;
+  }
+}
+@media (hover: hover) {
+  .availability__settings :deep(.number-stepper__button:hover:not(:disabled)) {
+    background: #b98ad545;
   }
 }
 </style>

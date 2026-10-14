@@ -406,3 +406,29 @@ test('drag keeps the preview and last date while crossing gaps between cells', (
     scope.stop();
   }
 });
+
+test('new rental names use their billing unit rather than bedroom or bathhouse wording', () => {
+  const { scope, store, model } = setup();
+  try {
+    store.switchProfile('victoria');
+    for (const unit of ['hour', 'day'] as const) {
+      const service = store.addService({
+        name: 'Отдых с террасой ' + unit,
+        categoryId: 1,
+        duration: unit === 'day' ? 1440 : 60,
+        rentalUnit: unit,
+        price: 35,
+        description: '',
+      });
+      store.selectService(service);
+      assert.equal(model.daily.value, unit === 'day');
+      model.selectDate('2030-05-06');
+      if (unit === 'day') model.selectDate('2030-05-08');
+      else assert.ok(model.slots.value.length);
+      assert.equal(model.totalPrice.value, 35 * model.quantity.value * model.guestCount.value);
+      assert.ok(model.requestDetails.value.includes('Отдых с террасой'));
+    }
+  } finally {
+    scope.stop();
+  }
+});
