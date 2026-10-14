@@ -79,10 +79,10 @@
           <button
             type="button"
             class="btn btn-primary price-list__choose"
-            :aria-label="'Выбрать даты: ' + service.name"
+            :aria-label="'Посмотреть даты: ' + service.name"
             @click="emit('choose', service.id)"
           >
-            Выбрать даты <ActionArrow />
+            Посмотреть даты
           </button>
         </div>
       </article>
@@ -94,7 +94,6 @@
 import { usePractice } from '../../../entities/practice/index.ts';
 import { money } from '../../../shared/lib/format/index.ts';
 import { ContactLink } from '../../../features/contact-specialist/index.ts';
-import { ActionArrow } from '../../../shared/ui/index.ts';
 
 const emit = defineEmits<{ choose: [serviceId: number] }>();
 const { services } = usePractice();
@@ -237,17 +236,18 @@ const detailFields = [
 }
 .price-list__actions {
   display: grid;
-  justify-items: stretch;
+  justify-items: start;
   gap: 8px;
   margin-top: 28px;
 }
 .price-list__choose {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   gap: 16px;
-  min-height: 56px;
-  width: 100%;
+  min-height: 50px;
+  width: fit-content;
+  max-width: 100%;
   padding: 14px 20px;
   font-size: 17px;
 }

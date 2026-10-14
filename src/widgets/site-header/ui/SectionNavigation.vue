@@ -28,7 +28,6 @@ const emit = defineEmits<{ follow: [] }>();
 const links: { section: SiteSection; label: string }[] = [
   { section: 'price-list', label: 'Цены и даты' },
   { section: 'work-gallery', label: 'Фото бани' },
-  { section: 'contacts', label: 'Контакты' },
 ];
 const container = ref<HTMLElement | null>(null);
 const marker = ref({ x: 0, y: 0, width: 0, height: 0 });

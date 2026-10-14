@@ -250,8 +250,8 @@
           <ContactLink
             class="btn btn-primary section-button availability__call"
             :service-name="requestDetails"
-            >Позвонить <ActionArrow
-          /></ContactLink>
+            >Связаться</ContactLink
+          >
           <p class="availability__confirmation">Бронь подтверждается по телефону.</p>
         </div>
       </div>
@@ -287,7 +287,7 @@
 import { computed, ref, watch } from 'vue';
 import { MAX_GUESTS, rentalPrice, usePractice } from '../../../entities/practice/index.ts';
 import { ContactLink } from '../../../features/contact-specialist/index.ts';
-import { ActionArrow, NumberStepper, MediaDialog } from '../../../shared/ui/index.ts';
+import { NumberStepper, MediaDialog } from '../../../shared/ui/index.ts';
 import { fullDate, shortDate, money } from '../../../shared/lib/format/index.ts';
 import { usePublicAvailability } from '../model/usePublicAvailability.ts';
 import CalendarStage from './CalendarStage.vue';

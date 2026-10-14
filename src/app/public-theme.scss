@@ -249,7 +249,7 @@ body:has(.services-page) {
 
 // Shared public action shape, including text links promoted to buttons.
 body:has(.services-page) .btn-primary {
-  border-radius: 14px;
+  border-radius: 999px;
   padding: 12px 20px;
   font-size: 16px;
   font-weight: 600;
@@ -498,4 +498,41 @@ body:has(.practice-demo__admin) {
 
 .services-page {
   --section-space: clamp(24px, 3.4vw, 48px);
+}
+
+body:has(.services-page) .section-button,
+body:has(.services-page) .work-gallery__more .btn,
+body:has(.services-page) .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-sizing: border-box;
+  width: 240px;
+  max-width: 100%;
+  height: 54px;
+  min-height: 54px;
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 12px 20px;
+  border-radius: 999px;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+body:has(.services-page) .back-to-top {
+  display: flex;
+  width: 140px;
+  height: 54px;
+  min-height: 54px;
+  border-radius: 999px;
+  border: 1px solid #c578df;
+  background: linear-gradient(115deg, #7135ad, #a02a83);
+  color: white;
+  padding: 12px 20px;
+  gap: 8px;
+  box-shadow: 0 7px 28px #d02bad29;
+}
+body:has(.services-page) .back-to-top__label {
+  display: inline;
 }

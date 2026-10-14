@@ -1,12 +1,12 @@
 <template>
   <Transition name="mobile-contact">
     <div v-if="visible" class="mobile-contact" aria-label="Быстрая связь">
-      <div class="container d-flex align-items-center gap-2">
+      <div class="container d-flex align-items-center justify-content-center gap-2">
         <ContactLink
           :service-name="serviceName"
-          class="btn btn-primary section-button flex-grow-1 mobile-contact__button"
+          class="btn btn-primary section-button mobile-contact__button"
         >
-          Позвонить <ActionArrow />
+          Связаться
         </ContactLink>
       </div>
     </div>
@@ -15,7 +15,6 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { ActionArrow } from '../../../shared/ui/index.ts';
 import ContactLink from './ContactLink.vue';
 defineProps<{ serviceName?: string }>();
 const visible = ref(false);

@@ -33,9 +33,6 @@
             {{ filter.label }} <span class="work-gallery__filter-count">{{ filter.count }}</span>
           </button>
         </div>
-        <p class="work-gallery__count">
-          Показано {{ visiblePhotos.length }} из {{ filteredPhotos.length }} фото
-        </p>
       </div>
       <div
         v-if="galleryPhotos.length"
@@ -65,7 +62,6 @@
               decoding="async"
             />
           </button>
-          <figcaption class="work-gallery__caption">{{ photo.title }}</figcaption>
         </figure>
       </div>
       <div v-else class="gallery-empty">
@@ -98,7 +94,7 @@
           aria-controls="gallery-photo-grid"
           @click="showMore"
         >
-          Ещё фотографии <span aria-hidden="true">↓</span>
+          Ещё фотографии
         </button>
       </div>
       <p class="visually-hidden" role="status">{{ announcement }}</p>
@@ -120,7 +116,6 @@
         role="region"
         aria-label="Фотографии бани — листайте влево или вправо"
         tabindex="0"
-        @scroll="onSwipe"
         @pointerdown="startGesture"
         @pointermove="moveGesture"
         @pointerup="endGesture"
@@ -131,6 +126,18 @@
           <img :src="photo.url" :alt="photo.title" draggable="false" class="photo-swiper__image" />
         </div>
       </div>
+      <nav ref="thumbnails" class="photo-thumbnails" aria-label="Выбрать фотографию">
+        <button
+          v-for="(photo, index) in filteredPhotos"
+          :key="photo.id"
+          type="button"
+          :aria-label="'Фото ' + (index + 1) + ': ' + photo.title"
+          :aria-current="selectedId === photo.id ? 'true' : undefined"
+          @click="settlePhoto(index)"
+        >
+          <img :src="photo.url" alt="" loading="lazy" draggable="false" />
+        </button>
+      </nav>
     </MediaDialog>
   </section>
 </template>
@@ -173,8 +180,10 @@ function moveGesture(event: PointerEvent) {
 function settlePhoto(index: number) {
   const element = swiper.value;
   if (!element) return;
+  const target = Math.max(0, Math.min(filteredPhotos.value.length - 1, index));
+  selectedId.value = filteredPhotos.value[target]?.id ?? null;
   element.scrollTo({
-    left: Math.max(0, Math.min(filteredPhotos.value.length - 1, index)) * element.clientWidth,
+    left: target * element.clientWidth,
     behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
   });
 }
@@ -203,6 +212,20 @@ function cancelGesture() {
 const visibleCount = ref(5);
 const activeFilter = ref<PhotoFilter>('all');
 const selectedId = ref<string | null>(null);
+const thumbnails = ref<HTMLElement | null>(null);
+watch(selectedId, async () => {
+  await nextTick();
+  centerThumbnail();
+});
+function centerThumbnail() {
+  const strip = thumbnails.value;
+  const active = strip?.querySelector<HTMLElement>('[aria-current="true"]');
+  if (strip && active)
+    strip.scrollTo({
+      left: active.offsetLeft - strip.clientWidth / 2 + active.offsetWidth / 2,
+      behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+    });
+}
 const closing = ref(false);
 const swipeClose = ref(false);
 let closeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -296,6 +319,7 @@ onMounted(() => {
     if (!element?.clientWidth || selectedIndex.value < 0) return;
     measuredWidth = element.clientWidth;
     element.scrollTo({ left: selectedIndex.value * measuredWidth, behavior: 'instant' });
+    centerThumbnail();
   });
   if (swiper.value) resizeObserver.observe(swiper.value);
 });
@@ -309,20 +333,11 @@ async function openPhoto(id: string) {
     behavior: 'instant',
   });
 }
-function onSwipe() {
-  const element = swiper.value;
-  if (!element?.clientWidth || element.clientWidth !== measuredWidth) return;
-  const photo = filteredPhotos.value[Math.round(element.scrollLeft / element.clientWidth)];
-  if (photo) selectedId.value = photo.id;
-}
 function movePhoto(direction: number) {
   if (selectedIndex.value < 0 || filteredPhotos.value.length < 2) return;
   const index =
     (selectedIndex.value + direction + filteredPhotos.value.length) % filteredPhotos.value.length;
-  swiper.value?.scrollTo({
-    left: index * swiper.value.clientWidth,
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-  });
+  settlePhoto(index);
 }
 function onDialogKeydown(event: KeyboardEvent) {
   if (event.altKey || event.ctrlKey || event.metaKey || !selectedPhoto.value) return;
@@ -331,13 +346,15 @@ function onDialogKeydown(event: KeyboardEvent) {
   event.stopPropagation();
   movePhoto(event.key === 'ArrowLeft' ? -1 : 1);
 }
-async function showMore() {
+async function showMore(event: MouseEvent) {
   const firstNewIndex = visiblePhotos.value.length;
   visibleCount.value += 4;
   await nextTick();
-  content.value
-    ?.querySelectorAll<HTMLElement>('.work-gallery__photo')
-    [firstNewIndex]?.focus({ preventScroll: true });
+  if (event.detail === 0) {
+    content.value
+      ?.querySelectorAll<HTMLElement>('.work-gallery__preview')
+      [firstNewIndex]?.focus({ preventScroll: true });
+  }
   announcement.value = `Показано ${visiblePhotos.value.length} из ${filteredPhotos.value.length} фото.`;
 }
 </script>
@@ -417,7 +434,7 @@ async function showMore() {
   width: min(100%, 900px);
   height: clamp(300px, 42vw, 560px);
 }
-.work-gallery__photo:focus {
+.work-gallery__photo:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
@@ -703,7 +720,7 @@ async function showMore() {
 }
 .work-gallery .work-gallery__dialog[open] {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
 }
 .work-gallery__dialog :deep(.media-dialog__header) {
   min-height: 64px;
@@ -726,8 +743,8 @@ async function showMore() {
 }
 .photo-swiper {
   position: absolute;
-  inset: 16px max(12px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
-    max(12px, env(safe-area-inset-left));
+  inset: max(64px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    calc(92px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   display: flex;
   min-height: 0;
   overflow-x: hidden;
@@ -793,5 +810,141 @@ async function showMore() {
 .section-heading__intro {
   max-width: 720px;
   margin: 0;
+}
+
+.work-gallery__filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: min(100%, 420px);
+}
+.work-gallery__filter {
+  width: 100%;
+  padding-inline: 8px;
+}
+.work-gallery__grid {
+  gap: 12px 0;
+  padding-block: 8px;
+}
+.work-gallery__photo {
+  border: 3px solid #291636;
+  box-shadow: 0 12px 30px #08030a55;
+}
+.work-gallery__photo:nth-child(2),
+.work-gallery__photo:nth-child(3),
+.work-gallery__photo:nth-child(2n + 5) {
+  margin-left: -24px;
+  z-index: 1;
+}
+.work-gallery__photo:nth-child(n + 4) {
+  margin-top: -22px;
+}
+.work-gallery__photo:focus-within {
+  z-index: 2;
+}
+.work-gallery__dialog :deep(.media-dialog__header) {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  z-index: 3;
+}
+.work-gallery__dialog :deep(.media-dialog__title) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.work-gallery__dialog :deep(.media-dialog__close) {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: 1px solid #c578df;
+  background: linear-gradient(115deg, #8033a7, #a22b87);
+  color: #fff;
+  box-shadow: 0 4px 20px #0008;
+}
+.work-gallery__dialog :deep(.media-dialog__close:hover) {
+  background: linear-gradient(115deg, #953bb3, #b83298);
+}
+.photo-thumbnails {
+  position: absolute;
+  inset: auto max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 6px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.photo-thumbnails::before,
+.photo-thumbnails::after {
+  content: '';
+  flex: 0 0 calc(50% - 48px);
+}
+.photo-thumbnails button {
+  flex: 0 0 76px;
+  height: 58px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #25172e;
+  opacity: 0.65;
+}
+.photo-thumbnails button[aria-current='true'] {
+  border-color: #ff9adf;
+  opacity: 1;
+  box-shadow: 0 0 0 2px #ff9adf44;
+}
+.photo-thumbnails button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+.photo-thumbnails img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+@media (max-width: 575.98px) {
+  .work-gallery__filter {
+    font-size: 14px;
+  }
+  .work-gallery__photo:nth-child(n) {
+    margin-left: 0;
+    margin-top: -16px;
+  }
+  .work-gallery__photo:first-child {
+    margin-top: 0;
+  }
+  .work-gallery__photo:nth-child(2n + 3) {
+    margin-left: -12px;
+  }
+}
+@media (orientation: landscape) and (max-height: 600px) {
+  .photo-swiper {
+    inset: 10px max(68px, env(safe-area-inset-right)) calc(66px + env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+  .photo-thumbnails {
+    gap: 8px;
+    bottom: max(4px, env(safe-area-inset-bottom));
+  }
+  .photo-thumbnails::before,
+  .photo-thumbnails::after {
+    flex-basis: calc(50% - 37px);
+  }
+  .photo-thumbnails button {
+    flex-basis: 58px;
+    height: 42px;
+    border-radius: 8px;
+  }
 }
 </style>

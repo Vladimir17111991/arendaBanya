@@ -12,15 +12,13 @@
             До встречи <em class="contact-section__accent">в бане.</em>
           </h2>
           <p class="contact-section__intro">
-            Позвоните, чтобы договориться об отдыхе: на несколько часов или на сутки со спальней.
+            Выберите удобный способ связи или оставьте вопрос — обсудим даты и детали отдыха.
           </p>
         </div>
-        <div class="col-lg-5 offset-lg-1">
-          <ContactLink class="btn section-button contact-section__instagram w-100"
-            >Позвонить <ActionArrow
-          /></ContactLink>
-          <p class="contact-section__handle">{{ phone.label }}</p>
-        </div>
+      </div>
+      <div class="contact-section__form">
+        <h3>Связаться с нами</h3>
+        <ContactForm />
       </div>
       <LocationCard />
     </div>
@@ -28,13 +26,30 @@
 </template>
 
 <script setup lang="ts">
-import { phone } from '../../../entities/specialist/index.ts';
-import { ContactLink } from '../../../features/contact-specialist/index.ts';
-import { ActionArrow } from '../../../shared/ui/index.ts';
+import { ContactForm } from '../../../features/contact-specialist/index.ts';
 import LocationCard from './LocationCard.vue';
 </script>
 
 <style scoped>
+.contact-section__form {
+  margin-top: 32px;
+  padding: clamp(20px, 3vw, 32px);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--surface-raised);
+}
+.contact-section__form h3 {
+  font-family: var(--display);
+  font-size: 32px;
+  margin: 0 0 20px;
+}
+
+.contact-section__phone-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .contact-section {
   border-top: 1px solid var(--line);
   background: radial-gradient(ellipse at 0 100%, #eb55bf1a, transparent 60%), #160d2399;

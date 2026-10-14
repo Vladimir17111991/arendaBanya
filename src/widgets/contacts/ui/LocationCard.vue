@@ -118,6 +118,9 @@ const routeSteps = [
 }
 .location-card__actions {
   display: grid;
+  justify-items: stretch;
+  width: 240px;
+  max-width: 100%;
   gap: 12px;
 }
 .location-card__actions .btn {
@@ -202,7 +205,8 @@ const routeSteps = [
     aspect-ratio: 16 / 10;
   }
   .route-dialog__map {
-    width: 100%;
+    width: fit-content;
+    max-width: 100%;
   }
 }
 </style>

@@ -16,7 +16,7 @@
           </p>
           <div id="hero-contact" class="hero__actions d-flex flex-wrap align-items-center gap-3">
             <SectionLink to="availability" class="btn btn-primary section-button hero__action">
-              Выбрать отдых <ActionArrow />
+              Выбрать отдых
             </SectionLink>
           </div>
         </div>
@@ -32,11 +32,11 @@
       class="rental-sheet"
       @close="calendarOpen = false"
     >
-      <PublicAvailability @selection-details="contactDetails = $event" />
+      <PublicAvailability />
     </MediaDialog>
+    <div class="section-reveal"><ReviewsSection /></div>
     <div class="section-reveal"><FirstVisit /></div>
     <div class="section-reveal"><ContactSection /></div>
-    <MobileContactBar :service-name="contactDetails" />
   </div>
 </template>
 
@@ -45,16 +45,15 @@ import { ref } from 'vue';
 import { PriceList } from '../../../widgets/price-list/index.ts';
 import { WorkGallery } from '../../../widgets/work-gallery/index.ts';
 import { ContactSection } from '../../../widgets/contacts/index.ts';
+import { ReviewsSection } from '../../../widgets/reviews/index.ts';
 import { FirstVisit } from '../../../widgets/first-visit/index.ts';
 import { PublicAvailability } from '../../../widgets/public-availability/index.ts';
 import HeroVisual from './HeroVisual.vue';
-import { MobileContactBar } from '../../../features/contact-specialist/index.ts';
-import { SectionLink, ActionArrow, MediaDialog } from '../../../shared/ui/index.ts';
+import { SectionLink, MediaDialog } from '../../../shared/ui/index.ts';
 import { usePractice } from '../../../entities/practice/index.ts';
 import ScrollAtmosphere from './ScrollAtmosphere.vue';
 import { useReveal } from '../../../shared/lib/reveal/index.ts';
 useReveal();
-const contactDetails = ref('');
 const { siteImages, services, selectService } = usePractice();
 const calendarOpen = ref(false);
 const calendarTitle = ref('Выберите даты');
@@ -287,7 +286,8 @@ function chooseRental(id: number) {
     margin-bottom: 20px;
   }
   .hero__action {
-    width: 100%;
+    width: fit-content;
+    max-width: 100%;
   }
   .hero__actions {
     justify-content: center;

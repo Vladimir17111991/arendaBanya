@@ -23,6 +23,23 @@
         <span class="brand-mark" aria-hidden="true">В.</span>
         <span>Виктория<small class="app-header__subtitle d-block">БАНЯ И ОТДЫХ</small></span>
       </SectionLink>
+      <SectionLink
+        to="contacts"
+        class="app-header__contact"
+        aria-label="Связаться"
+        @click="open = false"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          aria-hidden="true"
+        >
+          <path
+            d="M7 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-3l-5-2-2 2a14 14 0 0 1-7-7l2-2-2-5Z"
+            stroke-linejoin="round"
+          /></svg
+      ></SectionLink>
       <button
         ref="toggle"
         type="button"
@@ -148,6 +165,51 @@ watch(
 </script>
 
 <style scoped>
+.app-header__contact {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid #c578df;
+  background: linear-gradient(115deg, #7135ad, #a02a83);
+  color: white;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  margin-right: 12px;
+}
+.app-header__contact svg {
+  width: 22px;
+  height: 22px;
+  animation: phone-ring 6s infinite;
+}
+@keyframes phone-ring {
+  0%,
+  8%,
+  100% {
+    transform: rotate(0);
+  }
+  2%,
+  6% {
+    transform: rotate(-12deg);
+  }
+  4% {
+    transform: rotate(12deg);
+  }
+}
+@media (min-width: 992px) {
+  .app-header__contact {
+    order: 3;
+    margin-left: 16px;
+    margin-right: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-header__contact svg {
+    animation: none;
+  }
+}
+
 .app-header {
   position: sticky;
   top: 0;
@@ -314,4 +376,3 @@ watch(
   }
 }
 </style>
-

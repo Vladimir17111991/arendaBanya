@@ -4,7 +4,6 @@
       v-if="visible"
       type="button"
       class="back-to-top position-fixed align-items-center justify-content-center fw-semibold"
-      :class="{ 'back-to-top--desktop': mobileHidden }"
       aria-label="Наверх страницы"
       @click="backToTop"
     >

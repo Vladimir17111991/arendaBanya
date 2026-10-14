@@ -14,32 +14,21 @@
         aria-label="Закрыть окно связи"
         @click="emit('close')"
       >
-        ×
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
       </button>
-      <span class="contact-request__preview-label d-block">Тестовый контакт</span>
-      <h2 id="contact-request-title" class="contact-request__title">Позвонить</h2>
-      <p class="contact-request__text">
-        {{ phone.label }} — пример номера. Контактный телефон появится здесь позже.
-      </p>
-      <p id="contact-request-label" class="contact-request__label fw-semibold">Детали для звонка</p>
-      <p
-        id="contact-request-message"
-        class="contact-request__message"
-        aria-labelledby="contact-request-label"
-      >
-        {{ request?.message }}
-      </p>
-      <button type="button" class="btn btn-primary contact-request__copy" @click="copyMessage">
-        Скопировать текст
-      </button>
-      <p class="contact-request__note contact-request__text">
-        Это тестовая версия сайта. Номер пока не подключён, звонок не совершается и бронь не
-        создаётся.
-      </p>
-      <p class="contact-request__confirmation contact-request__text">
-        Дату, время и стоимость аренды можно уточнить по телефону.
-      </p>
-      <p class="contact-request__status contact-request__text" role="status">{{ feedback }}</p>
+      <h2 id="contact-request-title" class="contact-request__title">Связаться с нами</h2>
+      <ContactForm :initial-message="request?.message" />
     </div>
   </dialog>
 </template>
@@ -47,30 +36,20 @@
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, watch } from 'vue';
 import type { ContactRequest } from '../model/useContactRequest.ts';
-import { phone } from '../../../entities/specialist/index.ts';
+import ContactForm from './ContactForm.vue';
 
 const props = defineProps<{ request: ContactRequest | null }>();
 const emit = defineEmits<{ close: []; closed: [] }>();
 const dialog = ref<HTMLDialogElement | null>(null);
-const feedback = ref('');
+
 watch(
   () => props.request,
   async (request) => {
-    feedback.value = '';
     await nextTick();
     if (request && props.request === request) dialog.value?.showModal();
     else if (!props.request) dialog.value?.close();
   },
 );
-async function copyMessage() {
-  if (!props.request) return;
-  try {
-    await navigator.clipboard.writeText(props.request.message);
-    feedback.value = 'Текст скопирован.';
-  } catch {
-    feedback.value = 'Выделите текст выше и скопируйте его вручную.';
-  }
-}
 onUnmounted(() => dialog.value?.close());
 </script>
 
@@ -167,5 +146,21 @@ onUnmounted(() => dialog.value?.close());
   .contact-request__copy {
     width: 100%;
   }
+}
+
+.contact-request .contact-request__close {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #c578df;
+  border-radius: 50%;
+  background: linear-gradient(115deg, #8033a7, #a22b87);
+  color: white;
+  box-shadow: 0 4px 20px #0008;
+}
+.contact-request .contact-request__close:hover {
+  background: linear-gradient(115deg, #953bb3, #b83298);
+}
+.contact-request__title {
+  padding-right: 36px;
 }
 </style>
