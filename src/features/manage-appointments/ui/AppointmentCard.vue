@@ -1,6 +1,10 @@
 <template>
   <article
     class="appointment-card card mt-3"
+    :style="{
+      borderLeft: `6px solid ${categoryColor(booking.service.categoryId)}`,
+      background: categoryTint(booking.service.categoryId),
+    }"
     :class="{ 'appointment-card--cancelled': booking.status === 'cancelled' }"
   >
     <div class="appointment-card__body">
@@ -24,6 +28,7 @@
           >
         </div>
         <p v-if="isAdmin" class="mb-1">{{ booking.service.name }}</p>
+        <p class="small mb-2">{{ booking.service.category }}</p>
         <p class="small text-muted mb-2">
           Гостей: {{ booking.guestCount ?? 1 }} ·
           {{
@@ -38,9 +43,6 @@
         </p>
         <p class="small fw-semibold mb-2">Итого: {{ money(booking.service.price) }}</p>
         <div class="d-flex flex-wrap gap-2 align-items-center">
-          <span v-if="isAdmin && booking.status !== 'cancelled'" class="appointment-card__visit"
-            >Посещение №{{ visitNumber }}</span
-          >
           <a
             v-if="isAdmin"
             :href="'tel:' + booking.phone.replace(/[^+\d]/g, '')"
@@ -92,6 +94,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { categoryColor, categoryTint } from '../model/categoryColor.ts';
 import { bookingEnd, type Booking } from '../../../entities/practice/index.ts';
 import { money, shortDate } from '../../../shared/lib/format/index.ts';
 import { BaseButton } from '../../../shared/ui/index.ts';
@@ -99,7 +102,6 @@ const props = defineProps<{
   booking: Booking;
   isAdmin: boolean;
   confirming: boolean;
-  visitNumber: number;
   canComplete: boolean;
 }>();
 defineEmits<{ requestCancel: []; cancel: []; keep: []; complete: []; undo: [] }>();

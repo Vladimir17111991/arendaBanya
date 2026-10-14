@@ -94,17 +94,7 @@
       <label for="new-client-phone" class="form-label mt-4 mb-2 d-block small fw-semibold"
         >Телефон клиента</label
       >
-      <input
-        id="new-client-phone"
-        v-model="phone"
-        class="form-control"
-        required
-        type="tel"
-        maxlength="24"
-        autocomplete="off"
-        placeholder="+375 (29) 000-00-00"
-        aria-describedby="new-client-note"
-      />
+      <PhoneInput id="new-client-phone" v-model="phone" class="form-control" required />
       <p id="new-client-note" class="mt-3 small text-body-secondary">
         Регистрация не требуется. Для проверки используйте вымышленные данные.
       </p>
@@ -135,7 +125,7 @@ import {
   usePractice,
 } from '../../../entities/practice/index.ts';
 
-import { BaseButton } from '../../../shared/ui/index.ts';
+import { BaseButton, PhoneInput } from '../../../shared/ui/index.ts';
 
 const { visitsForClient } = usePractice();
 

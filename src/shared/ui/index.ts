@@ -6,3 +6,4 @@ export { default as SectionButton } from './SectionButton.vue';
 export { default as PhotoPair } from './PhotoPair.vue';
 export { default as MediaDialog } from './MediaDialog.vue';
 export { default as NumberStepper } from './NumberStepper.vue';
+export { default as PhoneInput } from './PhoneInput.vue';

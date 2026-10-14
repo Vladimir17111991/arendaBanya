@@ -20,19 +20,6 @@
       </button>
     </div>
     <section class="cabinet-dashboard__agenda">
-      <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-        <p class="small text-muted mb-0">
-          {{ date === today ? 'Сегодня' : dayName(date) }} · время UTC+3
-        </p>
-        <button
-          v-if="canBook"
-          type="button"
-          class="btn btn-outline-primary cabinet-dashboard__add"
-          @click="emit('book', { date })"
-        >
-          ＋ Бронь
-        </button>
-      </div>
       <AppointmentsPanel
         :date="date"
         :closed="closed"
@@ -55,12 +42,6 @@
         >
       </button>
     </section>
-    <div class="cabinet-dashboard__clients">
-      <ClientsPanel
-        compact
-        @book="(clientId) => emit('book', { clientId, date: canBook ? date : undefined })"
-      />
-    </div>
   </div>
 </template>
 
@@ -78,8 +59,7 @@ import {
   AppointmentCalendar,
   AppointmentsPanel,
 } from '../../../features/manage-appointments/index.ts';
-import { ClientsPanel } from '../../../features/manage-clients/index.ts';
-import { dayName, shortDate, money } from '../../../shared/lib/format/index.ts';
+import { shortDate, money } from '../../../shared/lib/format/index.ts';
 import type { BookingPrefill } from '../../../shared/routing/index.ts';
 const emit = defineEmits<{ book: [prefill: BookingPrefill]; schedule: [] }>();
 const { adminDate, today, bookings, daysOff, breaks, clock, services } = usePractice();
@@ -129,7 +109,7 @@ const next = computed(
 .cabinet-dashboard {
   display: grid;
   gap: 24px;
-  grid-template-areas: 'summary' 'calendar' 'agenda' 'clients';
+  grid-template-areas: 'summary' 'calendar' 'agenda';
 }
 .cabinet-dashboard__calendar {
   grid-area: calendar;
@@ -185,7 +165,7 @@ const next = computed(
   .cabinet-dashboard {
     grid-template-columns: minmax(320px, 0.8fr) minmax(0, 1.65fr);
     grid-template-rows: auto 1fr;
-    grid-template-areas: 'summary summary' 'calendar agenda' 'clients agenda';
+    grid-template-areas: 'summary summary' 'calendar agenda';
     gap: 24px 32px;
     align-items: start;
   }

@@ -4,9 +4,6 @@
       <h2 class="fs-4 fw-semibold mb-0">
         {{ date ? shortDate(date) : isAdmin ? 'Брони клиентов' : 'Мои брони' }}
       </h2>
-      <span class="text-end small text-body-secondary">{{
-        date ? 'По времени начала' : `Активных броней: ${activeCount}`
-      }}</span>
     </div>
     <div v-if="isAdmin && !date" class="mb-4 d-flex flex-wrap align-items-end gap-3 small">
       <div class="flex-grow-1 appointments-panel__filter">
@@ -60,7 +57,6 @@
       :booking="booking"
       :is-admin="isAdmin"
       :confirming="cancellation === booking.id"
-      :visit-number="numberForVisit(booking)"
       :can-complete="canComplete(booking, clock)"
       @complete="complete(booking.id)"
       @undo="undoCompletion(booking.id)"
@@ -83,14 +79,12 @@ const props = defineProps<{ date?: string; closed?: boolean; canBook?: boolean }
 
 const {
   isAdmin,
-  activeCount,
   visibleBookings,
   adminDate,
   adminStatus,
   cancelBooking,
   completeBooking,
   undoCompletion,
-  numberForVisit,
   clock,
   bookings,
 } = usePractice();

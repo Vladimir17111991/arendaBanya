@@ -27,15 +27,7 @@
         placeholder="Например, Елена"
       />
       <label for="client-phone" class="form-label small">Телефон</label>
-      <input
-        id="client-phone"
-        v-model="phone"
-        class="form-control"
-        required
-        type="tel"
-        autocomplete="off"
-        placeholder="+375 (00) 000-00-03"
-      />
+      <PhoneInput id="client-phone" v-model="phone" class="form-control" required />
       <p v-if="error" role="alert" class="alert alert-warning mt-3 small">{{ error }}</p>
       <BaseButton type="submit" class="mt-3 w-100">Сохранить клиента</BaseButton>
     </form>
@@ -121,7 +113,7 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import { usePractice, matchesClient, bookingEnd } from '../../../entities/practice/index.ts';
 import { shortDate, money } from '../../../shared/lib/format/index.ts';
-import { BaseButton } from '../../../shared/ui/index.ts';
+import { BaseButton, PhoneInput } from '../../../shared/ui/index.ts';
 import ClientVisitSummary from './ClientVisitSummary.vue';
 const props = defineProps<{ compact?: boolean }>();
 const emit = defineEmits<{ book: [clientId: string] }>();

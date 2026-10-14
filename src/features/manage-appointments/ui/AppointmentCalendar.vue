@@ -39,17 +39,13 @@
           'appointment-calendar__day--outside': day.date.slice(0, 7) !== month.slice(0, 7),
           'appointment-calendar__day--today': day.date === today,
         }"
+        :style="day.background ? { background: day.background, color: '#30253b' } : undefined"
         :aria-pressed="day.date === modelValue"
         :aria-current="day.date === today ? 'date' : undefined"
         :aria-label="`${fullDate(day.date)}${day.closed ? ', выходной' : ''}, броней: ${day.count}`"
         @click="select(day.date)"
       >
-        {{ Number(day.date.slice(-2))
-        }}<span
-          class="appointment-calendar__dot"
-          :class="{ 'appointment-calendar__dot--visible': day.count > 0 }"
-          aria-hidden="true"
-        />
+        {{ Number(day.date.slice(-2)) }}
       </button>
     </div>
     <div class="d-flex justify-content-between align-items-center mt-2">
@@ -65,11 +61,12 @@
         {{ expanded ? 'Свернуть месяц ↑' : 'Весь месяц ↓' }}
       </button>
     </div>
-    <div
-      class="d-none d-lg-flex flex-wrap gap-3 mt-2 small text-muted appointment-calendar__legend"
-    >
-      <span
-        ><i class="appointment-calendar__key appointment-calendar__key--booked" />Есть брони</span
+    <div class="d-flex flex-wrap gap-3 mt-2 small text-muted appointment-calendar__legend">
+      <span v-for="category in legend" :key="category.id"
+        ><i
+          class="appointment-calendar__key"
+          :style="{ background: categoryColor(category.id) }"
+        />{{ category.name }}</span
       >
       <span><i class="appointment-calendar__key appointment-calendar__key--closed" />Выходной</span>
     </div>
@@ -87,10 +84,11 @@ import {
   isClosed,
   bookingDates,
 } from '../../../entities/practice/index.ts';
+import { categoryColor, categoryBackground } from '../model/categoryColor.ts';
 import { fullDate } from '../../../shared/lib/format/index.ts';
 const props = defineProps<{ modelValue: string }>();
 const emit = defineEmits<{ 'update:modelValue': [date: string] }>();
-const { today, daysOff, breaks, bookings } = usePractice();
+const { today, daysOff, breaks, bookings, categories } = usePractice();
 const month = ref(props.modelValue);
 const expanded = ref(false);
 const mobile = ref(false);
@@ -117,11 +115,26 @@ const monthLabel = computed(() =>
     timeZone: 'UTC',
   }),
 );
+const legend = computed(() => {
+  const entries = new Map(categories.value.map((item) => [item.id, item]));
+  for (const item of bookings.value)
+    if (item.status !== 'cancelled' && !entries.has(item.service.categoryId))
+      entries.set(item.service.categoryId, {
+        id: item.service.categoryId,
+        name: item.service.category,
+      });
+  return [...entries.values()];
+});
 const days = computed(() =>
   (mobile.value && !expanded.value ? weekDates(props.modelValue) : monthDates(month.value)).map(
     (date) => ({
       date,
       closed: isClosed(date, daysOff.value, breaks.value),
+      background: categoryBackground(
+        bookings.value
+          .filter((item) => bookingDates(item).includes(date) && item.status !== 'cancelled')
+          .map((item) => item.service.categoryId),
+      ),
       count: bookings.value.filter(
         (item) => bookingDates(item).includes(date) && item.status !== 'cancelled',
       ).length,
@@ -200,6 +213,9 @@ function move(delta: number) {
 .appointment-calendar__day--selected:hover {
   background: var(--brand);
   color: #fff;
+  outline: 2px solid #753b92;
+  outline-offset: -2px;
+  font-weight: 700;
   box-shadow: 0 4px 10px #34462625;
 }
 .appointment-calendar__dot {
