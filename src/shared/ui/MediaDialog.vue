@@ -8,14 +8,25 @@
     @close="restoreFocus"
   >
     <div class="media-dialog__header d-flex align-items-center justify-content-between gap-3">
-      <h2 :id="titleId" class="media-dialog__title m-0">{{ title }}</h2>
+      <h2 :id="titleId" ref="heading" tabindex="-1" class="media-dialog__title m-0">{{ title }}</h2>
       <button
         class="media-dialog__close flex-shrink-0"
         type="button"
         aria-label="Закрыть просмотр"
         @click="emit('close')"
       >
-        ×
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="m6 6 12 12M18 6 6 18" />
+        </svg>
       </button>
     </div>
     <div class="media-dialog__content"><slot /></div>
@@ -28,6 +39,7 @@ const props = defineProps<{ open: boolean; title: string }>();
 const emit = defineEmits<{ close: [] }>();
 const titleId = useId();
 const dialog = ref<HTMLDialogElement | null>(null);
+const heading = ref<HTMLElement | null>(null);
 let trigger: HTMLElement | null = null;
 watch(
   () => props.open,
@@ -35,8 +47,10 @@ watch(
     if (open)
       trigger = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     await nextTick();
-    if (open && props.open) dialog.value?.showModal();
-    else if (!props.open) dialog.value?.close();
+    if (open && props.open) {
+      dialog.value?.showModal();
+      heading.value?.focus({ preventScroll: true });
+    } else if (!props.open) dialog.value?.close();
   },
 );
 function restoreFocus() {
@@ -93,6 +107,30 @@ onUnmounted(() => dialog.value?.close());
   }
   .media-dialog__title {
     font-size: 21px;
+  }
+}
+.media-dialog .media-dialog__close {
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+}
+.media-dialog__title:focus {
+  outline: none;
+}
+.media-dialog .media-dialog__close:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+.media-dialog .media-dialog__close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .media-dialog .media-dialog__close:hover {
+    background: #b978d622;
   }
 }
 </style>

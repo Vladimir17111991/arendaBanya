@@ -22,9 +22,6 @@
           <p class="hero__hint">
             Почасовая и посуточная аренда. Бронь подтверждает Виктория лично.
           </p>
-          <SectionLink to="contacts" class="hero__address">
-            Как добраться <span aria-hidden="true">↗</span>
-          </SectionLink>
         </div>
       </div>
     </section>
@@ -75,11 +72,12 @@ function chooseRental(id: number) {
 
 <style scoped>
 .services-page .rental-sheet {
-  inset: auto 0 0;
-  margin: auto auto 0;
+  inset: 0;
+  margin: 0 auto;
   width: min(1120px, 100%);
-  max-height: 92dvh;
-  border-radius: 28px 28px 0 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
 }
 .rental-sheet[open] {
   animation: rental-rise 320ms cubic-bezier(0.2, 0.8, 0.2, 1);

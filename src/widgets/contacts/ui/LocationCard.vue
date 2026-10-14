@@ -13,8 +13,8 @@
         :href="location.routeHref"
         target="_blank"
         rel="noopener noreferrer"
-        class="btn location-card__route"
-        >Построить маршрут <span class="location-card__arrow" aria-hidden="true">↗</span></a
+        class="btn btn-primary section-button"
+        >Построить маршрут</a
       >
       <a
         :href="location.mapHref"

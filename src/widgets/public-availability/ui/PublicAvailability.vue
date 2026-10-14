@@ -9,7 +9,7 @@
               v-if="!daily"
               id="public-quantity"
               v-model="quantity"
-              label="Количество часов"
+              label="Часы"
               :min="1"
               :max="maxQuantity"
               suffix="ч."
@@ -18,7 +18,7 @@
               id="public-guests"
               v-model="guestCount"
               :class="{ 'availability__guests--single': daily }"
-              label="Количество гостей"
+              label="Гости"
               :min="1"
               :max="MAX_GUESTS"
               suffix="чел."
@@ -146,7 +146,7 @@
               </button>
             </div>
           </CalendarStage>
-          <div class="availability__legend">
+          <div v-if="!daily" class="availability__legend">
             <span class="availability__legend-dot"></span>
             {{
               daily
@@ -1268,6 +1268,33 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   .availability :deep(.calendar-stage) {
     padding: 14px 2px;
     margin-top: 18px;
+  }
+}
+@media (max-width: 575.98px) {
+  .availability__settings {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .availability__settings :deep(.number-stepper) {
+    padding: 8px 2px;
+  }
+  .availability__settings :deep(.number-stepper__heading) {
+    padding-inline: 6px;
+  }
+  .availability__settings :deep(.number-stepper__range) {
+    display: none;
+  }
+  .availability__settings :deep(.number-stepper__controls) {
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
+    gap: 0;
+  }
+  .availability__settings :deep(.number-stepper__button) {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+  }
+  .availability__settings :deep(.number-stepper__input) {
+    font-size: 22px;
   }
 }
 </style>

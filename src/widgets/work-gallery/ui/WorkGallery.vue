@@ -56,7 +56,7 @@
             type="button"
             class="work-gallery__preview"
             :aria-label="'Рассмотреть: ' + photo.title"
-            @click="selectedId = photo.id"
+            @click="openPhoto(photo.id)"
           >
             <img
               :src="photo.url"
@@ -90,9 +90,6 @@
             Виктория добавит фотографии бани и спальни. Пока можно посмотреть свободные даты и
             обсудить отдых по телефону.
           </p>
-          <SectionLink to="availability" class="gallery-empty__link"
-            >Посмотреть даты <span aria-hidden="true">↗</span></SectionLink
-          >
         </div>
       </div>
       <div v-if="galleryPhotos.length" class="work-gallery__more">
@@ -105,9 +102,6 @@
         >
           Ещё фотографии <span aria-hidden="true">↓</span>
         </button>
-        <SectionLink to="availability" class="work-gallery__dates">
-          Посмотреть свободные даты <span aria-hidden="true">↗</span>
-        </SectionLink>
       </div>
       <p class="visually-hidden" role="status">{{ announcement }}</p>
     </div>
@@ -118,41 +112,22 @@
       @close="selectedId = null"
       @keydown="onDialogKeydown"
     >
-      <img
-        v-if="selectedPhoto"
-        id="gallery-expanded-photo"
-        :src="selectedPhoto.url"
-        :alt="selectedPhoto.title"
-        class="work-gallery__expanded"
-      />
-      <div v-if="selectedPhoto" class="work-gallery__viewer-controls">
-        <button
-          v-if="filteredPhotos.length > 1"
-          type="button"
-          class="work-gallery__viewer-arrow"
-          aria-label="Предыдущее фото"
-          aria-controls="gallery-expanded-photo"
-          @click="movePhoto(-1)"
-        >
-          <span aria-hidden="true">←</span>
-        </button>
-        <p class="work-gallery__viewer-position" aria-live="polite" aria-atomic="true">
-          Фото {{ selectedIndex + 1 }} из {{ filteredPhotos.length }}
-        </p>
-        <button
-          v-if="filteredPhotos.length > 1"
-          type="button"
-          class="work-gallery__viewer-arrow"
-          aria-label="Следующее фото"
-          aria-controls="gallery-expanded-photo"
-          @click="movePhoto(1)"
-        >
-          <span aria-hidden="true">→</span>
-        </button>
+      <div
+        ref="swiper"
+        class="photo-swiper"
+        role="region"
+        aria-label="Фотографии бани — листайте влево или вправо"
+        tabindex="0"
+        @scroll="onSwipe"
+      >
+        <div v-for="photo in filteredPhotos" :key="photo.id" class="photo-swiper__slide">
+          <img :src="photo.url" :alt="photo.title" draggable="false" class="photo-swiper__image" />
+        </div>
       </div>
-      <p v-if="selectedPhoto?.isDemo" class="work-gallery__demo-note">
-        Демонстрационная фотография для оформления сайта.
-      </p>
+      <div class="photo-swiper__footer">
+        <p aria-live="polite">{{ selectedIndex + 1 }} / {{ filteredPhotos.length }}</p>
+        <p>Листайте влево или вправо <span class="photo-swiper__keyboard">· клавиши ← →</span></p>
+      </div>
     </MediaDialog>
   </section>
 </template>
@@ -160,11 +135,12 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import { usePractice } from '../../../entities/practice/index.ts';
-import { MediaDialog, SectionLink } from '../../../shared/ui/index.ts';
+import { MediaDialog } from '../../../shared/ui/index.ts';
 
 type PhotoFilter = 'all' | 'bath' | 'bedroom';
 const { photos, siteImages, services } = usePractice();
 const content = ref<HTMLElement | null>(null);
+const swiper = ref<HTMLElement | null>(null);
 const visibleCount = ref(5);
 const activeFilter = ref<PhotoFilter>('all');
 const selectedId = ref<string | null>(null);
@@ -236,11 +212,28 @@ watch(
   },
   { flush: 'sync' },
 );
+async function openPhoto(id: string) {
+  selectedId.value = id;
+  await nextTick();
+  swiper.value?.scrollTo({
+    left: selectedIndex.value * swiper.value.clientWidth,
+    behavior: 'instant',
+  });
+}
+function onSwipe() {
+  const element = swiper.value;
+  if (!element?.clientWidth) return;
+  const photo = filteredPhotos.value[Math.round(element.scrollLeft / element.clientWidth)];
+  if (photo) selectedId.value = photo.id;
+}
 function movePhoto(direction: number) {
   if (selectedIndex.value < 0 || filteredPhotos.value.length < 2) return;
   const index =
     (selectedIndex.value + direction + filteredPhotos.value.length) % filteredPhotos.value.length;
-  selectedId.value = filteredPhotos.value[index]!.id;
+  swiper.value?.scrollTo({
+    left: index * swiper.value.clientWidth,
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+  });
 }
 function onDialogKeydown(event: KeyboardEvent) {
   if (event.altKey || event.ctrlKey || event.metaKey || !selectedPhoto.value) return;
@@ -416,13 +409,7 @@ async function showMore() {
   border-color: var(--line);
   background: var(--surface);
 }
-.work-gallery__dialog :deep(.media-dialog__close) {
-  border-color: var(--line);
-  background: var(--control-bg);
-  color: var(--ink);
-  width: 52px;
-  height: 52px;
-}
+
 .work-gallery__expanded {
   display: block;
   max-width: 100%;
@@ -610,6 +597,84 @@ async function showMore() {
     grid-column: 1 / -1;
     grid-row: auto;
     height: 310px;
+  }
+}
+
+.work-gallery .work-gallery__dialog {
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+  background: #100b17;
+}
+.work-gallery .work-gallery__dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.work-gallery__dialog :deep(.media-dialog__header) {
+  flex: 0 0 76px;
+  position: relative;
+  padding-top: max(12px, env(safe-area-inset-top));
+}
+.work-gallery__dialog :deep(.media-dialog__title) {
+  font-size: 18px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.work-gallery__dialog :deep(.media-dialog__content) {
+  padding: 0;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.photo-swiper {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.photo-swiper::-webkit-scrollbar {
+  display: none;
+}
+.photo-swiper__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 100%;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
+}
+.photo-swiper__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+}
+.photo-swiper__footer {
+  flex: 0 0 auto;
+  text-align: center;
+  padding: 12px 16px max(16px, env(safe-area-inset-bottom));
+  color: var(--muted);
+  font-size: 14px;
+}
+.photo-swiper__footer p {
+  margin: 4px 0;
+}
+@media (pointer: coarse) {
+  .photo-swiper__keyboard {
+    display: none;
   }
 }
 </style>
