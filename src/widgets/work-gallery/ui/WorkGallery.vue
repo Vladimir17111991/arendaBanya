@@ -123,16 +123,13 @@
         aria-label="Фотографии бани — листайте влево или вправо"
         tabindex="0"
         @scroll="onSwipe"
-        @pointerdown="startDismiss"
-        @pointerup="endDismiss"
-        @pointercancel="dismissGesture = null"
+        @pointerdown="startGesture"
+        @pointermove="moveGesture"
+        @pointerup="endGesture"
+        @pointercancel="cancelGesture"
+        @lostpointercapture="gesture.cancel()"
       >
-        <div
-          v-for="photo in filteredPhotos"
-          :key="photo.id"
-          class="photo-swiper__slide"
-          @click.self="closePhoto()"
-        >
+        <div v-for="photo in filteredPhotos" :key="photo.id" class="photo-swiper__slide">
           <img :src="photo.url" :alt="photo.title" draggable="false" class="photo-swiper__image" />
         </div>
       </div>
@@ -144,27 +141,66 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 import { usePractice } from '../../../entities/practice/index.ts';
 import { MediaDialog } from '../../../shared/ui/index.ts';
+import { createPhotoGesture } from '../model/photoGesture.ts';
 
 type PhotoFilter = 'all' | 'bath' | 'bedroom';
 const { photos, siteImages, services } = usePractice();
 const content = ref<HTMLElement | null>(null);
 const swiper = ref<HTMLElement | null>(null);
-let dismissGesture: { id: number; x: number; y: number } | null = null;
-function startDismiss(event: PointerEvent) {
+const gesture = createPhotoGesture();
+let startScroll = 0;
+let startIndex = 0;
+function point(event: PointerEvent) {
+  return { id: event.pointerId, x: event.clientX, y: event.clientY };
+}
+function startGesture(event: PointerEvent) {
+  const element = swiper.value;
+  if (!element || closing.value) return;
   if (!event.isPrimary) {
-    dismissGesture = null;
+    cancelGesture();
     return;
   }
   if (event.button !== 0) return;
-  dismissGesture = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  // Stop an unfinished slide animation so the next gesture acts immediately.
+  startScroll = element.scrollLeft;
+  startIndex = Math.round(startScroll / element.clientWidth);
+  element.scrollTo({ left: startScroll, behavior: 'instant' });
+  gesture.begin(point(event));
+  element.setPointerCapture(event.pointerId);
 }
-function endDismiss(event: PointerEvent) {
-  const start = dismissGesture;
-  dismissGesture = null;
-  if (!start || start.id !== event.pointerId) return;
-  const dx = event.clientX - start.x;
-  const dy = event.clientY - start.y;
-  if (dy < -70 && Math.abs(dy) > Math.abs(dx) * 1.4) closePhoto(true);
+function moveGesture(event: PointerEvent) {
+  const movement = gesture.move(point(event));
+  if (movement?.axis === 'x' && swiper.value) swiper.value.scrollLeft = startScroll - movement.dx;
+}
+function settlePhoto(index: number) {
+  const element = swiper.value;
+  if (!element) return;
+  element.scrollTo({
+    left: Math.max(0, Math.min(filteredPhotos.value.length - 1, index)) * element.clientWidth,
+    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+  });
+}
+function endGesture(event: PointerEvent) {
+  const movement = gesture.end(point(event));
+  if (!movement) return;
+  if (movement.axis === 'y' && movement.dy < -70) {
+    closePhoto(true);
+    return;
+  }
+  if (!movement.axis) {
+    // Pointer capture retargets events: check the actual photo bounds instead of click.target.
+    const hit = document.elementFromPoint(event.clientX, event.clientY);
+    if (!hit?.closest('.photo-swiper__image')) {
+      closePhoto();
+      return;
+    }
+  }
+  const step = movement.axis === 'x' && Math.abs(movement.dx) > 40 ? (movement.dx < 0 ? 1 : -1) : 0;
+  settlePhoto(startIndex + step);
+}
+function cancelGesture() {
+  gesture.cancel();
+  settlePhoto(startIndex);
 }
 const visibleCount = ref(5);
 const activeFilter = ref<PhotoFilter>('all');
@@ -696,10 +732,9 @@ async function showMore() {
     max(12px, env(safe-area-inset-left));
   display: flex;
   min-height: 0;
-  overflow-x: auto;
+  overflow-x: hidden;
   overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  touch-action: pan-x pinch-zoom;
+  touch-action: pinch-zoom;
   scrollbar-width: none;
   overscroll-behavior-x: contain;
 }
@@ -713,8 +748,6 @@ async function showMore() {
   display: flex;
   align-items: center;
   justify-content: center;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
 }
 .photo-swiper__image {
   display: block;
