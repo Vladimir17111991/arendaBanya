@@ -20,15 +20,11 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
-import type { SiteSection } from '../../../shared/routing/index.ts';
+import { publicSectionLinks as links, type SiteSection } from '../../../shared/routing/index.ts';
 import { SectionLink } from '../../../shared/ui/index.ts';
 
 const props = defineProps<{ activeSection?: SiteSection }>();
 const emit = defineEmits<{ follow: [] }>();
-const links: { section: SiteSection; label: string }[] = [
-  { section: 'price-list', label: 'Цены и даты' },
-  { section: 'work-gallery', label: 'Фото бани' },
-];
 const container = ref<HTMLElement | null>(null);
 const marker = ref({ x: 0, y: 0, width: 0, height: 0 });
 const visible = ref(false);

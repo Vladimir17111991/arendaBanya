@@ -8,27 +8,13 @@
     @click="$event.target === $event.currentTarget && emit('close')"
   >
     <div class="contact-request__content position-relative">
-      <button
-        class="contact-request__close position-absolute d-grid p-0"
-        type="button"
-        aria-label="Закрыть окно связи"
+      <DialogClose
+        class="contact-request__close position-absolute"
+        label="Закрыть окно связи"
         @click="emit('close')"
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          <path d="m6 6 12 12M18 6 6 18" />
-        </svg>
-      </button>
+      />
       <h2 id="contact-request-title" class="contact-request__title">Связаться с нами</h2>
-      <ContactForm :initial-message="request?.message" />
+      <ContactForm />
     </div>
   </dialog>
 </template>
@@ -37,6 +23,7 @@
 import { nextTick, onUnmounted, ref, watch } from 'vue';
 import type { ContactRequest } from '../model/useContactRequest.ts';
 import ContactForm from './ContactForm.vue';
+import { DialogClose } from '../../../shared/ui/index.ts';
 
 const props = defineProps<{ request: ContactRequest | null }>();
 const emit = defineEmits<{ close: []; closed: [] }>();
@@ -74,15 +61,6 @@ onUnmounted(() => dialog.value?.close());
 .contact-request__close {
   top: 12px;
   right: 12px;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid #dfc8d0;
-  border-radius: 50%;
-  color: var(--brand);
-  background: #fffaf6;
-  font-size: 26px;
-  line-height: 1;
 }
 .contact-request__preview-label {
   margin: 0 24px 16px 0;
@@ -148,18 +126,6 @@ onUnmounted(() => dialog.value?.close());
   }
 }
 
-.contact-request .contact-request__close {
-  width: 46px;
-  height: 46px;
-  border: 1px solid #ba9268;
-  border-radius: 50%;
-  background: linear-gradient(115deg, #895f3b, #805736);
-  color: white;
-  box-shadow: 0 4px 20px #0008;
-}
-.contact-request .contact-request__close:hover {
-  background: linear-gradient(115deg, #996c44, #966a43);
-}
 .contact-request__title {
   padding-right: 36px;
 }

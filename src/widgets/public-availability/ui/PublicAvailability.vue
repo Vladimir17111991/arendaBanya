@@ -2,262 +2,237 @@
   <section class="availability" tabindex="-1" aria-labelledby="availability-title">
     <div class="container">
       <h2 id="availability-title" class="visually-hidden">Свободные даты и расчёт стоимости</h2>
+      <div class="availability__dialog-heading">
+        <h2 :id="titleId" class="availability__dialog-title" tabindex="-1">{{ title }}</h2>
+        <DialogClose label="Закрыть календарь" @click="emit('close')" />
+      </div>
       <div v-if="services.length" class="availability__layout">
         <div class="availability__calendar">
-          <div class="availability__settings">
-            <NumberStepper
-              v-if="!daily"
-              id="public-quantity"
-              v-model="quantity"
-              label="Часы"
-              :min="1"
-              :max="maxQuantity"
-              suffix="ч."
-            />
-            <NumberStepper
-              id="public-guests"
-              v-model="guestCount"
-              :class="{ 'availability__guests--single': daily }"
-              label="Гости"
-              :min="1"
-              :max="MAX_GUESTS"
-              suffix="чел."
-            />
-          </div>
-          <div v-if="daily" class="availability__period">
-            <div class="availability__period-dates">
-              <div :class="{ 'availability__period-date--active': !selectedDate }">
-                <span>Заезд</span>
-                <strong>{{ rangeStart ? shortDate(rangeStart) : 'Выберите дату' }}</strong>
-              </div>
-              <span class="availability__period-arrow" aria-hidden="true">→</span>
-              <div :class="{ 'availability__period-date--active': choosingEnd }">
-                <span>Выезд</span>
-                <strong>{{ rangeEnd ? shortDate(rangeEnd) : 'Выберите дату' }}</strong>
-              </div>
+          <div class="availability__controls">
+            <div class="availability__settings">
+              <NumberStepper
+                v-if="!daily"
+                id="public-quantity"
+                v-model="quantity"
+                label="Часы"
+                :min="1"
+                :max="maxQuantity"
+                suffix="ч."
+                @update:model-value="revealEstimate(true)"
+              />
+              <NumberStepper
+                id="public-guests"
+                v-model="guestCount"
+                :class="{ 'availability__guests--single': daily }"
+                label="Гости"
+                :min="1"
+                :max="MAX_GUESTS"
+                suffix="чел."
+                @update:model-value="revealEstimate(true)"
+              />
             </div>
-            <div class="availability__period-footer">
-              <p id="public-range-help" class="availability__range-help" aria-live="polite">
-                {{ rangeHint }}
-              </p>
-              <button
-                v-if="selectedDate"
-                type="button"
-                class="availability__reset"
-                @click="clearSelection"
-              >
-                Сбросить даты
-              </button>
-            </div>
-          </div>
-          <CalendarStage :month="month" :direction="monthDirection">
-            <template #header>
-              <div class="availability__month-nav">
+            <div v-if="daily" class="availability__period">
+              <div class="availability__period-dates">
+                <div :class="{ 'availability__period-date--active': !selectedDate }">
+                  <span>Заезд</span>
+                  <strong>{{ rangeStart ? shortDate(rangeStart) : '—' }}</strong>
+                </div>
+                <span class="availability__period-arrow" aria-hidden="true">→</span>
+                <div :class="{ 'availability__period-date--active': choosingEnd }">
+                  <span>Выезд</span>
+                  <strong>{{ rangeEnd ? shortDate(rangeEnd) : '—' }}</strong>
+                </div>
+              </div>
+              <div class="availability__period-footer">
+                <p id="public-range-help" class="availability__range-help" aria-live="polite">
+                  {{ rangeHint }}
+                </p>
                 <button
                   type="button"
-                  class="availability__arrow"
-                  :disabled="month <= today.slice(0, 7)"
-                  aria-label="Предыдущий месяц"
-                  @click="changeMonth(-1)"
+                  class="availability__reset"
+                  :disabled="!selectedDate"
+                  @click="clearSelection"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="22"
-                    height="22"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    aria-hidden="true"
-                  >
-                    <path d="m14 6-6 6 6 6" />
-                  </svg>
-                </button>
-                <h3 class="availability__month" aria-live="polite">
-                  <span>{{ monthName }}</span>
-                  <small>{{ month.slice(0, 4) }}</small>
-                </h3>
-                <button
-                  type="button"
-                  class="availability__arrow"
-                  :disabled="month >= lastDate.slice(0, 7)"
-                  aria-label="Следующий месяц"
-                  @click="changeMonth(1)"
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    width="22"
-                    height="22"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    aria-hidden="true"
-                  >
-                    <path d="m10 6 6 6-6 6" />
-                  </svg>
+                  Сбросить даты
                 </button>
               </div>
-            </template>
-            <div
-              class="availability__grid"
-              :class="{ 'availability__grid--daily': daily }"
-              @pointerdown="beginDrag"
-              @pointermove="moveDrag"
-              @pointerup="endDrag"
-              @pointercancel="cancelDrag"
-              @lostpointercapture="cancelDrag"
-              @pointerleave="!drag.active && clearHover()"
-            >
-              <span
-                v-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']"
-                :key="day"
-                class="availability__weekday"
-                >{{ day }}</span
-              >
-              <button
-                v-for="day in calendar"
-                :key="day.date"
-                type="button"
-                class="availability__day"
-                :class="{
-                  'availability__day--available': day.selectable,
-                  'availability__day--selected': day.isStart || day.isEnd,
-                  'availability__day--range': day.inRange,
-                  'availability__day--start': daily && day.isStart && !!rangeEnd,
-                  'availability__day--end': daily && day.isEnd,
-                  'availability__day--preview': day.isPreview,
-                  'availability__day--outside': !day.inMonth,
-                }"
-                :disabled="!day.selectable || !day.inMonth"
-                :aria-pressed="day.isStart || day.isEnd || day.inRange"
-                :aria-label="dateLabel(day)"
-                :aria-describedby="daily ? 'public-range-help' : undefined"
-                :data-date="day.date"
-                @pointerenter="hoverDateAt(day.date)"
-                @focus="hoverDateAt(day.date)"
-                @blur="clearHover"
-                @click="chooseDate(day.date, $event)"
-              >
-                <span class="availability__day-number">{{ Number(day.date.slice(-2)) }}</span
-                ><span
-                  v-if="day.selectable && day.inMonth && !day.inRange && !day.isStart && !day.isEnd"
-                  class="availability__dot"
-                  aria-hidden="true"
-                ></span>
-              </button>
             </div>
-          </CalendarStage>
-          <div v-if="!daily" class="availability__legend">
-            <span class="availability__legend-dot"></span>
-            {{
-              daily
-                ? 'Проведите от заезда до выезда или нажмите две даты'
-                : 'Есть свободное время для выбранного срока'
-            }}
+            <AvailabilitySummary
+              v-if="desktop"
+              :price="displayedPrice"
+              :rate="service?.price"
+              :quantity="displayedQuantity"
+              :guests="guestCount"
+              :daily="daily"
+              :details="requestDetails"
+            />
           </div>
-          <p v-if="daily && rangeError" class="availability__range-error" role="status">
-            {{ rangeError }}
-          </p>
-          <p v-if="!validQuantity" class="small text-danger mt-3" role="alert">
-            Укажите целое число от 1 до {{ maxQuantity }}.
-          </p>
-          <p v-if="!validGuests" class="small text-danger mt-3" role="alert">
-            Укажите количество гостей от 1 до {{ MAX_GUESTS }}.
-          </p>
-          <p
-            v-if="validQuantity && !calendar.some((day) => day.inMonth && day.selectable)"
-            class="small mt-3"
-            role="status"
-          >
-            В этом месяце нет свободного времени для выбранного срока. Попробуйте другой месяц или
-            срок аренды.
-          </p>
-        </div>
-        <div class="availability__details" aria-live="polite">
-          <span class="availability__tag">{{ service?.name }}</span>
-          <div class="availability__price">
-            <p class="availability__price-label">
-              {{ previewValid ? 'Стоимость этого периода' : 'Ваш расчёт' }}
-            </p>
-            <strong class="availability__total">{{
-              displayedPrice === null ? 'Укажите гостей и срок' : money(displayedPrice)
-            }}</strong>
-            <p
-              v-if="displayedPrice !== null && service && service.price > 0"
-              class="availability__formula"
+          <div class="availability__month-view">
+            <CalendarStage
+              class="availability__month-stage"
+              :month="month"
+              :direction="monthDirection"
             >
-              {{ money(service.price) }} × {{ guestCount }} чел. × {{ displayedQuantity }}
-              {{ daily ? 'сут.' : 'ч.' }}
-            </p>
-            <p class="availability__price-note">
-              Тестовый тариф за каждого гостя. Условия и количество мест уточните по телефону.
-            </p>
-          </div>
-          <template v-if="daily">
-            <h3 class="availability__date">{{ checkoutDate ? 'Ваш отдых' : 'Когда приедете?' }}</h3>
-            <dl v-if="checkoutDate" class="availability__stay">
-              <div>
-                <dt>Заезд</dt>
-                <dd>{{ fullDate(selectedDate) }}</dd>
+              <template #header>
+                <div class="availability__month-nav">
+                  <button
+                    type="button"
+                    class="availability__arrow"
+                    :disabled="month <= today.slice(0, 7)"
+                    aria-label="Предыдущий месяц"
+                    @click="changeMonth(-1)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="22"
+                      height="22"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <path d="m14 6-6 6 6 6" />
+                    </svg>
+                  </button>
+                  <h3 class="availability__month" aria-live="polite">
+                    <span>{{ monthName }}</span>
+                    <small>{{ month.slice(0, 4) }}</small>
+                  </h3>
+                  <button
+                    type="button"
+                    class="availability__arrow"
+                    :disabled="month >= lastDate.slice(0, 7)"
+                    aria-label="Следующий месяц"
+                    @click="changeMonth(1)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="22"
+                      height="22"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      aria-hidden="true"
+                    >
+                      <path d="m10 6 6 6-6 6" />
+                    </svg>
+                  </button>
+                </div>
+              </template>
+              <div
+                class="availability__grid"
+                :class="{ 'availability__grid--daily': daily }"
+                @pointerdown="beginDrag"
+                @pointermove="moveDrag"
+                @pointerup="endDrag"
+                @pointercancel="cancelDrag"
+                @lostpointercapture="cancelDrag"
+                @pointerleave="!drag.active && clearHover()"
+              >
+                <span
+                  v-for="day in ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']"
+                  :key="day"
+                  class="availability__weekday"
+                  >{{ day }}</span
+                >
+                <button
+                  v-for="day in calendar"
+                  :key="day.date"
+                  type="button"
+                  class="availability__day"
+                  :class="{
+                    'availability__day--available': day.selectable,
+                    'availability__day--selected': day.isStart || day.isEnd,
+                    'availability__day--range': day.inRange,
+                    'availability__day--start': daily && day.isStart && !!rangeEnd,
+                    'availability__day--end': daily && day.isEnd,
+                    'availability__day--preview': day.isPreview,
+                    'availability__day--outside': !day.inMonth,
+                  }"
+                  :disabled="!day.selectable || !day.inMonth"
+                  :aria-pressed="day.isStart || day.isEnd || day.inRange"
+                  :aria-label="dateLabel(day)"
+                  :aria-describedby="daily ? 'public-range-help' : undefined"
+                  :data-date="day.date"
+                  @pointerenter="hoverDateAt(day.date)"
+                  @focus="hoverDateAt(day.date)"
+                  @blur="clearHover"
+                  @click="chooseDate(day.date, $event)"
+                >
+                  <span class="availability__day-number">{{ Number(day.date.slice(-2)) }}</span
+                  ><span
+                    v-if="
+                      day.selectable && day.inMonth && !day.inRange && !day.isStart && !day.isEnd
+                    "
+                    class="availability__dot"
+                    aria-hidden="true"
+                  ></span>
+                </button>
               </div>
-              <div>
-                <dt>Выезд</dt>
-                <dd>{{ fullDate(checkoutDate) }}</dd>
-              </div>
-              <div>
-                <dt>Продолжительность</dt>
-                <dd>{{ quantity }} {{ dayWord(quantity) }}</dd>
-              </div>
-            </dl>
-            <p v-else class="availability__hint">
+            </CalendarStage>
+            <AvailabilityTimes
+              v-if="desktop && !daily"
+              class="availability__inline-times"
+              :date="selectedDate"
+              :slots="slots"
+              :quantity="quantity"
+            />
+            <div v-if="!daily && !desktop" class="availability__legend">
+              <span class="availability__legend-dot"></span>
               {{
-                choosingEnd
-                  ? 'Теперь выберите дату выезда. Весь период будет выделен в календаре.'
-                  : 'Выберите дату заезда, затем дату выезда. Количество суток и стоимость рассчитаются автоматически.'
+                daily
+                  ? 'Проведите от заезда до выезда или нажмите две даты'
+                  : 'Есть свободное время для выбранного срока'
               }}
+            </div>
+            <p v-if="daily && rangeError" class="availability__range-error" role="status">
+              {{ rangeError }}
             </p>
-            <p class="availability__hint">Время заезда и выезда согласуйте по телефону.</p>
-          </template>
-          <h3 v-else class="availability__date">
-            {{ selectedDate ? fullDate(selectedDate) : 'Когда приедете?' }}
-          </h3>
-          <template v-if="!daily && selectedDate && slots.length">
-            <button type="button" class="availability__reset" @click="timeSheet = true">
-              Посмотреть свободное время
-            </button>
-            <p class="availability__hint">Время начала уточните при звонке.</p>
-          </template>
-          <p v-else-if="!daily" class="availability__hint">
-            Выберите отмеченную дату в календаре. Здесь появится доступное время с учётом
-            длительности аренды.
-          </p>
-          <div v-if="completeSelection" class="availability__phone-summary">
-            <p id="public-phone-summary-label" class="availability__summary-label">
-              Ваш выбор для звонка
+            <p v-if="!validQuantity" class="small text-danger mt-3" role="alert">
+              Укажите целое число от 1 до {{ maxQuantity }}.
+            </p>
+            <p v-if="!validGuests" class="small text-danger mt-3" role="alert">
+              Укажите количество гостей от 1 до {{ MAX_GUESTS }}.
             </p>
             <p
-              id="public-phone-summary"
-              class="availability__summary-text"
-              tabindex="0"
-              aria-labelledby="public-phone-summary-label"
+              v-if="validQuantity && !calendar.some((day) => day.inMonth && day.selectable)"
+              class="small mt-3"
+              role="status"
             >
-              {{ requestDetails }}
+              В этом месяце нет свободного времени для выбранного срока. Попробуйте другой месяц или
+              срок аренды.
             </p>
-            <button type="button" @click="copySelection">
-              Скопировать детали <span aria-hidden="true">↗</span>
-            </button>
-            <p v-if="copyFeedback" role="status">{{ copyFeedback }}</p>
           </div>
-          <ContactLink
-            class="btn btn-primary section-button availability__call"
-            :service-name="requestDetails"
-            >Связаться</ContactLink
-          >
-          <p class="availability__confirmation">Бронь подтверждается по телефону.</p>
         </div>
       </div>
       <p v-else class="availability__intro">
         Расписание появится после добавления вариантов аренды. Уточните доступные даты по телефону.
       </p>
+    </div>
+    <div v-if="!desktop" class="availability__estimate-dock">
+      <button
+        v-if="!estimateVisible"
+        type="button"
+        class="availability__estimate-trigger"
+        @click="openEstimate"
+      >
+        Показать расчёт
+      </button>
+      <AvailabilityEstimate
+        :visible="estimateVisible && active"
+        :expanded="estimateExpanded"
+        :price="displayedPrice"
+        :rate="service?.price"
+        :quantity="displayedQuantity"
+        :guests="guestCount"
+        :daily="daily"
+        :start="selectedDate"
+        :end="checkoutDate"
+        :has-times="slots.length > 0"
+        :details="requestDetails"
+        @toggle="toggleEstimate"
+        @show-times="timeSheet = true"
+      />
     </div>
     <MediaDialog
       :open="timeSheet"
@@ -266,32 +241,51 @@
       @close="timeSheet = false"
     >
       <p class="time-sheet__date">{{ selectedDate ? fullDate(selectedDate) : '' }}</p>
-      <p>{{ quantity }} ч. · {{ guestCount }} гостей · {{ money(totalPrice ?? 0) }}</p>
-      <div class="availability__slots">
-        <span v-for="time in slots" :key="time" class="availability__slot"
-          >{{ time }}–{{ slotEnd(time) }}</span
-        >
-      </div>
+      <p class="time-sheet__summary">
+        {{ quantity }} ч. · Гостей: {{ guestCount }} · {{ money(totalPrice ?? 0) }}
+      </p>
+      <ul class="availability__slots" aria-label="Свободные интервалы">
+        <li v-for="time in slots" :key="time" class="availability__slot">
+          {{ time }}–{{ slotEnd(time) }}
+        </li>
+      </ul>
       <p v-if="!slots.length" role="status">
         Свободного времени на эту дату нет. Выберите другую дату.
       </p>
       <p class="time-sheet__selection" aria-live="polite">
-        Свободные варианты для выбранной длительности. Точное время согласуйте по телефону.
+        Варианты начала и окончания аренды.<br />Точное время согласуйте по телефону.
       </p>
-      <button type="button" class="btn btn-primary w-100" @click="timeSheet = false">Готово</button>
+      <button type="button" class="btn btn-primary section-button" @click="timeSheet = false">
+        Закрыть
+      </button>
     </MediaDialog>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { MAX_GUESTS, rentalPrice, usePractice } from '../../../entities/practice/index.ts';
-import { ContactLink } from '../../../features/contact-specialist/index.ts';
-import { NumberStepper, MediaDialog } from '../../../shared/ui/index.ts';
+import { NumberStepper, MediaDialog, DialogClose } from '../../../shared/ui/index.ts';
 import { fullDate, shortDate, money } from '../../../shared/lib/format/index.ts';
 import { usePublicAvailability } from '../model/usePublicAvailability.ts';
 import CalendarStage from './CalendarStage.vue';
 import { createDateDrag } from '../model/dateDrag.ts';
+import { useEstimateDrawer } from '../model/useEstimateDrawer.ts';
+import AvailabilityEstimate from './AvailabilityEstimate.vue';
+import AvailabilitySummary from './AvailabilitySummary.vue';
+import AvailabilityTimes from './AvailabilityTimes.vue';
+
+const props = withDefaults(defineProps<{ active?: boolean; title: string; titleId: string }>(), {
+  active: true,
+});
+const {
+  visible: estimateVisible,
+  expanded: estimateExpanded,
+  reveal: revealEstimate,
+  toggle: toggleEstimate,
+  open: openEstimate,
+  reset: resetEstimate,
+} = useEstimateDrawer();
 
 const {
   services,
@@ -332,6 +326,29 @@ function slotEnd(time: string) {
   );
 }
 const timeSheet = ref(false);
+const desktop = ref(false);
+let desktopQuery: MediaQueryList | undefined;
+function updateDesktop() {
+  desktop.value = desktopQuery?.matches ?? false;
+  if (desktop.value) timeSheet.value = false;
+}
+onMounted(() => {
+  desktopQuery = window.matchMedia('(min-width: 992px)');
+  updateDesktop();
+  desktopQuery.addEventListener('change', updateDesktop);
+});
+onUnmounted(() => desktopQuery?.removeEventListener('change', updateDesktop));
+watch(
+  [() => props.active, serviceId],
+  () => {
+    resetEstimate();
+    timeSheet.value = false;
+  },
+  { flush: 'sync' },
+);
+watch([selectedDate, checkoutDate], () => {
+  if (props.active && selectedDate.value) revealEstimate(Boolean(checkoutDate.value));
+});
 const drag = createDateDrag({ clearSelection, selectDate, hoverDateAt, clearHover });
 function dateButton(target: EventTarget | null) {
   return target instanceof Element
@@ -365,7 +382,7 @@ function cancelDrag() {
 function chooseDate(date: string, event: MouseEvent) {
   if (drag.ignoreClick(event.detail)) return;
   selectDate(date);
-  if (!daily.value && selectedDate.value === date) timeSheet.value = true;
+  if (!daily.value && !desktop.value && selectedDate.value === date) timeSheet.value = true;
 }
 watch(serviceId, () => {
   cancelDrag();
@@ -383,37 +400,18 @@ function changeMonth(direction: -1 | 1) {
   moveMonth(direction);
 }
 
-const copyFeedback = ref('');
-const emit = defineEmits<{ selectionDetails: [details: string] }>();
+const emit = defineEmits<{ selectionDetails: [details: string]; close: [] }>();
 watch(requestDetails, (details) => emit('selectionDetails', details), { immediate: true });
-const completeSelection = computed(
-  () =>
-    validGuests.value &&
-    validQuantity.value &&
-    (daily.value ? !!checkoutDate.value : !!selectedDate.value),
-);
-watch(requestDetails, () => {
-  copyFeedback.value = '';
-});
-async function copySelection() {
-  try {
-    await navigator.clipboard.writeText(requestDetails.value);
-    copyFeedback.value = 'Детали скопированы.';
-  } catch {
-    copyFeedback.value = 'Выделите текст выше и скопируйте вручную.';
-  }
-}
-
 function dayWord(value: number) {
   return value % 10 === 1 && value % 100 !== 11 ? 'сутки' : 'суток';
 }
 const rangeHint = computed(() => {
   if (previewValid.value)
-    return `${previewQuantity.value} ${dayWord(previewQuantity.value)} · нажмите на дату, чтобы выбрать период`;
-  if (choosingEnd.value) return 'Выберите выезд или проведите пальцем по датам.';
+    return `${previewQuantity.value} ${dayWord(previewQuantity.value)} · нажмите дату выезда`;
+  if (choosingEnd.value) return 'Выберите дату выезда.';
   if (checkoutDate.value)
-    return `${quantity.value} ${dayWord(quantity.value)} · новый клик начнёт выбор заново`;
-  return 'Проведите от заезда до выезда или нажмите две даты.';
+    return `${quantity.value} ${dayWord(quantity.value)} · можно выбрать новый период`;
+  return 'Выберите заезд и выезд.';
 });
 const displayedQuantity = computed(() =>
   daily.value && previewValid.value ? previewQuantity.value : quantity.value,
@@ -450,6 +448,46 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   font-size: 16px;
   line-height: 1.65;
 }
+.availability__estimate-dock {
+  display: grid;
+  place-items: center;
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  height: 86px;
+  margin-top: 20px;
+}
+.availability__dialog-heading {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  background: var(--surface);
+}
+.availability__dialog-title {
+  margin: 0;
+  color: var(--ink);
+  font: 400 26px/1.2 var(--display);
+}
+.availability__dialog-title:focus {
+  outline: none;
+}
+.availability__estimate-trigger {
+  display: block;
+  min-height: 44px;
+  margin: 0 auto;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 .availability .small {
   font-size: 14px;
 }
@@ -474,7 +512,9 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 720px;
+  margin-inline: auto;
   gap: 24px;
 }
 .availability__steps {
@@ -508,10 +548,15 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__calendar {
   min-width: 0;
-  background: var(--surface, #30251d);
-  border: 1px solid var(--line, #70543e);
-  border-radius: 24px;
-  padding: 28px;
+}
+.availability__controls {
+  min-width: 0;
+}
+.availability__month-view {
+  min-width: 0;
+}
+.availability__inline-times {
+  margin-top: 12px;
 }
 .availability__settings {
   display: grid;
@@ -648,21 +693,22 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__period-footer {
   margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 10px;
-  align-items: start;
-  justify-content: space-between;
 }
 .availability__range-help {
   margin: 0;
   color: var(--muted);
   font-size: 14px;
   line-height: 1.6;
-  min-height: 38px;
+  min-height: 3.2em;
+  display: grid;
+  align-items: center;
+  text-align: center;
 }
 .availability__reset {
-  flex-shrink: 0;
+  justify-self: center;
   min-height: 44px;
   padding: 9px 16px;
   border: 1px solid var(--accent, #deb989);
@@ -672,6 +718,10 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   font-size: 16px;
   font-weight: 500;
   line-height: 1.5;
+}
+.availability__reset:disabled {
+  opacity: 0.45;
+  cursor: default;
 }
 .availability__range-error {
   margin: 14px 0 0;
@@ -830,10 +880,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__day:focus-visible,
 .availability__reset:focus-visible,
-.availability__arrow:focus-visible,
-.availability__slot:focus-visible,
-.availability__phone-summary button:focus-visible,
-.availability__summary-text:focus-visible {
+.availability__arrow:focus-visible {
   outline: 3px solid var(--focus, #e2be8d);
   outline-offset: 2px;
   z-index: 2;
@@ -869,183 +916,37 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.availability__details {
-  min-width: 0;
-  width: 100%;
-  border: 1px solid var(--line, #70543e);
-  background: var(--surface, #30251d);
-  padding: 32px;
-  border-radius: 24px;
-  display: flex;
-  align-items: start;
-  flex-direction: column;
-  align-self: start;
-  position: sticky;
-  top: 120px;
-}
-.availability__tag {
-  border: 1px solid var(--line, #70543e);
-  padding: 7px 12px;
-  font-size: 14px;
-  border-radius: 100px;
-  margin-bottom: 18px;
-}
-.availability__price {
-  width: 100%;
-  margin-bottom: 26px;
-  padding-bottom: 22px;
-  border-bottom: 1px solid var(--line, #70543e);
-}
-.availability__price-label {
-  font-size: 16px;
-  color: var(--muted);
-  margin: 0 0 8px;
-}
-.availability__total {
-  display: block;
-  font: 400 clamp(30px, 3vw, 40px)/1.2 var(--display);
-  color: var(--brand);
-  overflow-wrap: anywhere;
-}
-.availability__formula {
-  margin: 10px 0 0;
-  font-size: 16px;
-}
-.availability__price-note {
-  margin: 12px 0 0;
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--muted);
-}
-.availability__date {
-  font: 400 30px/1.25 var(--display);
-  margin-bottom: 16px;
-}
-.availability__detail-label {
-  font-size: 16px;
-  color: var(--muted);
-}
 .availability__slots {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 22px;
+  justify-content: center;
+  width: 100%;
+  max-width: 430px;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 .availability__slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 calc((100% - 16px) / 3);
   min-height: 48px;
-  min-width: 72px;
+  min-width: 0;
   border: 1px solid var(--line, #70543e);
   border-radius: 10px;
   background: var(--control-bg, #443427);
-  padding: 10px 14px;
-  font-size: 16px;
+  padding: 10px 6px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   color: var(--brand);
 }
-.availability__slot--selected {
-  background: var(--selected-bg, #8d623d);
-  border-color: var(--accent, #deb989);
-  color: var(--selected-text, #fff);
-}
-.availability__selection {
-  line-height: 1.8;
-  font-size: 16px;
-}
-.availability__stay {
-  width: 100%;
-  margin: 0 0 20px;
-}
-.availability__stay > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line, #70543e);
-  font-size: 16px;
-}
-.availability__stay dt {
-  font-weight: 400;
-  color: var(--muted);
-}
-.availability__stay dd {
-  min-width: 0;
-  margin: 0;
-  color: var(--brand);
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-.availability__hint {
-  color: var(--muted);
-  line-height: 1.8;
-  font-size: 16px;
-}
-.availability__call {
-  margin-top: auto;
-  width: 100%;
-  min-height: 52px;
-  font-size: 16px;
-}
-.availability__phone-summary {
-  width: 100%;
-  padding-top: 16px;
-  border-top: 1px solid var(--line, #70543e);
-  margin: 4px 0 22px;
-}
-.availability__summary-label {
-  display: block;
-  color: var(--muted);
-  font-size: 16px;
-  margin: 0 0 10px;
-}
-.availability__summary-text {
-  display: block;
-  width: 100%;
-  margin: 0;
-  padding: 16px;
-  border: 1px solid var(--line, #70543e);
-  border-radius: 14px;
-  background: var(--surface-soft, #3b2e23);
-  font-size: 16px;
-  line-height: 1.7;
-  color: var(--brand);
-  user-select: text;
-  -webkit-user-select: text;
-  -webkit-touch-callout: default;
-  cursor: text;
-  overflow-wrap: anywhere;
-}
-.availability__phone-summary button {
-  min-height: 44px;
-  width: 100%;
-  margin-top: 12px;
-  padding: 10px 14px;
-  border: 1px solid var(--line, #70543e);
-  border-radius: 12px;
-  background: var(--control-bg, #443427);
-  color: var(--brand);
-  font-size: 16px;
-  line-height: 1.5;
-}
-.availability__phone-summary p[role='status'] {
-  margin: 10px 0 0;
-  font-size: 14px;
-  color: var(--brand);
-}
-.availability__confirmation {
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 16px 0 0;
-  color: var(--muted);
-}
-.availability__demo {
-  font-size: 14px;
-  color: var(--muted);
-  margin: 20px 0 0;
-  line-height: 1.7;
-}
-.availability__reset:hover,
-.availability__arrow:hover:not(:disabled),
-.availability__slot:hover,
-.availability__phone-summary button:hover {
+.availability__reset:hover:not(:disabled),
+.availability__arrow:hover:not(:disabled) {
   border-color: var(--accent, #deb989);
   background: var(--selected-bg, #8d623d);
   color: var(--selected-text, #fff);
@@ -1071,15 +972,11 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   .availability__layout {
     grid-template-columns: minmax(0, 1fr);
   }
-  .availability__calendar,
-  .availability__details {
+  .availability__calendar {
     padding: 20px;
   }
   .availability__settings {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .availability__details {
-    position: static;
   }
 }
 @media (max-width: 767.98px) {
@@ -1094,10 +991,6 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   }
   .availability__settings {
     grid-template-columns: 1fr 1fr;
-  }
-  .availability__details {
-    min-height: 320px;
-    position: static;
   }
 }
 @media (max-width: 575.98px) {
@@ -1129,19 +1022,15 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   .availability__period-dates > div {
     padding: 12px;
   }
-  .availability__period-footer {
-    flex-wrap: wrap;
-  }
-  .availability__reset {
-    width: 100%;
-  }
 }
 @media (max-width: 399.98px) {
+  .availability__period-dates strong {
+    min-height: 3.3em;
+  }
   .availability__settings {
     grid-template-columns: 1fr;
   }
-  .availability__calendar,
-  .availability__details {
+  .availability__calendar {
     padding: 14px;
   }
   .availability__grid {
@@ -1205,39 +1094,42 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   background: var(--selected-bg);
 }
 .time-sheet__date {
-  font-size: 22px;
+  margin: 0 0 8px;
+  font-size: clamp(20px, 3vw, 24px);
+  font-weight: 600;
+  line-height: 1.4;
   color: var(--ink);
 }
+.time-sheet__summary {
+  margin: 0 0 24px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
 .time-sheet__selection {
-  margin: 24px 0;
+  margin: 22px 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--muted);
 }
 .time-sheet {
-  max-width: 520px;
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
 }
-@media (max-width: 767.98px) {
-  .time-sheet {
-    margin: auto 0 0;
-    width: 100%;
-    max-width: none;
-    max-height: 85dvh;
-    border-radius: 24px 24px 0 0;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  .time-sheet[open] {
-    animation: sheet-in 260ms ease-out;
-  }
+.time-sheet.media-dialog :deep(.media-dialog__content) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
 }
-@keyframes sheet-in {
-  from {
-    transform: translateY(100%);
+@media (max-width: 575.98px) {
+  .time-sheet.media-dialog :deep(.media-dialog__content) {
+    padding: 22px 16px;
   }
-  to {
-    transform: translateY(0);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .time-sheet[open] {
-    animation: none;
+  .availability__slot {
+    flex-basis: calc((100% - 8px) / 2);
   }
 }
 @media (max-width: 575.98px) {
@@ -1342,6 +1234,14 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   color: var(--ink);
   min-height: 44px;
 }
+.availability__settings :deep(.number-stepper__input:focus) {
+  outline: none;
+  box-shadow: none;
+}
+.availability__settings :deep(.number-stepper__controls:has(.number-stepper__input:focus-visible)) {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
 .availability__settings :deep(.number-stepper__suffix) {
   display: none;
 }
@@ -1364,6 +1264,199 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 @media (hover: hover) {
   .availability__settings :deep(.number-stepper__button:hover:not(:disabled)) {
     background: #c7b09845;
+  }
+}
+
+.availability__calendar {
+  padding: 0;
+}
+.availability__period-dates strong {
+  min-height: 1.65em;
+}
+@media (max-width: 991.98px) {
+  .availability__dialog-heading {
+    margin-bottom: 12px;
+  }
+  .availability__settings .availability__guests--single {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: none;
+  }
+  .availability__guests--single :deep(.number-stepper__heading) {
+    margin: 0;
+    padding: 0;
+  }
+  .availability__guests--single :deep(.number-stepper__controls) {
+    flex: 1;
+    min-width: 0;
+    max-width: 260px;
+  }
+  .availability__period {
+    margin-top: 12px;
+    padding-top: 12px;
+  }
+  .availability__period-dates > div {
+    padding: 8px 10px;
+  }
+  .availability__period-dates span:not(.availability__period-arrow) {
+    margin-bottom: 0;
+    font-size: 12px;
+  }
+  .availability__period-footer {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .availability__range-help {
+    font-size: 12px;
+    text-align: left;
+  }
+  .availability__reset {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  .availability .availability__month-stage {
+    margin: 12px 0 0;
+    padding: 12px 2px;
+  }
+  .availability__month-stage :deep(.calendar-stage__header) {
+    padding-bottom: 8px;
+  }
+  .availability__month {
+    font-size: 25px;
+  }
+  .availability__grid {
+    row-gap: 3px;
+  }
+  .availability__day {
+    min-height: 44px;
+  }
+  .availability__weekday {
+    padding-bottom: 4px;
+    font-size: 14px;
+  }
+  .availability__estimate-dock {
+    height: 78px;
+    margin-top: 12px;
+  }
+}
+@media (min-width: 992px) {
+  .availability {
+    --calendar-day-size: clamp(44px, calc((100dvh - 570px) / 6), 54px);
+    --availability-times-height: clamp(
+      34px,
+      calc(100dvh - 396px - 6 * var(--calendar-day-size)),
+      154px
+    );
+  }
+  .availability__layout {
+    max-width: none;
+  }
+  .availability__calendar {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    align-items: start;
+    gap: 24px;
+  }
+  .availability__settings {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .availability__period {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  .availability__period-dates {
+    gap: 8px;
+  }
+  .availability__period-dates > div {
+    padding: 10px;
+  }
+  .availability__month-stage {
+    width: 100%;
+    margin: 0;
+    padding: 12px 8px;
+  }
+  .availability__month-stage :deep(.calendar-stage__header) {
+    padding-bottom: 8px;
+  }
+  .availability__month {
+    font-size: 28px;
+  }
+  .availability__grid {
+    width: 100%;
+    row-gap: 4px;
+  }
+  .availability__weekday {
+    padding-bottom: 4px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+  .availability__day {
+    justify-self: center;
+    width: calc(100% - 6px);
+    min-height: var(--calendar-day-size);
+    line-height: 1.2;
+  }
+  .availability__day--range {
+    justify-self: stretch;
+    width: auto;
+  }
+}
+@media (min-width: 992px) and (max-height: 760px) {
+  .availability {
+    --availability-times-height: clamp(34px, calc(100dvh - 604px), 154px);
+  }
+  .availability__dialog-heading {
+    margin-bottom: 8px;
+  }
+  .availability__month-stage {
+    padding-block: 4px;
+  }
+  .availability__month {
+    font-size: 25px;
+  }
+  .availability__grid {
+    row-gap: 3px;
+  }
+  .availability__weekday {
+    font-size: 14px;
+    padding-bottom: 0;
+  }
+}
+@media (min-width: 992px) and (max-height: 680px) {
+  .availability__period {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  .availability__period-dates > div {
+    padding: 8px;
+  }
+  .availability__period-footer {
+    margin-top: 8px;
+    gap: 6px;
+  }
+  .availability__range-help {
+    font-size: 12px;
+  }
+  .availability__settings .availability__guests--single {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .availability__guests--single :deep(.number-stepper__heading) {
+    margin: 0;
+    padding: 0;
+  }
+  .availability__guests--single :deep(.number-stepper__controls) {
+    flex: 1;
+    min-width: 0;
+  }
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .availability .availability__month-stage {
+    max-width: 374px;
+    margin-inline: auto;
   }
 }
 </style>

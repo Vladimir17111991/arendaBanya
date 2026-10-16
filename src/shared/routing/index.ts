@@ -9,6 +9,10 @@ export interface BookingPrefill {
 }
 export const sections = ['home', 'work-gallery', 'price-list', 'availability', 'contacts'] as const;
 export type SiteSection = (typeof sections)[number];
+export const publicSectionLinks: ReadonlyArray<{ section: SiteSection; label: string }> = [
+  { section: 'work-gallery', label: 'Галерея' },
+  { section: 'price-list', label: 'Цены и даты' },
+];
 export interface NavigationOptions {
   reset?: boolean;
   tab?: CabinetTab;

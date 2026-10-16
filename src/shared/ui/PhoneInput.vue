@@ -4,54 +4,75 @@
     type="tel"
     inputmode="tel"
     autocomplete="tel"
-    placeholder="+375 29 123 45 67"
+    :maxlength="PHONE_MAX_LENGTH"
+    :pattern="PHONE_PATTERN"
+    placeholder="+375 (XX) XXX-XX-XX"
+    title="Введите номер полностью: +375 (XX) XXX-XX-XX"
     @focus="onFocus"
+    @beforeinput="onBeforeInput"
     @input="onInput"
-    @keydown="onKeydown"
+    @paste="onPaste"
   />
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { formatPhone } from '../lib/phone/index.ts';
+import {
+  editPhone,
+  formatPhone,
+  PHONE_MAX_LENGTH,
+  PHONE_PATTERN,
+  PHONE_PREFIX,
+} from '../lib/phone/index.ts';
 const model = defineModel<string>({ required: true });
 const display = computed(() => formatPhone(model.value));
-function onFocus() {
-  if (!model.value) model.value = '+375';
+function update(input: HTMLInputElement, value: string, caret = value.length) {
+  model.value = value;
+  input.value = value;
+  input.setSelectionRange(caret, caret);
 }
-function update(input: HTMLInputElement, raw: string, caret: number) {
-  const formatted = formatPhone(raw);
-  const digitsBefore =
-    raw.slice(0, caret).replace(/\D/g, '').length +
-    Math.max(0, formatted.replace(/\D/g, '').length - raw.replace(/\D/g, '').length);
-  model.value = formatted;
-  input.value = formatted;
-  let count = 0;
-  let position = formatted.startsWith('+') ? 1 : 0;
-  while (position < formatted.length && count < digitsBefore) {
-    if (/\d/.test(formatted[position]!)) count++;
-    position++;
-  }
-  input.setSelectionRange(position, position);
+function onFocus(event: FocusEvent) {
+  const input = event.target as HTMLInputElement;
+  if (!model.value) update(input, PHONE_PREFIX);
 }
+function onBeforeInput(event: InputEvent) {
+  const input = event.target as HTMLInputElement;
+  if (!event.cancelable) return;
+  const deleting = event.inputType.startsWith('delete');
+  if (!deleting && event.data === null) return;
+  event.preventDefault();
+  if (!deleting && !/\d/.test(event.data ?? '')) return;
+  const result = editPhone(
+    input.value,
+    input.selectionStart ?? input.value.length,
+    input.selectionEnd ?? input.value.length,
+    deleting ? '' : (event.data ?? ''),
+    deleting ? (event.inputType.includes('Backward') ? 'backward' : 'forward') : undefined,
+  );
+  update(input, result.value, result.caret);
+}
+// Autofill and input methods which do not dispatch a cancelable beforeinput.
 function onInput(event: Event) {
   const input = event.target as HTMLInputElement;
-  update(input, input.value, input.selectionStart ?? input.value.length);
+  update(input, formatPhone(input.value));
 }
-function onKeydown(event: KeyboardEvent) {
-  const input = event.target as HTMLInputElement;
-  const caret = input.selectionStart ?? 0;
-  if (
-    event.key !== 'Backspace' ||
-    caret !== input.selectionEnd ||
-    !caret ||
-    /\d/.test(input.value[caret - 1]!)
-  )
-    return;
-  let previous = caret - 1;
-  while (previous >= 0 && !/\d/.test(input.value[previous]!)) previous--;
-  if (previous < 0) return;
+function onPaste(event: ClipboardEvent) {
+  if (!event.clipboardData) return;
   event.preventDefault();
-  update(input, input.value.slice(0, previous) + input.value.slice(caret), previous);
+  const input = event.target as HTMLInputElement;
+  const pasted = event.clipboardData.getData('text');
+  const digits = pasted.replace(/\D/g, '');
+  if (!digits || (pasted.trim().startsWith('+') && !digits.startsWith('375'))) return;
+  if (digits.length >= 9 || digits.startsWith('375') || digits.startsWith('80')) {
+    update(input, formatPhone(pasted));
+    return;
+  }
+  const result = editPhone(
+    input.value,
+    input.selectionStart ?? input.value.length,
+    input.selectionEnd ?? input.value.length,
+    pasted,
+  );
+  update(input, result.value, result.caret);
 }
 </script>

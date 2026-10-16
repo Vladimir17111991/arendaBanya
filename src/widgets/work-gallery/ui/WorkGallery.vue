@@ -890,16 +890,6 @@ async function showMore(event: MouseEvent) {
   position: absolute;
   top: max(12px, env(safe-area-inset-top));
   right: max(16px, env(safe-area-inset-right));
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  border: 1px solid #ba9268;
-  background: linear-gradient(115deg, #895f3b, #805736);
-  color: #fff;
-  box-shadow: 0 4px 20px #0008;
-}
-.work-gallery__dialog :deep(.media-dialog__close:hover) {
-  background: linear-gradient(115deg, #996c44, #966a43);
 }
 .photo-thumbnails {
   position: absolute;

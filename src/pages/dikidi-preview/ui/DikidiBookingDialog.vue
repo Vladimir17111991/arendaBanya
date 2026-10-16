@@ -16,15 +16,7 @@
           >DIKIDI<span class="dikidi-booking-dialog__brand-dot">.</span></span
         ><span class="border-start ps-3 small text-body-secondary">Пример окна записи</span>
       </div>
-      <button
-        type="button"
-        class="grid align-items-center justify-content-center rounded-pill bg-light fs-5 dikidi-booking-dialog__close"
-        aria-label="Закрыть пример записи"
-        autofocus
-        @click="close"
-      >
-        ×
-      </button>
+      <DialogClose label="Закрыть пример записи" autofocus @click="close" />
     </div>
     <div class="p-4 p-md-4">
       <p
@@ -160,6 +152,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { usePractice, addDays, todayKey, type Service } from '../../../entities/practice/index.ts';
 
 import { dayName, fullDate, money, shortDate } from '../../../shared/lib/format/index.ts';
+import { DialogClose } from '../../../shared/ui/index.ts';
 
 const props = defineProps<{ service: Service | null }>();
 const { services } = usePractice();
@@ -243,13 +236,6 @@ function onBackdrop(event: MouseEvent) {
 }
 .dikidi-booking-dialog__brand-dot {
   color: #ff8348;
-}
-.dikidi-booking-dialog__close {
-  width: 2.25rem;
-  height: 2.25rem;
-}
-.dikidi-booking-dialog__close:hover {
-  background-color: #e8eae8;
 }
 .dikidi-booking-dialog__avatar {
   width: 3rem;

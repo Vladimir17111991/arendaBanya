@@ -16,11 +16,13 @@
           </p>
         </div>
       </div>
-      <div class="contact-section__form">
-        <h3>Связаться с нами</h3>
-        <ContactForm />
+      <div class="contact-section__cards">
+        <div class="contact-section__form">
+          <h3>Связаться с нами</h3>
+          <ContactForm />
+        </div>
+        <LocationCard />
       </div>
-      <LocationCard />
     </div>
   </section>
 </template>
@@ -31,12 +33,24 @@ import LocationCard from './LocationCard.vue';
 </script>
 
 <style scoped>
-.contact-section__form {
+.contact-section__cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  align-items: start;
+  gap: 24px;
   margin-top: 32px;
+}
+.contact-section__form {
+  min-width: 0;
   padding: clamp(20px, 3vw, 32px);
   border: 1px solid var(--line);
   border-radius: 24px;
   background: var(--surface-raised);
+}
+@media (max-width: 991.98px) {
+  .contact-section__cards {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .contact-section__form h3 {
   font-family: var(--display);

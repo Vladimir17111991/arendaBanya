@@ -41,20 +41,12 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { PhoneInput } from '../../../shared/ui/index.ts';
-const props = defineProps<{ initialMessage?: string }>();
 const name = ref('');
 const phone = ref('');
 const message = ref('');
 const notice = ref('');
-watch(
-  () => props.initialMessage,
-  (value) => {
-    message.value = value?.includes('Хочу забронировать баню:') ? value : '';
-    notice.value = '';
-  },
-);
 function submit() {
   notice.value = 'Отправка ещё не подключена. Ваш запрос не отправлен.';
 }
@@ -113,7 +105,11 @@ function submit() {
   color: var(--muted);
 }
 .contact-form textarea {
-  resize: vertical;
+  height: 128px;
+  min-height: 128px;
+  max-height: 128px;
+  resize: none;
+  overflow-y: auto;
 }
 .contact-form__message {
   margin: 0;

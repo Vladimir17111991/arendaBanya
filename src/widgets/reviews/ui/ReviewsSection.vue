@@ -7,19 +7,21 @@
       Поделитесь впечатлениями о нашей бане — ваш отзыв поможет другим гостям выбрать отдых.
     </p>
     <div
-      ref="track"
+      ref="review-track"
       class="reviews__grid"
       :class="{ 'is-dragging': dragging }"
       tabindex="0"
+      role="region"
+      aria-roledescription="карусель"
       aria-label="Отзывы гостей"
-      @scroll="onScroll"
       @pointerdown="startDrag"
       @pointermove="moveDrag"
       @pointerup="endDrag"
       @pointercancel="endDrag"
-      @keydown.left.prevent="go(current - 1, true)"
-      @keydown.right.prevent="go(current + 1, true)"
-      @wheel.passive="interact"
+      @lostpointercapture="endDrag"
+      @keydown.left.prevent="advance(-1)"
+      @keydown.right.prevent="advance(1)"
+      @wheel="onWheel"
       @keydown="interact"
       @focusin="interact"
     >
@@ -27,7 +29,7 @@
         v-for="(review, index) in slides"
         :key="index"
         class="reviews__card"
-        :aria-hidden="index === 0 || index === slides.length - 1"
+        :aria-hidden="index < reviews.length || index >= reviews.length * 2"
       >
         <span class="reviews__stars" aria-label="5 из 5 звёзд">★★★★★</span>
         <p>{{ review.text }}</p>
@@ -51,7 +53,18 @@
                 required
                 :aria-label="star + ' из 5 звёзд'"
               />
-              <span aria-hidden="true">★</span>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="m12 2.8 2.85 5.78 6.38.93-4.62 4.5 1.09 6.36L12 17.37l-5.7 3 1.09-6.36-4.62-4.5 6.38-.93L12 2.8Z"
+                />
+              </svg>
             </label>
           </div>
         </fieldset>
@@ -76,109 +89,18 @@
           />
         </label>
 
-        <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+        <button type="submit" class="btn btn-primary review-form__submit">Отправить отзыв</button>
         <p v-if="notice" role="status" class="review-form__notice">{{ notice }}</p>
       </form>
     </MediaDialog>
   </section>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { MediaDialog } from '../../../shared/ui/index.ts';
+import { useReviewCarousel } from '../model/useReviewCarousel.ts';
 const open = ref(false);
-const track = ref<HTMLElement | null>(null);
-const current = ref(1);
-const paused = ref(false);
-const dragging = ref(false);
-let dragStartX = 0;
-let dragStartScroll = 0;
-let dragStartIndex = 0;
-function startDrag(event: PointerEvent) {
-  interact();
-  if (event.pointerType !== 'mouse' || event.button !== 0 || !track.value) return;
-  dragging.value = true;
-  dragStartX = event.clientX;
-  dragStartScroll = track.value.scrollLeft;
-  dragStartIndex = current.value;
-  track.value.setPointerCapture(event.pointerId);
-}
-function moveDrag(event: PointerEvent) {
-  if (!dragging.value || !track.value) return;
-  track.value.scrollLeft = dragStartScroll + dragStartX - event.clientX;
-  interact();
-}
-function endDrag(event: PointerEvent) {
-  interact();
-  if (!dragging.value || !track.value) return;
-  const distance = dragStartX - event.clientX;
-  dragging.value = false;
-  if (track.value.hasPointerCapture(event.pointerId))
-    track.value.releasePointerCapture(event.pointerId);
-  const target =
-    event.type !== 'pointercancel' && Math.abs(distance) > 40
-      ? dragStartIndex + Math.sign(distance)
-      : dragStartIndex;
-  requestAnimationFrame(() => go(Math.max(0, Math.min(slides.length - 1, target)), true));
-}
-let nextAt = 0;
-let timer: ReturnType<typeof setInterval> | undefined;
-let settleTimer: ReturnType<typeof setTimeout> | undefined;
-let resizeObserver: ResizeObserver | undefined;
-function interact() {
-  nextAt = Date.now() + 10000;
-}
-function go(index: number, manual = false, instant = false) {
-  if (manual) interact();
-  const el = track.value;
-  const card = el?.children[index] as HTMLElement | undefined;
-  if (el && card)
-    el.scrollTo({
-      left: card.offsetLeft - (el.children[0] as HTMLElement).offsetLeft,
-      behavior:
-        instant || matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-    });
-}
-function onScroll() {
-  const el = track.value;
-  if (!el) return;
-  const step =
-    (el.children[1] as HTMLElement)?.offsetLeft - (el.children[0] as HTMLElement)?.offsetLeft;
-  if (step) current.value = Math.round(el.scrollLeft / step);
-  clearTimeout(settleTimer);
-  settleTimer = setTimeout(() => {
-    if (dragging.value) return;
-    if (current.value === 0) go(reviews.length, false, true);
-    else if (current.value === slides.length - 1) go(1, false, true);
-  }, 120);
-}
-onMounted(() => {
-  go(1, false, true);
-  resizeObserver = new ResizeObserver(() => go(current.value, false, true));
-  if (track.value) resizeObserver.observe(track.value);
-  paused.value = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  nextAt = Date.now() + 5000;
-  timer = setInterval(() => {
-    const rect = track.value?.getBoundingClientRect();
-    if (
-      paused.value ||
-      dragging.value ||
-      open.value ||
-      document.hidden ||
-      !rect ||
-      rect.bottom < 0 ||
-      rect.top > innerHeight ||
-      Date.now() < nextAt
-    )
-      return;
-    go(current.value + 1);
-    nextAt = Date.now() + 5000;
-  }, 500);
-});
-onUnmounted(() => {
-  clearInterval(timer);
-  clearTimeout(settleTimer);
-  resizeObserver?.disconnect();
-});
+const track = useTemplateRef<HTMLElement>('review-track');
 const name = ref('');
 const rating = ref<number | ''>('');
 const comment = ref('');
@@ -198,7 +120,12 @@ const reviews = [
   },
   { name: 'Елена', text: 'Удобно остаться с ночёвкой после бани — отдохнуть и уехать уже утром.' },
 ];
-const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
+const slides = [...reviews, ...reviews, ...reviews];
+const { dragging, startDrag, moveDrag, endDrag, onWheel, advance, interact } = useReviewCarousel(
+  reviews.length,
+  open,
+  track,
+);
 </script>
 <style scoped>
 .reviews__note {
@@ -206,17 +133,36 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
   margin: 18px 0 28px;
 }
 .reviews__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  position: relative;
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: pan-y pinch-zoom;
   gap: 20px;
+  border-radius: 24px;
+}
+.reviews__grid:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+.reviews__grid.is-dragging {
+  cursor: grabbing;
 }
 .reviews__card {
+  flex: 0 0 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   padding: 28px;
   border: 1px solid var(--line);
   border-radius: 24px;
   background: var(--surface-raised);
+}
+@media (min-width: 768px) {
+  .reviews__card {
+    flex-basis: calc((100% - 20px) / 2);
+  }
 }
 .reviews__quote {
   color: var(--accent);
@@ -235,9 +181,6 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
   font-size: 14px;
 }
 @media (max-width: 767.98px) {
-  .reviews__grid {
-    grid-template-columns: 1fr;
-  }
   .reviews__card {
     padding: 24px;
   }
@@ -275,12 +218,16 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
   opacity: 0;
   cursor: pointer;
 }
-.review-form__stars span {
-  font-size: 36px;
-  line-height: 1;
+.review-form__stars svg {
+  width: 36px;
+  height: 36px;
+  pointer-events: none;
 }
 .review-form__stars .is-filled {
-  color: #deb989;
+  color: #ffd185;
+}
+.review-form__stars .is-filled svg {
+  fill: currentColor;
 }
 .review-form__stars label:has(input:focus-visible) {
   outline: 2px solid #deb989;
@@ -304,6 +251,10 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
 .review-form textarea {
   resize: vertical;
 }
+.review-form__submit {
+  display: block;
+  margin-top: 24px;
+}
 .review-form__note {
   color: var(--muted);
   font-size: 14px;
@@ -315,27 +266,9 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
   color: var(--accent);
 }
 
-.reviews__grid {
-  display: flex;
-  cursor: grab;
-  user-select: none;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  gap: 20px;
-}
-.reviews__grid.is-dragging {
-  cursor: grabbing;
-  scroll-snap-type: none;
-}
 .reviews__author {
   margin-top: auto;
   color: var(--ink);
-}
-.reviews__card {
-  flex: 0 0 100%;
-  scroll-snap-align: start;
-  box-sizing: border-box;
 }
 .reviews__stars {
   color: var(--accent);

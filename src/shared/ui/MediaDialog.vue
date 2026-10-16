@@ -7,35 +7,21 @@
     @click="$event.target === $event.currentTarget && emit('close')"
     @close="restoreFocus"
   >
-    <div class="media-dialog__header d-flex align-items-center justify-content-between gap-3">
+    <div
+      v-if="!embeddedHeader"
+      class="media-dialog__header d-flex align-items-center justify-content-between gap-3"
+    >
       <h2 :id="titleId" ref="heading" tabindex="-1" class="media-dialog__title m-0">{{ title }}</h2>
-      <button
-        class="media-dialog__close flex-shrink-0"
-        type="button"
-        aria-label="Закрыть просмотр"
-        @click="emit('close')"
-      >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-          aria-hidden="true"
-        >
-          <path d="m6 6 12 12M18 6 6 18" />
-        </svg>
-      </button>
+      <DialogClose class="media-dialog__close" label="Закрыть просмотр" @click="emit('close')" />
     </div>
-    <div class="media-dialog__content"><slot /></div>
+    <div class="media-dialog__content"><slot :title-id="titleId" /></div>
   </dialog>
 </template>
 
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, useId, watch } from 'vue';
-const props = defineProps<{ open: boolean; title: string }>();
+import DialogClose from './DialogClose.vue';
+const props = defineProps<{ open: boolean; title: string; embeddedHeader?: boolean }>();
 const emit = defineEmits<{ close: [] }>();
 const titleId = useId();
 const dialog = ref<HTMLDialogElement | null>(null);
@@ -49,7 +35,8 @@ watch(
     await nextTick();
     if (open && props.open) {
       dialog.value?.showModal();
-      heading.value?.focus({ preventScroll: true });
+      const title = heading.value ?? document.getElementById(titleId);
+      title?.focus({ preventScroll: true });
     } else if (!props.open) dialog.value?.close();
   },
 );
@@ -89,15 +76,6 @@ onUnmounted(() => dialog.value?.close());
   font-size: 25px;
   font-weight: 400;
 }
-.media-dialog__close {
-  width: 44px;
-  height: 44px;
-  border: 1px solid #dcc4ce;
-  border-radius: 50%;
-  color: var(--brand);
-  background: #fff5ef;
-  font-size: 26px;
-}
 .media-dialog__content {
   padding: 18px;
 }
@@ -109,28 +87,7 @@ onUnmounted(() => dialog.value?.close());
     font-size: 21px;
   }
 }
-.media-dialog .media-dialog__close {
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  box-shadow: none;
-}
 .media-dialog__title:focus {
   outline: none;
-}
-.media-dialog .media-dialog__close:focus:not(:focus-visible) {
-  outline: none;
-  box-shadow: none;
-}
-.media-dialog .media-dialog__close:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-@media (hover: hover) {
-  .media-dialog .media-dialog__close:hover {
-    background: #c1a78d22;
-  }
 }
 </style>

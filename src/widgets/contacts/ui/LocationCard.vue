@@ -83,15 +83,15 @@ const routeSteps = [
 </script>
 <style scoped>
 .location-card {
-  margin-top: 28px;
-  padding: 32px;
+  min-width: 0;
+  padding: clamp(20px, 3vw, 32px);
   border: 1px solid var(--line);
   border-radius: 24px;
   background: var(--surface);
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   gap: 28px;
-  align-items: center;
+  align-items: start;
 }
 .location-card__title {
   margin: 0 0 20px;

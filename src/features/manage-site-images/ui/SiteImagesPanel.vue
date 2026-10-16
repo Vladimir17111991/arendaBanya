@@ -17,7 +17,7 @@
         <SiteImageEditor
           slot-name="studio"
           title="Обложка галереи"
-          description="Первое фото в разделе «Фото бани»."
+          description="Первое фото в разделе «Галерея»."
         />
       </div>
     </div>

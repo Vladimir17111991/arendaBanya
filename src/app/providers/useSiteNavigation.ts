@@ -8,6 +8,7 @@ import {
   type Navigation,
 } from '../../shared/routing/index.ts';
 import { scrollToElement } from '../../shared/lib/scroll/index.ts';
+import { activeSectionAt, navigationSection } from '../model/activeSection.ts';
 
 const viewSections: Partial<Record<View, SiteSection>> = {
   services: 'home',
@@ -55,7 +56,7 @@ export function provideSiteNavigation(
     cancelNavigation();
     const controller = new AbortController();
     navigationController = controller;
-    activeSection.value = section;
+    activeSection.value = navigationSection(section);
     target.focus({ preventScroll: true });
     // Keep the chosen link highlighted while passing intermediate sections.
     await scrollToElement(target, controller.signal, behavior);
@@ -106,18 +107,14 @@ export function provideSiteNavigation(
     scrollFrame = 0;
     if (!publicPage.value || navigationController || disposed) return;
     const headerHeight = document.querySelector('.app-header')?.getBoundingClientRect().height ?? 0;
-    let current: SiteSection = 'home';
-    for (const section of sections) {
+    const positions = sections.flatMap((section) => {
       const target = document.getElementById(section);
-      if (target && target.getBoundingClientRect().top <= headerHeight + 140) current = section;
-    }
-    if (
+      return target ? [{ section, top: target.getBoundingClientRect().top }] : [];
+    });
+    const atPageEnd =
       window.scrollY > 0 &&
-      document.documentElement.scrollHeight - window.innerHeight - window.scrollY <= 2
-    ) {
-      current = 'contacts';
-    }
-    activeSection.value = current;
+      document.documentElement.scrollHeight - window.innerHeight - window.scrollY <= 2;
+    activeSection.value = activeSectionAt(positions, headerHeight + 140, atPageEnd);
   }
 
   function onScroll() {

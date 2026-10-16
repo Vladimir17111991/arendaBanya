@@ -6,7 +6,8 @@
           Договоримся<br /><em class="section-heading__accent">обо всём.</em>
         </h2>
         <p class="first-visit__intro">
-          Несколько ответов перед бронированием. Остальные детали можно уточнить по телефону.
+          Несколько ответов перед бронированием. Остальные детали можно уточнить
+          <SectionLink to="contacts" class="first-visit__contact">по телефону</SectionLink>.
         </p>
       </div>
       <div class="col-lg-7">
@@ -22,6 +23,7 @@
 </template>
 
 <script setup lang="ts">
+import { SectionLink } from '../../../shared/ui/index.ts';
 const questions = [
   {
     question: 'Как забронировать баню?',
@@ -67,6 +69,16 @@ const questions = [
   line-height: 1.8;
   font-size: 16px;
   max-width: 380px;
+}
+.first-visit__contact {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.first-visit__contact:hover {
+  color: var(--ink);
 }
 .first-visit__link {
   display: inline-flex;

@@ -27,12 +27,19 @@
       <PriceList @choose="chooseRental" />
     </div>
     <MediaDialog
+      v-slot="{ titleId }"
       :open="calendarOpen"
       :title="calendarTitle"
+      embedded-header
       class="rental-sheet"
       @close="calendarOpen = false"
     >
-      <PublicAvailability />
+      <PublicAvailability
+        :active="calendarOpen"
+        :title="calendarTitle"
+        :title-id="titleId"
+        @close="calendarOpen = false"
+      />
     </MediaDialog>
     <div class="section-reveal"><ReviewsSection /></div>
     <div class="section-reveal"><FirstVisit /></div>
@@ -69,11 +76,24 @@ function chooseRental(id: number) {
 <style scoped>
 .services-page .rental-sheet {
   inset: 0;
-  margin: 0 auto;
-  width: min(1120px, 100%);
-  height: 100dvh;
-  max-height: 100dvh;
-  border-radius: 0;
+  margin: auto;
+  width: min(1020px, calc(100% - 40px));
+  max-width: calc(100% - 40px);
+  max-height: calc(100dvh - 40px);
+  border-radius: 24px;
+}
+.rental-sheet :deep(.media-dialog__content) {
+  padding: 24px;
+}
+@media (min-width: 992px) {
+  .services-page .rental-sheet {
+    width: min(820px, calc(100% - 40px));
+  }
+}
+@media (min-width: 992px) and (max-height: 760px) {
+  .rental-sheet :deep(.media-dialog__content) {
+    padding: 16px;
+  }
 }
 .rental-sheet[open] {
   animation: rental-rise 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -258,9 +278,6 @@ function chooseRental(id: number) {
   }
 }
 @media (max-width: 767.98px) {
-  .services-page {
-    padding-bottom: calc(76px + env(safe-area-inset-bottom));
-  }
   .hero__layout {
     column-gap: 26px;
     padding-block: 32px 40px;
@@ -310,11 +327,13 @@ function chooseRental(id: number) {
 }
 @media (max-width: 575.98px) {
   .services-page .rental-sheet {
-    width: 100%;
-    max-width: 100%;
+    width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    max-height: calc(100dvh - 32px);
+    border-radius: 20px;
   }
   .rental-sheet :deep(.media-dialog__content) {
-    padding: 12px 8px;
+    padding: 16px 12px;
   }
 }
 </style>
