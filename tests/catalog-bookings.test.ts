@@ -170,37 +170,33 @@ test('photo validation is atomic and disposal releases uploads', (context) => {
   assert.deepEqual(revoked, ['blob:photo']);
 });
 
-test('rental visit counts update only after checkout and support correction', () => {
-  const { store, client, draft, at } = setup();
-  store.setPreviousVisits(client.id, 4);
+test('rental completion is available after checkout and supports correction', () => {
+  const { store, draft, at } = setup();
   const first = store.book(draft);
   const cancelled = store.book({ ...draft, time: '12:00' });
-  assert.equal(store.visitsForClient(client.id), 4);
-  assert.equal(store.numberForVisit(first), 5);
+  assert.equal(first.status, 'confirmed');
   assert.throws(() => store.completeBooking(first.id), /после окончания/);
   at('2030-01-08T07:05:00Z');
   assert.throws(() => store.completeBooking(first.id), /после окончания/);
   store.cancelBooking(cancelled.id);
   at('2030-01-08T09:00:00Z');
   store.completeBooking(first.id);
-  assert.equal(store.visitsForClient(client.id), 5);
-  assert.equal(store.numberForVisit(first), 5);
+  assert.equal(first.status, 'completed');
+  assert.equal(store.feedback.value, 'Аренда завершена.');
   assert.equal(store.activeCount.value, 0);
   assert.throws(() => store.completeBooking(first.id));
   assert.throws(() => store.completeBooking(cancelled.id));
   store.cancelBooking(first.id);
   assert.equal(first.status, 'completed');
   const next = store.book({ ...draft, time: '14:00' });
-  assert.equal(store.numberForVisit(next), 6);
   store.undoCompletion(first.id);
-  assert.equal(store.visitsForClient(client.id), 4);
-  assert.equal(store.numberForVisit(next), 5);
-  assert.throws(() => store.setPreviousVisits(client.id, -1));
-  assert.throws(() => store.setPreviousVisits(client.id, 1.5));
+  assert.equal(first.status, 'confirmed');
+  assert.equal(next.status, 'confirmed');
+  assert.equal(store.activeCount.value, 2);
 });
 
-test('guest cannot edit catalog, photos or visit counts', () => {
-  const { store, client, draft } = setup();
+test('guest cannot edit catalog or change rental completion', () => {
+  const { store, draft } = setup();
   const booking = store.book(draft);
   store.switchProfile('guest');
   const actions = [
@@ -210,11 +206,10 @@ test('guest cannot edit catalog, photos or visit counts', () => {
     () => store.removeService(1),
     () => store.addService({ ...draft.service, categoryId: 1 }),
     () => store.editService(1, { ...draft.service, categoryId: 1 }),
-    () => store.setPreviousVisits(client.id, 999),
     () => store.completeBooking(booking.id),
     () => store.undoCompletion(booking.id),
   ];
   for (const action of actions) assert.throws(action, /только Виктории/);
-  assert.equal(store.visitsForClient(client.id), 0);
+  assert.equal(booking.status, 'confirmed');
   assert.equal(store.categories.value.length, 2);
 });

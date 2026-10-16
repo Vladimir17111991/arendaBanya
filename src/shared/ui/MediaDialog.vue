@@ -69,11 +69,11 @@ onUnmounted(() => dialog.value?.close());
   padding: 0;
   color: var(--ink);
   background: #fff8f3;
-  box-shadow: 0 24px 80px #38263070;
+  box-shadow: 0 24px 80px #3f373170;
   overscroll-behavior: contain;
 }
 .media-dialog::backdrop {
-  background: #32232cba;
+  background: #3b2e23ba;
   backdrop-filter: blur(6px);
 }
 .media-dialog__header {
@@ -130,7 +130,7 @@ onUnmounted(() => dialog.value?.close());
 }
 @media (hover: hover) {
   .media-dialog .media-dialog__close:hover {
-    background: #b978d622;
+    background: #c1a78d22;
   }
 }
 </style>

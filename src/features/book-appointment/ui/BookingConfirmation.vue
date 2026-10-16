@@ -20,7 +20,7 @@
     <h2 class="display-subtitle mb-4">Бронь добавлена</h2>
     <p v-if="isAdmin">{{ booking.name }} · {{ booking.phone }}</p>
     <p v-else>{{ booking.name }}, бронь появилась в расписании.</p>
-    <div class="my-4 d-flex flex-column gap-3 rounded-2 bg-light p-4">
+    <div class="my-4 d-flex flex-column gap-3 rounded-2 workspace-surface p-4">
       <strong>{{ booking.service.name }}</strong>
       <p>Начало: {{ fullDate(booking.date) }} · {{ booking.time }}</p>
       <p>Окончание: {{ fullDate(end.date) }} · {{ end.time }}</p>

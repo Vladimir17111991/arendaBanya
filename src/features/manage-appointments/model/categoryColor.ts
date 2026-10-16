@@ -3,7 +3,7 @@ export function categoryColor(id: number): string {
   return `hsl(${(245 + id * 137.508) % 360} 48% 38%)`;
 }
 export function categoryTint(id: number): string {
-  return `hsl(${(245 + id * 137.508) % 360} 65% 91%)`;
+  return `color-mix(in srgb, ${categoryColor(id)} 55%, var(--surface))`;
 }
 export function categoryBackground(ids: number[]): string | undefined {
   const unique = [...new Set(ids)];

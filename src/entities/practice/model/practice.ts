@@ -2,7 +2,7 @@ import { computed, inject, provide, readonly, ref, type InjectionKey } from 'vue
 import { createDemoClients, profiles as demoProfiles } from '../config/demo.ts';
 import { createCatalog } from './catalog.ts';
 import { createSiteImages } from './site-images.ts';
-import { canComplete, completedVisits, visitNumber } from '../lib/visits.ts';
+import { canComplete } from '../lib/booking-status.ts';
 import { prepareBooking, prepareClient } from '../lib/booking.ts';
 import {
   activeBookings,
@@ -141,22 +141,6 @@ export function createPracticeStore(
     return client;
   }
 
-  function visitsForClient(id: string) {
-    const client = clients.value.find((item) => item.id === id);
-    return client ? completedVisits(client, bookings.value) : 0;
-  }
-  function numberForVisit(booking: Booking) {
-    const client = clients.value.find((item) => item.id === booking.clientId);
-    return client ? visitNumber(client, booking, bookings.value) : 1;
-  }
-  function setPreviousVisits(id: string, count: number) {
-    requireAdmin();
-    if (!Number.isInteger(count) || count < 0 || count > 10000)
-      throw new Error('Укажите целое число посещений от 0 до 10 000.');
-    const client = clients.value.find((item) => item.id === id);
-    if (!client) throw new Error('Клиент не найден.');
-    client.previousVisits = count;
-  }
   function completeBooking(id: string) {
     requireAdmin();
     const booking = bookings.value.find((item) => item.id === id);
@@ -164,14 +148,14 @@ export function createPracticeStore(
       throw new Error('Завершить можно только подтверждённую бронь после окончания аренды.');
     booking.status = 'completed';
     adminStatus.value = 'all';
-    feedback.value = 'Аренда завершена. Счётчик посещений обновлён.';
+    feedback.value = 'Аренда завершена.';
   }
   function undoCompletion(id: string) {
     requireAdmin();
     const booking = bookings.value.find((item) => item.id === id);
     if (!booking || booking.status !== 'completed') return;
     booking.status = 'confirmed';
-    feedback.value = 'Отметка о посещении снята. Счётчик пересчитан.';
+    feedback.value = 'Завершение отменено. Бронь снова подтверждена.';
   }
 
   function focusBooking(booking: Booking) {
@@ -286,9 +270,6 @@ export function createPracticeStore(
     book,
     addClient,
     enableClientAccess,
-    visitsForClient,
-    numberForVisit,
-    setPreviousVisits,
     completeBooking,
     undoCompletion,
     focusBooking,

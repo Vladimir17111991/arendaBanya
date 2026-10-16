@@ -32,43 +32,30 @@
       <h2 class="display-subtitle mb-3">Добавить бронь</h2>
       <p class="small text-body-secondary mb-4">Внесите договорённость после звонка клиента.</p>
       <ClientPicker v-model="customer" :clients="clients" />
-      <label for="service" class="form-label mt-4 mb-2 d-block small fw-semibold"
-        >Вариант аренды</label
-      >
+      <label for="service" class="form-label mb-2 d-block small fw-semibold">Вариант аренды</label>
       <select id="service" v-model="service" class="form-select">
         <option v-for="item in services" :key="item.id" :value="item">{{ item.name }}</option>
       </select>
-      <NumberStepper
-        id="rental-quantity"
-        v-model="quantity"
-        class="mt-4"
-        :label="service.rentalUnit === 'day' ? 'Количество суток' : 'Количество часов'"
-        :suffix="service.rentalUnit === 'day' ? 'сут.' : 'ч'"
-        :min="1"
-        :max="maxQuantity"
-      />
-      <p class="small text-body-secondary mt-2">
-        {{
-          service.rentalUnit === 'day'
-            ? 'Сутки — 24 часа от согласованного времени заезда.'
-            : `Тестовое расписание: 10:00–19:00, до ${maxQuantity} часов.`
-        }}
-      </p>
-      <NumberStepper
-        id="rental-guests"
-        v-model="guestCount"
-        class="mt-4"
-        label="Количество гостей"
-        suffix="чел."
-        :min="1"
-        :max="maxGuestCount"
-      />
-      <p class="small text-body-secondary mt-2">
-        Стоимость считается за каждого гостя за
-        {{ service.rentalUnit === 'day' ? 'сутки' : 'час' }}.
-      </p>
+      <div class="booking-view__quantities">
+        <NumberStepper
+          id="rental-quantity"
+          v-model="quantity"
+          compact
+          :label="service.rentalUnit === 'day' ? 'Сутки' : 'Часы'"
+          :min="1"
+          :max="maxQuantity"
+        />
+        <NumberStepper
+          id="rental-guests"
+          v-model="guestCount"
+          compact
+          label="Гости"
+          :min="1"
+          :max="maxGuestCount"
+        />
+      </div>
       <div class="booking-view__price mt-3" aria-live="polite">
-        <small class="text-body-secondary">Тестовый расчёт стоимости</small>
+        <small class="text-body-secondary">Стоимость аренды</small>
         <template v-if="totalPrice !== null">
           <p v-if="service.price" class="mt-2 mb-1">
             {{ money(service.price) }} × {{ guestCount }} чел. × {{ quantity }}
@@ -176,6 +163,12 @@ const end = computed(() =>
 }
 .booking-view__form {
   min-width: 0;
+}
+.booking-view__quantities {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+  margin-top: 20px;
 }
 .booking-view__period {
   padding: 16px;

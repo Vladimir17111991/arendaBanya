@@ -19,7 +19,7 @@
     <div class="grid gap-3">
       <CategoryEditorRow v-for="category in categories" :key="category.id" :category="category" />
     </div>
-    <p v-if="!categories.length" class="rounded-3 bg-light p-3 small">
+    <p v-if="!categories.length" class="rounded-3 workspace-surface p-3 small">
       Категорий пока нет. Добавьте первую, затем создайте вариант аренды.
     </p>
   </section>

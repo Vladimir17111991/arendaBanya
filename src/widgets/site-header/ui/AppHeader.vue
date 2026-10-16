@@ -170,8 +170,8 @@ watch(
   height: 46px;
   flex-shrink: 0;
   border-radius: 50%;
-  border: 1px solid #c578df;
-  background: linear-gradient(115deg, #7135ad, #a02a83);
+  border: 1px solid #ba9268;
+  background: linear-gradient(115deg, #8e643f, #765033);
   color: white;
   display: grid;
   place-items: center;

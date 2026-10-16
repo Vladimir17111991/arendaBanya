@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-4 border bg-white p-3">
+  <div class="rounded-4 border workspace-surface p-3">
     <form class="d-flex flex-wrap align-items-end gap-3" @submit.prevent="save">
       <div class="flex-grow-1 category-editor-row__name-field">
         <label :for="`category-${category.id}`" class="mb-2 d-block small text-body-secondary"
@@ -29,7 +29,7 @@
         >Удалить</BaseButton
       >
     </form>
-    <div v-if="removing" class="mt-3 rounded-3 bg-light p-3">
+    <div v-if="removing" class="mt-3 rounded-3 workspace-surface p-3">
       <p class="small">Удалить категорию «{{ category.name }}»?</p>
       <template v-if="count">
         <p class="mt-2 small text-body-secondary">

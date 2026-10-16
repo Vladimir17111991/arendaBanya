@@ -62,7 +62,7 @@ const paired = computed(() => !!props.beforeSrc || props.demoDiptych);
 .photo-pair__label {
   display: block;
   padding: 4px 5px 8px;
-  color: #664554;
+  color: #63485c;
   font-size: 12px;
   font-weight: 600;
 }

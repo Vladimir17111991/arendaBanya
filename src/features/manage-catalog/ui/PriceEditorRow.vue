@@ -33,7 +33,7 @@
         v-model="description"
         maxlength="400"
         rows="2"
-        class="w-100 rounded-2 border bg-white p-3 small form-control"
+        class="w-100 rounded-2 border workspace-surface p-3 small form-control"
       ></textarea>
       <details class="mt-3">
         <summary class="small fw-semibold">Подробности для посетителей</summary>
@@ -95,7 +95,7 @@
         ><span v-if="saved" role="status" class="small text-secondary">Прайс обновлён</span>
       </div>
     </form>
-    <div v-if="removing && service" class="mt-3 rounded-3 bg-light p-3">
+    <div v-if="removing && service" class="mt-3 rounded-3 workspace-surface p-3">
       <p class="small">
         Удалить «{{ service.name }}» из вариантов аренды и новых броней? История существующих броней
         сохранится.

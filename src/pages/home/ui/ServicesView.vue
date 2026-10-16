@@ -114,7 +114,7 @@ function chooseRental(id: number) {
   position: relative;
   z-index: 1;
   overflow: clip;
-  background: linear-gradient(90deg, #100a1b4d, transparent 78%);
+  background: linear-gradient(90deg, #231b164d, transparent 78%);
 }
 .hero__layout {
   display: grid;
@@ -142,11 +142,11 @@ function chooseRental(id: number) {
   letter-spacing: -0.045em;
   margin: 0 0 26px;
   color: var(--ink);
-  text-shadow: 0 3px 24px #100a1b60;
+  text-shadow: 0 3px 24px #231b1660;
 }
 .hero__accent {
   color: var(--accent);
-  text-shadow: 0 0 38px #eb55bf33;
+  text-shadow: 0 0 38px #b98b5933;
 }
 .hero__visual {
   grid-area: visual;
@@ -165,7 +165,7 @@ function chooseRental(id: number) {
 }
 .hero__action {
   min-height: 56px;
-  box-shadow: 0 10px 36px -14px #db55bf80;
+  box-shadow: 0 10px 36px -14px #b7987980;
 }
 .hero__formats {
   display: flex;
@@ -178,10 +178,10 @@ function chooseRental(id: number) {
   padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: linear-gradient(135deg, #321c45d9, #21132fe6);
+  background: linear-gradient(135deg, #443427d9, #30251de6);
   text-align: left;
   color: var(--ink);
-  box-shadow: inset 0 1px 0 #e4bcff0d;
+  box-shadow: inset 0 1px 0 #e4ddd70d;
   transition:
     border-color 160ms,
     background 160ms,
@@ -190,8 +190,8 @@ function chooseRental(id: number) {
 .hero__format:hover,
 .hero__format:focus-visible {
   border-color: var(--accent);
-  background: #3a2050;
-  box-shadow: 0 0 24px -10px #d975ec66;
+  background: #3f3831;
+  box-shadow: 0 0 24px -10px #c8b19966;
 }
 .hero__format:focus-visible {
   outline: 3px solid var(--focus);

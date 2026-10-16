@@ -112,7 +112,7 @@ onUnmounted(() => {
   margin: 0 7px 18px;
   padding: 0 3px 18px;
   border-bottom: 1px solid #dbc0cb;
-  color: #674052;
+  color: #61465a;
 }
 .gallery-filter__icon {
   width: 22px;
@@ -133,9 +133,9 @@ onUnmounted(() => {
   inset: 0 0 auto;
   height: var(--category-height, 0px);
   transform: translateY(var(--category-top, 0px));
-  border: 1px solid #c8a3b7;
+  border: 1px solid #c1aabb;
   border-radius: 14px;
-  background: linear-gradient(120deg, #efd0d9, #ddc8e3);
+  background: linear-gradient(120deg, #efd0d9, #dccfd9);
   box-shadow:
     0 5px 14px #78475614,
     inset 0 1px 0 #ffffff80;
@@ -163,15 +163,15 @@ onUnmounted(() => {
     color 360ms ease;
 }
 .gallery-filter__option:not(.gallery-filter__option--selected):hover {
-  color: #4f2e42;
-  border-color: #b48b9f;
+  color: #463e37;
+  border-color: #af90a7;
 }
 .gallery-filter__label {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 .gallery-filter__option--selected {
-  color: #4f2e42;
+  color: #463e37;
   background: transparent;
   border-color: transparent;
 }
@@ -179,7 +179,7 @@ onUnmounted(() => {
   place-items: center;
   width: 17px;
   height: 17px;
-  border: 1px solid #b89aa8;
+  border: 1px solid #b79bb0;
   border-radius: 50%;
   transition: border-color 360ms ease;
 }
@@ -196,7 +196,7 @@ onUnmounted(() => {
     transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .gallery-filter__option--selected .gallery-filter__mark {
-  border-color: #916077;
+  border-color: #8c6582;
 }
 .gallery-filter__option--selected .gallery-filter__mark::after {
   opacity: 1;
@@ -224,18 +224,18 @@ onUnmounted(() => {
   .gallery-filter__mobile-label {
     font-size: 15px;
     font-weight: 600;
-    color: #674052;
+    color: #61465a;
     flex-shrink: 0;
   }
   .gallery-filter__select {
     min-width: 0;
     min-height: 48px;
-    background-color: #f6e8ee;
-    border-color: #c8a3b7;
+    background-color: #f2efec;
+    border-color: #c1aabb;
     border-radius: 12px;
     font-size: 16px;
     color: var(--ink);
-    box-shadow: inset 0 2px 4px #7144590a;
+    box-shadow: inset 0 2px 4px #694c620a;
   }
 }
 @media (max-width: 575.98px) {

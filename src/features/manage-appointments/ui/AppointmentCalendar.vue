@@ -39,7 +39,7 @@
           'appointment-calendar__day--outside': day.date.slice(0, 7) !== month.slice(0, 7),
           'appointment-calendar__day--today': day.date === today,
         }"
-        :style="day.background ? { background: day.background, color: '#30253b' } : undefined"
+        :style="day.background ? { background: day.background, color: 'var(--ink)' } : undefined"
         :aria-pressed="day.date === modelValue"
         :aria-current="day.date === today ? 'date' : undefined"
         :aria-label="`${fullDate(day.date)}${day.closed ? ', выходной' : ''}, броней: ${day.count}`"
@@ -213,7 +213,7 @@ function move(delta: number) {
 .appointment-calendar__day--selected:hover {
   background: var(--brand);
   color: #fff;
-  outline: 2px solid #753b92;
+  outline: 2px solid #77566f;
   outline-offset: -2px;
   font-weight: 700;
   box-shadow: 0 4px 10px #34462625;

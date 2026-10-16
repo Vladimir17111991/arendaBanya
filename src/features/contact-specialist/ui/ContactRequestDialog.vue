@@ -62,10 +62,10 @@ onUnmounted(() => dialog.value?.close());
   border-radius: 26px;
   color: var(--ink);
   background: var(--surface-raised);
-  box-shadow: 0 28px 90px #38263050;
+  box-shadow: 0 28px 90px #3f373150;
 }
 .contact-request::backdrop {
-  background: #38263080;
+  background: #3f373180;
   backdrop-filter: blur(5px);
 }
 .contact-request__content {
@@ -151,14 +151,14 @@ onUnmounted(() => dialog.value?.close());
 .contact-request .contact-request__close {
   width: 46px;
   height: 46px;
-  border: 1px solid #c578df;
+  border: 1px solid #ba9268;
   border-radius: 50%;
-  background: linear-gradient(115deg, #8033a7, #a22b87);
+  background: linear-gradient(115deg, #895f3b, #805736);
   color: white;
   box-shadow: 0 4px 20px #0008;
 }
 .contact-request .contact-request__close:hover {
-  background: linear-gradient(115deg, #953bb3, #b83298);
+  background: linear-gradient(115deg, #996c44, #966a43);
 }
 .contact-request__title {
   padding-right: 36px;

@@ -44,5 +44,5 @@ export {
   closureConflicts,
 } from './lib/schedule.ts';
 export type { ScheduleBooking, DateRange, AvailabilityOptions } from './lib/schedule.ts';
-export { canComplete, completedVisits, visitNumber } from './lib/visits.ts';
+export { canComplete } from './lib/booking-status.ts';
 export { monthDates, weekDates, adjacentMonth } from './lib/calendar.ts';

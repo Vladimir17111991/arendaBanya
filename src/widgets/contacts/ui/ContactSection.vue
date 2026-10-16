@@ -52,7 +52,7 @@ import LocationCard from './LocationCard.vue';
 
 .contact-section {
   border-top: 1px solid var(--line);
-  background: radial-gradient(ellipse at 0 100%, #eb55bf1a, transparent 60%), #160d2399;
+  background: radial-gradient(ellipse at 0 100%, #b98b591a, transparent 60%), #2b201999;
   color: var(--ink);
 }
 .contact-section__title {
@@ -77,17 +77,17 @@ import LocationCard from './LocationCard.vue';
   --bs-btn-color: var(--selected-text);
   --bs-btn-bg: var(--selected-bg);
   --bs-btn-border-color: var(--neon);
-  --bs-btn-hover-bg: #9346cd;
+  --bs-btn-hover-bg: #ad8a66;
   --bs-btn-hover-color: var(--selected-text);
   --bs-btn-hover-border-color: var(--accent);
-  --bs-btn-active-bg: #6a29a3;
+  --bs-btn-active-bg: #856647;
   --bs-btn-active-color: var(--selected-text);
-  --action-arrow-bg: #ff95d426;
+  --action-arrow-bg: #deb98926;
   min-height: 60px;
   font-size: 18px;
   box-shadow:
-    0 8px 30px #eb55bf29,
-    inset 0 1px 0 #ff95d433;
+    0 8px 30px #b98b5929,
+    inset 0 1px 0 #deb98933;
 }
 .contact-section__handle {
   font-size: 18px;

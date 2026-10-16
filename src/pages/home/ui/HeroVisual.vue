@@ -49,9 +49,9 @@ defineProps<{ image?: SiteImage | null }>();
   content: '';
   position: absolute;
   inset: 8px -8px -8px 8px;
-  border: 1px solid #c878c985;
+  border: 1px solid #bda18485;
   border-radius: 24px;
-  background: linear-gradient(145deg, #6e3694, #311644 70%, #852964);
+  background: linear-gradient(145deg, #765033, #3c352f 70%, #71573d);
   z-index: -1;
 }
 .hero-visual__halo {
@@ -59,19 +59,19 @@ defineProps<{ image?: SiteImage | null }>();
   inset: 6% -5% 8% 4%;
   border-radius: 30%;
   background:
-    radial-gradient(ellipse at 85% 15%, #ff80cb45, transparent 62%),
-    radial-gradient(ellipse at 10% 65%, #a469f75c, transparent 64%);
+    radial-gradient(ellipse at 85% 15%, #d3c0ac45, transparent 62%),
+    radial-gradient(ellipse at 10% 65%, #c8b0985c, transparent 64%);
   filter: blur(26px);
   z-index: -1;
 }
 .hero-visual__image,
 .hero-visual__placeholder {
   border-radius: 24px;
-  background: #291736;
-  border: 5px solid #422650;
+  background: #352f2a;
+  border: 5px solid #423b34;
   box-shadow:
-    0 24px 56px -24px #08050edb,
-    0 0 28px -14px #e790ee80;
+    0 24px 56px -24px #151210db,
+    0 0 28px -14px #d2bfac80;
 }
 .hero-visual__image {
   height: auto;
@@ -84,14 +84,14 @@ defineProps<{ image?: SiteImage | null }>();
   overflow: hidden;
   color: var(--ink);
   background:
-    radial-gradient(ellipse at 20% 5%, #b663c473, transparent 75%),
-    linear-gradient(145deg, #583377, #21112f);
+    radial-gradient(ellipse at 20% 5%, #b4937373, transparent 75%),
+    linear-gradient(145deg, #6f553c, #2e2924);
 }
 .hero-visual__placeholder::before {
   content: '';
   position: absolute;
   inset: 14px;
-  border: 1px solid #f2d5fc45;
+  border: 1px solid #ede8e445;
   border-radius: 16px;
 }
 .hero-visual__branch {
@@ -100,7 +100,7 @@ defineProps<{ image?: SiteImage | null }>();
   height: 350px;
   top: -90px;
   right: -55px;
-  border: 1px solid #f7d0fd59;
+  border: 1px solid #ebe6e259;
   border-radius: 50%;
   transform: rotate(-38deg);
 }
@@ -108,7 +108,7 @@ defineProps<{ image?: SiteImage | null }>();
   content: '';
   position: absolute;
   inset: 24px;
-  border: 1px solid #f7d0fd38;
+  border: 1px solid #ebe6e238;
   border-radius: 50%;
 }
 .hero-visual__monogram {

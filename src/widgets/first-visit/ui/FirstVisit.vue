@@ -90,7 +90,7 @@ const questions = [
   padding-inline: 22px;
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: #21132fc4;
+  background: #2f2a25c4;
 }
 .first-visit__question {
   display: flex;

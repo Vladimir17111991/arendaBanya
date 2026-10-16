@@ -446,7 +446,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 
 .availability {
   background: transparent;
-  color: var(--ink, #fcf5ff);
+  color: var(--ink, #fff5e8);
   font-size: 16px;
   line-height: 1.65;
 }
@@ -490,10 +490,10 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   gap: 14px;
   align-items: start;
   padding-top: 18px;
-  border-top: 1px solid var(--line, #5b3b71);
+  border-top: 1px solid var(--line, #70543e);
 }
 .availability__steps li > span {
-  color: var(--accent, #ff95d4);
+  color: var(--accent, #deb989);
   font: italic 24px/1.2 var(--display);
 }
 .availability__steps strong {
@@ -508,8 +508,8 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__calendar {
   min-width: 0;
-  background: var(--surface, #21132f);
-  border: 1px solid var(--line, #5b3b71);
+  background: var(--surface, #30251d);
+  border: 1px solid var(--line, #70543e);
   border-radius: 24px;
   padding: 28px;
 }
@@ -557,19 +557,19 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   padding: 16px;
   min-width: 0;
   min-height: 100px;
-  border: 1px solid var(--line, #5b3b71);
+  border: 1px solid var(--line, #70543e);
   border-radius: 16px;
-  background: var(--surface-soft, #2b1a3b);
+  background: var(--surface-soft, #3b2e23);
   cursor: pointer;
   color: var(--brand);
 }
 .availability__format--selected {
-  background: var(--control-bg, #321c45);
-  border-color: var(--accent, #ff95d4);
-  box-shadow: inset 0 0 0 1px var(--accent, #ff95d4);
+  background: var(--control-bg, #443427);
+  border-color: var(--accent, #deb989);
+  box-shadow: inset 0 0 0 1px var(--accent, #deb989);
 }
 .availability__format:has(input:focus-visible) {
-  outline: 3px solid var(--focus, #ff9ede);
+  outline: 3px solid var(--focus, #e2be8d);
   outline-offset: 3px;
 }
 .availability__format strong {
@@ -604,13 +604,13 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__format--selected .availability__format-check {
   color: var(--selected-text, #fff);
-  background: var(--selected-bg, #7b35b7);
-  border-color: var(--accent, #ff95d4);
+  background: var(--selected-bg, #8d623d);
+  border-color: var(--accent, #deb989);
 }
 .availability__period {
   margin-top: 22px;
   padding-top: 22px;
-  border-top: 1px solid var(--line, #5b3b71);
+  border-top: 1px solid var(--line, #70543e);
 }
 .availability__period-dates {
   display: grid;
@@ -621,13 +621,13 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__period-dates > div {
   min-width: 0;
   padding: 12px 14px;
-  background: var(--surface-soft, #2b1a3b);
-  border: 1px solid var(--line, #5b3b71);
+  background: var(--surface-soft, #3b2e23);
+  border: 1px solid var(--line, #70543e);
   border-radius: 14px;
 }
 .availability__period-dates > .availability__period-date--active {
-  border-color: var(--accent, #ff95d4);
-  background: var(--control-bg, #321c45);
+  border-color: var(--accent, #deb989);
+  background: var(--control-bg, #443427);
 }
 .availability__period-dates span:not(.availability__period-arrow) {
   display: block;
@@ -643,7 +643,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   overflow-wrap: anywhere;
 }
 .availability__period-arrow {
-  color: var(--accent, #ff95d4);
+  color: var(--accent, #deb989);
   font-size: 20px;
 }
 .availability__period-footer {
@@ -665,9 +665,9 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   flex-shrink: 0;
   min-height: 44px;
   padding: 9px 16px;
-  border: 1px solid var(--accent, #ff95d4);
+  border: 1px solid var(--accent, #deb989);
   border-radius: 12px;
-  background: var(--control-bg, #321c45);
+  background: var(--control-bg, #443427);
   color: var(--brand);
   font-size: 16px;
   font-weight: 500;
@@ -675,7 +675,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 .availability__range-error {
   margin: 14px 0 0;
-  color: var(--accent, #ff95d4);
+  color: var(--accent, #deb989);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -693,7 +693,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   text-align: center;
   text-transform: capitalize;
   color: var(--ink);
-  text-shadow: 0 2px 18px #eaa4ff25;
+  text-shadow: 0 2px 18px #dfd2c425;
 }
 .availability__month small {
   display: block;
@@ -708,14 +708,14 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   height: 48px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: linear-gradient(145deg, #58356d, #321c45);
-  border: 1px solid var(--line, #5b3b71);
+  background: linear-gradient(145deg, #695139, #443427);
+  border: 1px solid var(--line, #70543e);
   color: var(--brand);
   font-size: 22px;
   box-shadow:
-    inset 0 1px 0 #f6d9ff30,
-    0 4px 0 #170d22,
-    0 8px 14px #09040f50;
+    inset 0 1px 0 #efece930,
+    0 4px 0 #24201d,
+    0 8px 14px #15121050;
   transition:
     transform 180ms,
     box-shadow 180ms;
@@ -723,8 +723,8 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__arrow:active:not(:disabled) {
   transform: translateY(3px);
   box-shadow:
-    inset 0 1px 0 #f6d9ff30,
-    0 1px 0 #170d22;
+    inset 0 1px 0 #efece930,
+    0 1px 0 #24201d;
 }
 .availability__arrow:disabled {
   opacity: 0.45;
@@ -752,7 +752,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   background: transparent;
   border: 1px solid transparent;
   border-radius: 12px;
-  color: var(--muted, #cdbedb);
+  color: var(--muted, #cbb8a4);
   margin: 0 3px;
   transition:
     transform 180ms,
@@ -764,40 +764,40 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   z-index: 1;
 }
 .availability__day--available {
-  color: var(--ink, #fcf5ff);
-  background: linear-gradient(145deg, #513165, #34203f);
-  border-color: #b084ca45;
+  color: var(--ink, #fff5e8);
+  background: linear-gradient(145deg, #624b35, #3f3832);
+  border-color: #c1a78d45;
   transform: none;
   box-shadow:
-    inset 0 1px 0 #f5d5ff25,
-    0 4px 0 #160c21,
-    0 7px 10px #08031055;
+    inset 0 1px 0 #eeeae625,
+    0 4px 0 #231f1c,
+    0 7px 10px #15121055;
 }
 .availability__day--available:hover {
-  border-color: var(--accent, #ff95d4);
-  background: linear-gradient(145deg, #724184, #482653);
+  border-color: var(--accent, #deb989);
+  background: linear-gradient(145deg, #806245, #443c35);
   box-shadow:
-    inset 0 1px 0 #ffe6ff70,
-    0 4px 0 #160c21,
-    0 0 18px #eb55bf35;
+    inset 0 1px 0 #f5f2f070,
+    0 4px 0 #231f1c,
+    0 0 18px #b98b5935;
 }
 .availability__day--available:active {
   transform: none;
   box-shadow:
-    inset 0 1px 0 #ffe6ff70,
-    0 1px 0 #160c21;
+    inset 0 1px 0 #f5f2f070,
+    0 1px 0 #231f1c;
 }
 .availability__day--range {
   margin-inline: 0;
   border-radius: 0;
-  color: var(--ink, #fcf5ff);
-  background: linear-gradient(180deg, #66338a, #4e245f);
+  color: var(--ink, #fff5e8);
+  background: linear-gradient(180deg, #7b5f42, #55422e);
   border-inline-color: transparent;
-  border-block-color: #c177d177;
+  border-block-color: #bfa48977;
   transform: none;
   box-shadow:
-    inset 0 1px 0 #f3b0ed30,
-    0 4px 0 #291237;
+    inset 0 1px 0 #dfd2c430,
+    0 4px 0 #332d28;
 }
 .availability__day--start {
   margin-right: 0;
@@ -808,25 +808,25 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   border-radius: 0 12px 12px 0;
 }
 .availability__day--preview.availability__day--range {
-  background: var(--control-bg, #321c45);
-  box-shadow: inset 0 -3px var(--accent, #ff95d4);
+  background: var(--control-bg, #443427);
+  box-shadow: inset 0 -3px var(--accent, #deb989);
 }
 .availability__day--selected {
   color: var(--selected-text, #fff);
-  background: linear-gradient(145deg, #a557d6, #8d327f);
-  border-color: #ffb1e4;
+  background: linear-gradient(145deg, #b69777, #754e31);
+  border-color: #e4d8cc;
   transform: none;
   box-shadow:
-    inset 0 1px 0 #ffe0fbb0,
-    0 5px 0 #451c53,
-    0 0 22px #ed76d957;
+    inset 0 1px 0 #f2efedb0,
+    0 5px 0 #453225,
+    0 0 22px #c9b29a57;
   font-weight: 700;
 }
 .availability__day--selected:hover {
-  background: linear-gradient(145deg, #b66ce2, #9a408d);
+  background: linear-gradient(145deg, #c1a78d, #895f3b);
 }
 .availability__day--range:hover {
-  background: linear-gradient(180deg, #8142a5, #633075);
+  background: linear-gradient(180deg, #967451, #6b523a);
 }
 .availability__day:focus-visible,
 .availability__reset:focus-visible,
@@ -834,13 +834,13 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__slot:focus-visible,
 .availability__phone-summary button:focus-visible,
 .availability__summary-text:focus-visible {
-  outline: 3px solid var(--focus, #ff9ede);
+  outline: 3px solid var(--focus, #e2be8d);
   outline-offset: 2px;
   z-index: 2;
 }
 .availability__day:disabled {
   cursor: not-allowed;
-  color: #ac99b7;
+  color: #c2a88e;
 }
 .availability__day--outside {
   opacity: 0.45;
@@ -865,15 +865,15 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__legend-dot {
   width: 7px;
   height: 7px;
-  background: var(--accent, #ff95d4);
+  background: var(--accent, #deb989);
   border-radius: 50%;
   flex-shrink: 0;
 }
 .availability__details {
   min-width: 0;
   width: 100%;
-  border: 1px solid var(--line, #5b3b71);
-  background: var(--surface, #21132f);
+  border: 1px solid var(--line, #70543e);
+  background: var(--surface, #30251d);
   padding: 32px;
   border-radius: 24px;
   display: flex;
@@ -884,7 +884,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   top: 120px;
 }
 .availability__tag {
-  border: 1px solid var(--line, #5b3b71);
+  border: 1px solid var(--line, #70543e);
   padding: 7px 12px;
   font-size: 14px;
   border-radius: 100px;
@@ -894,7 +894,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   width: 100%;
   margin-bottom: 26px;
   padding-bottom: 22px;
-  border-bottom: 1px solid var(--line, #5b3b71);
+  border-bottom: 1px solid var(--line, #70543e);
 }
 .availability__price-label {
   font-size: 16px;
@@ -934,16 +934,16 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__slot {
   min-height: 48px;
   min-width: 72px;
-  border: 1px solid var(--line, #5b3b71);
+  border: 1px solid var(--line, #70543e);
   border-radius: 10px;
-  background: var(--control-bg, #321c45);
+  background: var(--control-bg, #443427);
   padding: 10px 14px;
   font-size: 16px;
   color: var(--brand);
 }
 .availability__slot--selected {
-  background: var(--selected-bg, #7b35b7);
-  border-color: var(--accent, #ff95d4);
+  background: var(--selected-bg, #8d623d);
+  border-color: var(--accent, #deb989);
   color: var(--selected-text, #fff);
 }
 .availability__selection {
@@ -959,7 +959,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   justify-content: space-between;
   gap: 18px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line, #5b3b71);
+  border-bottom: 1px solid var(--line, #70543e);
   font-size: 16px;
 }
 .availability__stay dt {
@@ -987,7 +987,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__phone-summary {
   width: 100%;
   padding-top: 16px;
-  border-top: 1px solid var(--line, #5b3b71);
+  border-top: 1px solid var(--line, #70543e);
   margin: 4px 0 22px;
 }
 .availability__summary-label {
@@ -1001,9 +1001,9 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   width: 100%;
   margin: 0;
   padding: 16px;
-  border: 1px solid var(--line, #5b3b71);
+  border: 1px solid var(--line, #70543e);
   border-radius: 14px;
-  background: var(--surface-soft, #2b1a3b);
+  background: var(--surface-soft, #3b2e23);
   font-size: 16px;
   line-height: 1.7;
   color: var(--brand);
@@ -1018,9 +1018,9 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   width: 100%;
   margin-top: 12px;
   padding: 10px 14px;
-  border: 1px solid var(--line, #5b3b71);
+  border: 1px solid var(--line, #70543e);
   border-radius: 12px;
-  background: var(--control-bg, #321c45);
+  background: var(--control-bg, #443427);
   color: var(--brand);
   font-size: 16px;
   line-height: 1.5;
@@ -1046,8 +1046,8 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 .availability__arrow:hover:not(:disabled),
 .availability__slot:hover,
 .availability__phone-summary button:hover {
-  border-color: var(--accent, #ff95d4);
-  background: var(--selected-bg, #7b35b7);
+  border-color: var(--accent, #deb989);
+  background: var(--selected-bg, #8d623d);
   color: var(--selected-text, #fff);
 }
 @media (max-width: 991.98px) {
@@ -1315,9 +1315,9 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   padding: 5px;
   grid-template-columns: 44px minmax(0, 1fr) 44px;
   gap: 0;
-  border: 1px solid #b992d33b;
+  border: 1px solid #c9b39c3b;
   border-radius: 100px;
-  background: linear-gradient(120deg, #32213e, #24172e);
+  background: linear-gradient(120deg, #3f3832, #34271e);
   box-shadow: inset 0 1px 0 #ffffff09;
 }
 .availability__settings :deep(.number-stepper__button) {
@@ -1326,12 +1326,12 @@ function dateLabel(day: (typeof calendar.value)[number]) {
   border: 0;
   border-radius: 50%;
   background: #ffffff09;
-  color: #f8eaff;
+  color: #f6f4f3;
   font-size: 26px;
 }
 .availability__settings :deep(.number-stepper__button--increase) {
-  background: #b98ad526;
-  color: #f8eaff;
+  background: #c7b09826;
+  color: #f6f4f3;
 }
 .availability__settings :deep(.number-stepper__button:disabled) {
   opacity: 0.35;
@@ -1363,7 +1363,7 @@ function dateLabel(day: (typeof calendar.value)[number]) {
 }
 @media (hover: hover) {
   .availability__settings :deep(.number-stepper__button:hover:not(:disabled)) {
-    background: #b98ad545;
+    background: #c7b09845;
   }
 }
 </style>

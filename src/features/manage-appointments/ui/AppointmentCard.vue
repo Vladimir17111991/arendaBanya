@@ -3,7 +3,7 @@
     class="appointment-card card mt-3"
     :style="{
       borderLeft: `6px solid ${categoryColor(booking.service.categoryId)}`,
-      background: categoryTint(booking.service.categoryId),
+      background: `color-mix(in srgb, ${categoryColor(booking.service.categoryId)} 14%, var(--surface))`,
     }"
     :class="{ 'appointment-card--cancelled': booking.status === 'cancelled' }"
   >
@@ -94,7 +94,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { categoryColor, categoryTint } from '../model/categoryColor.ts';
+import { categoryColor } from '../model/categoryColor.ts';
 import { bookingEnd, type Booking } from '../../../entities/practice/index.ts';
 import { money, shortDate } from '../../../shared/lib/format/index.ts';
 import { BaseButton } from '../../../shared/ui/index.ts';

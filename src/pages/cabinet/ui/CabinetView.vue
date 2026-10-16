@@ -38,8 +38,7 @@
     <PhotosPanel v-else-if="tab === 'photos'" @open-price="tab = 'price'" />
     <SiteImagesPanel v-else-if="tab === 'site-photos'" />
     <div v-else class="cabinet__schedule">
-      <SchedulePanel />
-      <section class="card p-3 p-sm-4 mt-4"><AppointmentsPanel @book="startBooking" /></section>
+      <SchedulePanel @show-bookings="showBookings" />
     </div>
   </section>
 </template>
@@ -47,7 +46,6 @@
 <script setup lang="ts">
 import { usePractice } from '../../../entities/practice/index.ts';
 import { BaseButton } from '../../../shared/ui/index.ts';
-import { AppointmentsPanel } from '../../../features/manage-appointments/index.ts';
 import { SchedulePanel } from '../../../features/manage-schedule/index.ts';
 import { ClientsPanel } from '../../../features/manage-clients/index.ts';
 import { PriceEditor } from '../../../features/manage-catalog/index.ts';
@@ -61,6 +59,10 @@ import {
 import CabinetDashboard from './CabinetDashboard.vue';
 const { feedback, adminDate, today } = usePractice();
 const { navigate, cabinetTab: tab } = useNavigation();
+function showBookings(date: string) {
+  adminDate.value = date;
+  tab.value = 'overview';
+}
 function startBooking(prefill?: BookingPrefill) {
   navigate('booking', {
     reset: true,
@@ -173,21 +175,21 @@ const mainTabs = [
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   padding: 8px;
-  background: #eee5f5;
-  border: 1px solid #d9c4e5;
+  background: #f0edea;
+  border: 1px solid #dbced8;
 }
 .cabinet__tab {
   padding: 12px 8px;
   font-size: 15px;
-  color: #594165;
+  color: #60465a;
 }
 .cabinet__tab--active {
-  background: #753b92;
+  background: #77566f;
   color: white;
-  box-shadow: 0 4px 14px #753b9225;
+  box-shadow: 0 4px 14px #77566f25;
 }
 .cabinet__tab--active:hover {
-  background: #84479e;
+  background: #85607c;
 }
 .cabinet__create {
   width: auto;

@@ -267,7 +267,7 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
   display: grid;
   place-items: center;
   cursor: pointer;
-  color: #9b83ae;
+  color: #b7997a;
 }
 .review-form__stars input {
   position: absolute;
@@ -280,10 +280,10 @@ const slides = [reviews[reviews.length - 1]!, ...reviews, reviews[0]!];
   line-height: 1;
 }
 .review-form__stars .is-filled {
-  color: #ff95d4;
+  color: #deb989;
 }
 .review-form__stars label:has(input:focus-visible) {
-  outline: 2px solid #ff95d4;
+  outline: 2px solid #deb989;
   border-radius: 8px;
 }
 .review-form__field {

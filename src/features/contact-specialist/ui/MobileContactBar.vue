@@ -56,7 +56,7 @@ onUnmounted(() => {
     border-top: 1px solid #d9ddce;
     background: #f8f8efed;
     backdrop-filter: blur(18px);
-    box-shadow: 0 -6px 30px #51344616;
+    box-shadow: 0 -6px 30px #4d384816;
   }
   .mobile-contact__button {
     min-height: 50px;

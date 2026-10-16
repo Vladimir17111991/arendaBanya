@@ -14,7 +14,6 @@ export interface Client {
   name: string;
   phone: string;
   reminderChannel: 'telegram' | null;
-  previousVisits?: number;
 }
 
 export interface Category {

@@ -45,7 +45,7 @@
           v-for="client in filtered"
           :key="client.id"
           class="d-flex align-items-center gap-3 border-bottom p-3 small client-picker__option"
-          :class="{ 'bg-success-subtle client-picker__option--selected': selectedId === client.id }"
+          :class="{ 'client-picker__option--selected': selectedId === client.id }"
         >
           <input
             v-model="selectedId"
@@ -67,15 +67,8 @@
         </p>
         <BaseButton variant="text" @click="mode = 'new'">Добавить нового клиента</BaseButton>
       </template>
-      <p v-if="selected" class="mt-3 small text-break text-success" role="status">
+      <p v-if="selected" class="visually-hidden" role="status">
         Выбран клиент: <strong>{{ selected.name }}</strong> · {{ selected.phone }}
-      </p>
-      <p v-if="selected" class="mt-2 rounded-2 bg-primary-subtle p-3 small">
-        Посещений: {{ visitsForClient(selected.id) }} · Следующее посещение №{{
-          visitsForClient(selected.id) + 1
-        }}<small class="mt-1 d-block small text-body-secondary"
-          >Будущие и отменённые брони не учитываются.</small
-        >
       </p>
     </template>
     <template v-else>
@@ -98,11 +91,7 @@
       <p id="new-client-note" class="mt-3 small text-body-secondary">
         Регистрация не требуется. Для проверки используйте вымышленные данные.
       </p>
-      <div
-        v-if="duplicate"
-        class="mt-3 rounded-2 border border-warning-subtle bg-warning-subtle p-3 small"
-        role="status"
-      >
+      <div v-if="duplicate" class="mt-3 rounded-2 p-3 small alert alert-warning" role="status">
         <p>
           Этот телефон уже есть у клиента <strong>{{ duplicate.name }}</strong
           >.
@@ -125,12 +114,9 @@ import {
   matchesClient,
   type Client,
   type CustomerSelection,
-  usePractice,
 } from '../../../entities/practice/index.ts';
 
 import { BaseButton, PhoneInput } from '../../../shared/ui/index.ts';
-
-const { visitsForClient } = usePractice();
 
 const props = defineProps<{ clients: readonly Client[] }>();
 const customer = defineModel<CustomerSelection>({ required: true });
@@ -204,7 +190,20 @@ function selectExisting(client: Client) {
   border: 0;
 }
 .client-picker__option--selected {
-  box-shadow: inset 3px 0 #285849;
+  background: color-mix(in srgb, var(--selected-bg) 22%, var(--surface));
+  box-shadow: inset 3px 0 var(--selected-bg);
+  color: var(--ink);
+}
+.client-picker__option {
+  cursor: pointer;
+  transition: background-color 160ms;
+}
+.client-picker__option:hover {
+  background: var(--control-bg);
+}
+.client-picker__option:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
 }
 .client-picker__identity {
   min-width: 0;

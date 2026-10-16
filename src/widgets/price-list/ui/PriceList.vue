@@ -119,8 +119,8 @@ const detailFields = [
   border-radius: 28px;
   background: var(--surface);
   box-shadow:
-    0 16px 34px -22px #09040dcc,
-    inset 0 1px 0 #ead7ff0d;
+    0 16px 34px -22px #14110fcc,
+    inset 0 1px 0 #efebe70d;
 }
 .price-list__card-heading {
   min-height: 200px;

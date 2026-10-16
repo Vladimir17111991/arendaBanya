@@ -1,5 +1,5 @@
 <template>
-  <div class="number-stepper">
+  <div class="number-stepper" :class="{ 'number-stepper--compact': compact }">
     <div class="number-stepper__heading">
       <label :for="id" class="number-stepper__label">{{ label }}</label>
       <span v-if="hasUsableBounds" class="number-stepper__range" aria-hidden="true"
@@ -58,6 +58,7 @@ const props = defineProps<{
   min: number;
   max: number;
   suffix?: string;
+  compact?: boolean;
 }>();
 const emit = defineEmits<{ 'update:modelValue': [value: number] }>();
 const value = computed(() =>
@@ -221,5 +222,37 @@ function step(direction: -1 | 1) {
   .number-stepper__button {
     transition: none;
   }
+}
+.number-stepper--compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+}
+.number-stepper--compact .number-stepper__heading {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+.number-stepper--compact .number-stepper__label {
+  font-size: 15px;
+}
+.number-stepper--compact .number-stepper__range {
+  font-size: 12px;
+}
+.number-stepper--compact .number-stepper__controls {
+  grid-template-columns: 44px 36px 44px;
+  gap: 2px;
+}
+.number-stepper--compact .number-stepper__button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 24px;
+}
+.number-stepper--compact .number-stepper__input {
+  font-size: 22px;
 }
 </style>

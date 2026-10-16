@@ -66,16 +66,10 @@
             Бронь
           </button>
         </div>
-        <p class="small mt-3 mb-1">
-          <strong>{{ visitsForClient(client.id) }}</strong> посещений · следующий №{{
-            visitsForClient(client.id) + 1
-          }}
-        </p>
-        <p class="small text-muted mb-2">{{ nextVisit(client.id) }}</p>
-        <details class="clients-panel__details">
-          <summary class="small">Карточка и история аренды</summary>
-          <div class="mt-3"><ClientVisitSummary :client="client" /></div>
-          <div v-if="history(client.id).length" class="mt-3">
+        <p class="small text-muted mt-3 mb-2">{{ nextBooking(client.id) }}</p>
+        <details v-if="history(client.id).length" class="clients-panel__details">
+          <summary class="small">История аренды</summary>
+          <div class="mt-3">
             <h4 class="small fw-semibold">Последние брони</h4>
             <p
               v-for="visit in history(client.id)"
@@ -114,10 +108,9 @@ import { computed, nextTick, ref, watch } from 'vue';
 import { usePractice, matchesClient, bookingEnd } from '../../../entities/practice/index.ts';
 import { shortDate, money } from '../../../shared/lib/format/index.ts';
 import { BaseButton, PhoneInput } from '../../../shared/ui/index.ts';
-import ClientVisitSummary from './ClientVisitSummary.vue';
 const props = defineProps<{ compact?: boolean }>();
 const emit = defineEmits<{ book: [clientId: string] }>();
-const { clients, bookings, clock, visitsForClient, addClient } = usePractice();
+const { clients, bookings, clock, addClient } = usePractice();
 const name = ref('');
 const phone = ref('');
 const query = ref('');
@@ -133,7 +126,7 @@ const visible = computed(() => filtered.value.slice(0, limit.value));
 watch(query, () => {
   limit.value = props.compact ? 4 : 12;
 });
-function nextVisit(clientId: string) {
+function nextBooking(clientId: string) {
   const visit = bookings.value
     .filter(
       (item) =>

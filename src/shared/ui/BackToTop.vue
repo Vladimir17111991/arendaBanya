@@ -16,7 +16,6 @@
           stroke-linejoin="round"
         />
       </svg>
-      <span class="back-to-top__label">Наверх</span>
     </button>
   </Transition>
 </template>
@@ -58,16 +57,15 @@ onUnmounted(() => {
   z-index: 1010;
   display: flex;
   gap: 9px;
-  min-height: 56px;
-  padding: 14px 20px;
-  border: 1px solid #ffebdf80;
-  border-radius: 18px;
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
   color: #fffaf5;
-  background: linear-gradient(145deg, #798360, #3d5033);
-  box-shadow:
-    0 4px 0 #33442c,
-    0 12px 28px #27322140,
-    inset 0 1px 1px #fff2e960;
+  background: var(--selected-bg, #73556c);
+  box-shadow: 0 8px 24px #30283026;
   font-size: 13px;
   transition:
     transform 0.2s,
@@ -116,7 +114,7 @@ onUnmounted(() => {
     padding: 11px;
     border-radius: 50%;
     box-shadow:
-      0 5px 16px #40213330,
+      0 5px 16px #40393330,
       inset 0 1px 1px #fff2e950;
   }
   .back-to-top__label {

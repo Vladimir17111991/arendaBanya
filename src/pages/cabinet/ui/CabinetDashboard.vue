@@ -5,9 +5,6 @@
         <span class="small text-muted">Брони</span><strong>{{ planned }}</strong>
       </div>
       <div>
-        <span class="small text-muted">Завершено</span><strong>{{ completed }}</strong>
-      </div>
-      <div>
         <span class="small text-muted">Доступность</span
         ><strong class="cabinet-dashboard__hours">{{ closed ? 'Закрыто' : 'Открыто' }}</strong>
       </div>
@@ -73,7 +70,6 @@ const daily = computed(() =>
   bookings.value.filter((item) => bookingDates(item).includes(date.value)),
 );
 const planned = computed(() => daily.value.filter((item) => item.status === 'confirmed').length);
-const completed = computed(() => daily.value.filter((item) => item.status === 'completed').length);
 const closed = computed(() => isClosed(date.value, daysOff.value, breaks.value));
 const canBook = computed(
   () =>
@@ -126,7 +122,7 @@ const next = computed(
 .cabinet-dashboard__summary {
   grid-area: summary;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   padding: 20px;
   border-radius: 20px;

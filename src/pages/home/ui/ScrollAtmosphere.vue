@@ -1,12 +1,12 @@
 <template>
   <div ref="background" class="scroll-atmosphere" aria-hidden="true">
-    <div class="scroll-atmosphere__current scroll-atmosphere__current--violet">
+    <div class="scroll-atmosphere__current scroll-atmosphere__current--amber">
       <span class="scroll-atmosphere__ribbon"></span>
     </div>
-    <div class="scroll-atmosphere__current scroll-atmosphere__current--pink">
+    <div class="scroll-atmosphere__current scroll-atmosphere__current--copper">
       <span class="scroll-atmosphere__ribbon"></span>
     </div>
-    <div class="scroll-atmosphere__current scroll-atmosphere__current--blue">
+    <div class="scroll-atmosphere__current scroll-atmosphere__current--honey">
       <span class="scroll-atmosphere__ribbon"></span>
     </div>
     <div class="scroll-atmosphere__shade"></div>
@@ -18,11 +18,11 @@ import { onMounted, onUnmounted, ref } from 'vue';
 
 const background = ref<HTMLElement | null>(null);
 const stages = [
-  { id: 'home', x: -8, y: -10, turn: -16, violet: 0.76, pink: 0.45, blue: 0.28 },
-  { id: 'work-gallery', x: 14, y: 14, turn: 12, violet: 0.58, pink: 0.8, blue: 0.25 },
-  { id: 'price-list', x: -12, y: -5, turn: -10, violet: 0.82, pink: 0.35, blue: 0.65 },
-  { id: 'availability', x: 10, y: 12, turn: 18, violet: 0.65, pink: 0.72, blue: 0.3 },
-  { id: 'contacts', x: -6, y: -12, turn: -6, violet: 0.75, pink: 0.62, blue: 0.45 },
+  { id: 'home', x: -8, y: -10, turn: -16, amber: 0.76, copper: 0.45, honey: 0.28 },
+  { id: 'work-gallery', x: 14, y: 14, turn: 12, amber: 0.58, copper: 0.8, honey: 0.25 },
+  { id: 'price-list', x: -12, y: -5, turn: -10, amber: 0.82, copper: 0.35, honey: 0.65 },
+  { id: 'availability', x: 10, y: 12, turn: 18, amber: 0.65, copper: 0.72, honey: 0.3 },
+  { id: 'contacts', x: -6, y: -12, turn: -6, amber: 0.75, copper: 0.62, honey: 0.45 },
 ];
 let frame = 0;
 let resizeObserver: ResizeObserver | undefined;
@@ -32,14 +32,14 @@ let stops: number[] = [];
 function paint(first: (typeof stages)[number], last = first, progress = 0) {
   const style = background.value?.style;
   if (!style) return;
-  const mix = (key: 'x' | 'y' | 'turn' | 'violet' | 'pink' | 'blue') =>
+  const mix = (key: 'x' | 'y' | 'turn' | 'amber' | 'copper' | 'honey') =>
     first[key] + (last[key] - first[key]) * progress;
   style.setProperty('--flow-x', `${mix('x').toFixed(2)}vw`);
   style.setProperty('--flow-y', `${mix('y').toFixed(2)}vh`);
   style.setProperty('--flow-turn', `${mix('turn').toFixed(2)}deg`);
-  style.setProperty('--violet-strength', mix('violet').toFixed(3));
-  style.setProperty('--pink-strength', mix('pink').toFixed(3));
-  style.setProperty('--blue-strength', mix('blue').toFixed(3));
+  style.setProperty('--amber-strength', mix('amber').toFixed(3));
+  style.setProperty('--copper-strength', mix('copper').toFixed(3));
+  style.setProperty('--honey-strength', mix('honey').toFixed(3));
 }
 function update() {
   frame = 0;
@@ -123,9 +123,9 @@ onUnmounted(() => {
   --flow-x: -8vw;
   --flow-y: -10vh;
   --flow-turn: -16deg;
-  --violet-strength: 0.76;
-  --pink-strength: 0.45;
-  --blue-strength: 0.28;
+  --amber-strength: 0.76;
+  --copper-strength: 0.45;
+  --honey-strength: 0.28;
   position: fixed;
   inset: 0;
   z-index: 0;
@@ -133,8 +133,8 @@ onUnmounted(() => {
   pointer-events: none;
   contain: strict;
   background:
-    radial-gradient(ellipse at 85% 12%, #301642 0, transparent 58%),
-    radial-gradient(ellipse at 5% 100%, #22102f 0, transparent 65%), #100a1b;
+    radial-gradient(ellipse at 85% 12%, #493525 0, transparent 58%),
+    radial-gradient(ellipse at 5% 100%, #33241b 0, transparent 65%), #231b16;
 }
 .scroll-atmosphere__current {
   position: absolute;
@@ -143,23 +143,23 @@ onUnmounted(() => {
   pointer-events: none;
   will-change: transform, opacity;
 }
-.scroll-atmosphere__current--violet {
+.scroll-atmosphere__current--amber {
   top: -54vmax;
   left: -8vmax;
-  opacity: var(--violet-strength);
+  opacity: var(--amber-strength);
   transform: translate3d(var(--flow-x), var(--flow-y), 0) rotate(var(--flow-turn));
 }
-.scroll-atmosphere__current--pink {
+.scroll-atmosphere__current--copper {
   right: -58vmax;
   top: -14vmax;
-  opacity: var(--pink-strength);
+  opacity: var(--copper-strength);
   transform: translate3d(calc(var(--flow-x) * -0.7), calc(var(--flow-y) * -0.8), 0)
     rotate(calc(var(--flow-turn) * -0.8));
 }
-.scroll-atmosphere__current--blue {
+.scroll-atmosphere__current--honey {
   bottom: -66vmax;
   left: -32vmax;
-  opacity: var(--blue-strength);
+  opacity: var(--honey-strength);
   transform: translate3d(calc(var(--flow-x) * 0.65), calc(var(--flow-y) * -0.6), 0)
     rotate(calc(var(--flow-turn) * 0.6));
 }
@@ -169,38 +169,38 @@ onUnmounted(() => {
   background: radial-gradient(
     ellipse at 50% 35%,
     transparent 31%,
-    #57339108 36%,
-    #914bdf40 42%,
-    #cd89fb70 46%,
-    #974be85c 49%,
-    #64279c29 54%,
+    #7f624508 36%,
+    #b5957540 42%,
+    #d4c2b070 46%,
+    #b99a795c 49%,
+    #7f624429 54%,
     transparent 62%
   );
   animation: aurora-drift 26s ease-in-out infinite alternate;
 }
-.scroll-atmosphere__current--pink .scroll-atmosphere__ribbon {
+.scroll-atmosphere__current--copper .scroll-atmosphere__ribbon {
   background: radial-gradient(
     ellipse at 55% 44%,
     transparent 29%,
-    #7b296b0a 35%,
-    #d743b844 42%,
-    #ff9ad879 46%,
-    #d955c359 49%,
-    #8c348c26 55%,
+    #6b52390a 35%,
+    #af8d6b44 42%,
+    #cbb8a479 46%,
+    #b6977859 49%,
+    #7d604326 55%,
     transparent 63%
   );
   animation-name: aurora-rise;
   animation-duration: 32s;
   animation-delay: -14s;
 }
-.scroll-atmosphere__current--blue .scroll-atmosphere__ribbon {
+.scroll-atmosphere__current--honey .scroll-atmosphere__ribbon {
   background: radial-gradient(
     ellipse at 42% 43%,
     transparent 29%,
-    #40339108 37%,
-    #7565e14a 44%,
-    #a599ed61 48%,
-    #493ba82e 54%,
+    #7f624508 37%,
+    #bfa3874a 44%,
+    #d5c3b161 48%,
+    #94724f2e 54%,
     transparent 62%
   );
   animation-duration: 36s;
@@ -210,7 +210,7 @@ onUnmounted(() => {
 .scroll-atmosphere__shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, #100a1b55, transparent 45%, #100a1b0a);
+  background: linear-gradient(90deg, #231b1655, transparent 45%, #231b160a);
 }
 .scroll-atmosphere--paused .scroll-atmosphere__ribbon {
   animation-play-state: paused;
@@ -236,15 +236,15 @@ onUnmounted(() => {
     width: 100vmax;
     height: 76vmax;
   }
-  .scroll-atmosphere__current--violet {
+  .scroll-atmosphere__current--amber {
     left: -36vmax;
     top: -38vmax;
   }
-  .scroll-atmosphere__current--pink {
+  .scroll-atmosphere__current--copper {
     right: -62vmax;
     top: 3vmax;
   }
-  .scroll-atmosphere__current--blue {
+  .scroll-atmosphere__current--honey {
     display: none;
   }
 }

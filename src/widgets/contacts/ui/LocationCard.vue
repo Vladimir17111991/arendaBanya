@@ -169,7 +169,7 @@ const routeSteps = [
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #21132fe8;
+  background: #2f2a25e8;
   color: #fff;
   border: 1px solid #ffffff60;
 }

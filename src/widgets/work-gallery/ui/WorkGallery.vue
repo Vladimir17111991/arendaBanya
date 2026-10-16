@@ -40,29 +40,31 @@
         ref="content"
         class="work-gallery__grid"
       >
-        <figure
-          v-for="(photo, index) in visiblePhotos"
-          :key="photo.id"
-          class="work-gallery__photo"
-          :class="{ 'work-gallery__photo--main': index === 0 }"
-          tabindex="-1"
+        <div
+          v-for="group in photoGroups"
+          :key="group[0].id"
+          class="work-gallery__collage"
+          :class="{ 'work-gallery__collage--small': group.length < 5 }"
+          :style="{ '--photo-count': group.length }"
         >
-          <button
-            type="button"
-            class="work-gallery__preview"
-            :aria-label="'Рассмотреть: ' + photo.title"
-            @click="openPhoto(photo.id)"
-          >
-            <img
-              :src="photo.url"
-              :alt="photo.title"
-              class="work-gallery__image"
-              :style="{ objectPosition: photo.objectPosition }"
-              loading="lazy"
-              decoding="async"
-            />
-          </button>
-        </figure>
+          <figure v-for="photo in group" :key="photo.id" class="work-gallery__photo">
+            <button
+              type="button"
+              class="work-gallery__preview"
+              :aria-label="'Рассмотреть: ' + photo.title"
+              @click="openPhoto(photo.id)"
+            >
+              <img
+                :src="photo.url"
+                :alt="photo.title"
+                class="work-gallery__image"
+                :style="{ objectPosition: photo.objectPosition }"
+                loading="lazy"
+                decoding="async"
+              />
+            </button>
+          </figure>
+        </div>
       </div>
       <div v-else class="gallery-empty">
         <div class="gallery-empty__collage" aria-hidden="true">
@@ -209,7 +211,8 @@ function cancelGesture() {
   gesture.cancel();
   settlePhoto(startIndex);
 }
-const visibleCount = ref(5);
+const collageSize = 9;
+const visibleCount = ref(collageSize);
 const activeFilter = ref<PhotoFilter>('all');
 const selectedId = ref<string | null>(null);
 const thumbnails = ref<HTMLElement | null>(null);
@@ -288,6 +291,12 @@ const filteredPhotos = computed(() =>
     : galleryPhotos.value.filter((photo) => photo.group === activeFilter.value),
 );
 const visiblePhotos = computed(() => filteredPhotos.value.slice(0, visibleCount.value));
+const photoGroups = computed(() => {
+  const groups = [];
+  for (let index = 0; index < visiblePhotos.value.length; index += collageSize)
+    groups.push(visiblePhotos.value.slice(index, index + collageSize));
+  return groups;
+});
 const selectedIndex = computed(() =>
   filteredPhotos.value.findIndex((photo) => photo.id === selectedId.value),
 );
@@ -296,7 +305,7 @@ const hasMore = computed(() => visibleCount.value < filteredPhotos.value.length)
 watch(
   activeFilter,
   () => {
-    visibleCount.value = 5;
+    visibleCount.value = collageSize;
     selectedId.value = null;
     announcement.value = `Показано ${visiblePhotos.value.length} из ${filteredPhotos.value.length} фото.`;
   },
@@ -348,7 +357,7 @@ function onDialogKeydown(event: KeyboardEvent) {
 }
 async function showMore(event: MouseEvent) {
   const firstNewIndex = visiblePhotos.value.length;
-  visibleCount.value += 4;
+  visibleCount.value += collageSize;
   await nextTick();
   if (event.detail === 0) {
     content.value
@@ -411,32 +420,94 @@ async function showMore(event: MouseEvent) {
 }
 .work-gallery__grid {
   display: grid;
-  grid-template-columns: 1.18fr 0.82fr;
-  gap: 18px;
+  gap: 48px;
+  padding-block: 12px;
+}
+.work-gallery__collage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(100, minmax(0, 1fr));
+  grid-template-rows: repeat(100, minmax(0, 1fr));
+  aspect-ratio: 2.15;
 }
 .work-gallery__photo {
   margin: 0;
   min-width: 0;
+  min-height: 0;
   position: relative;
-  overflow: hidden;
-  height: 245px;
-  border-radius: 16px;
+  border-radius: 8px;
   background: var(--surface-soft);
+  box-shadow: 0 12px 32px #110f0e66;
+  transition:
+    transform 240ms ease,
+    box-shadow 240ms ease;
 }
-.work-gallery__photo--main {
-  grid-row: span 2;
-  height: 508px;
+.work-gallery__photo:nth-child(1) {
+  grid-area: 2 / 41 / 69 / 68;
+  z-index: 4;
 }
-.work-gallery__photo:only-child {
-  grid-column: 1 / -1;
-  grid-row: auto;
-  justify-self: center;
-  width: min(100%, 900px);
-  height: clamp(300px, 42vw, 560px);
+.work-gallery__photo:nth-child(2) {
+  grid-area: 19 / 11 / 81 / 40;
+  z-index: 5;
 }
-.work-gallery__photo:focus-visible {
+.work-gallery__photo:nth-child(3) {
+  grid-area: 38 / 64 / 100 / 93;
+  z-index: 6;
+}
+.work-gallery__photo:nth-child(4) {
+  grid-area: 61 / 35 / 99 / 67;
+  z-index: 7;
+}
+.work-gallery__photo:nth-child(5) {
+  grid-area: 40 / 1 / 75 / 20;
+  z-index: 2;
+}
+.work-gallery__photo:nth-child(6) {
+  grid-area: 5 / 8 / 50 / 32;
+  z-index: 1;
+}
+.work-gallery__photo:nth-child(7) {
+  grid-area: 9 / 64 / 57 / 87;
+  z-index: 1;
+}
+.work-gallery__photo:nth-child(8) {
+  grid-area: 34 / 86 / 70 / 101;
+  z-index: 3;
+}
+.work-gallery__photo:nth-child(9) {
+  grid-area: 70 / 21 / 101 / 43;
+  z-index: 2;
+}
+.work-gallery__photo:focus-within {
+  z-index: 10;
+}
+.work-gallery__preview:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 4px;
+}
+@media (hover: hover) {
+  .work-gallery__photo:hover {
+    z-index: 10;
+    transform: translateY(-6px);
+    box-shadow: 0 20px 42px #110f0e99;
+  }
+}
+.work-gallery__collage--small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: auto;
+  padding-block: 20px;
+}
+.work-gallery__collage--small .work-gallery__photo {
+  flex: 0 1 360px;
+  width: calc(100% / var(--photo-count));
+  aspect-ratio: 4 / 3;
+}
+.work-gallery__collage--small .work-gallery__photo:nth-child(even) {
+  margin-left: -24px;
+  transform: translateY(20px);
 }
 .work-gallery__preview {
   display: block;
@@ -444,6 +515,8 @@ async function showMore(event: MouseEvent) {
   height: 100%;
   padding: 0;
   border: 0;
+  border-radius: inherit;
+  overflow: hidden;
   background: transparent;
   cursor: zoom-in;
 }
@@ -462,7 +535,7 @@ async function showMore(event: MouseEvent) {
   position: absolute;
   inset: auto 0 0;
   padding: 45px 24px 20px;
-  background: linear-gradient(transparent, #100a1bee);
+  background: linear-gradient(transparent, #231b16ee);
   color: var(--ink);
   font-size: 16px;
   pointer-events: none;
@@ -478,7 +551,7 @@ async function showMore(event: MouseEvent) {
   height: 44px;
   border-radius: 50%;
   border: 1px solid var(--line);
-  background: #21132fe6;
+  background: #30251de6;
   color: var(--brand);
   font-size: 22px;
 }
@@ -509,7 +582,7 @@ async function showMore(event: MouseEvent) {
   background: var(--surface);
 }
 .work-gallery__dialog::backdrop {
-  background: #0c0614d9;
+  background: #191613d9;
 }
 .work-gallery__dialog :deep(.media-dialog__header) {
   border-color: var(--line);
@@ -581,29 +654,29 @@ async function showMore(event: MouseEvent) {
 .gallery-empty__frame--main {
   grid-row: span 2;
   background:
-    repeating-linear-gradient(90deg, #ff95d41a 0 1px, transparent 1px 44px),
-    linear-gradient(130deg, #46205f, #261335);
+    repeating-linear-gradient(90deg, #deb9891a 0 1px, transparent 1px 44px),
+    linear-gradient(130deg, #473f38, #35271e);
 }
 .gallery-empty__arch {
   position: absolute;
   width: 70%;
   height: 78%;
   bottom: -10px;
-  border: 1px solid #ff95d45c;
+  border: 1px solid #deb9895c;
   border-radius: 100px 100px 0 0;
 }
 .gallery-empty__arch::after {
   content: '';
   position: absolute;
   inset: 12px;
-  border: 1px solid #ead7ff3d;
+  border: 1px solid #f3e4cf3d;
   border-radius: inherit;
 }
 .gallery-empty__frame--bedroom {
-  background: linear-gradient(150deg, #55266d, #2b1a3b);
+  background: linear-gradient(150deg, #604a33, #3b2e23);
 }
 .gallery-empty__frame--detail {
-  background: radial-gradient(ellipse at 120% 0, #703b79, transparent), #321c45;
+  background: radial-gradient(ellipse at 120% 0, #755a3f, transparent), #443427;
 }
 .gallery-empty__frame-label {
   position: relative;
@@ -670,39 +743,14 @@ async function showMore(event: MouseEvent) {
   .gallery-empty__copy {
     padding: 8px 8px 18px;
   }
-  .work-gallery__grid {
-    gap: 12px;
-  }
-  .work-gallery__photo {
-    height: 170px;
-  }
-  .work-gallery__photo--main {
-    height: 352px;
-  }
-  .work-gallery__caption {
-    font-size: 16px;
-    padding: 40px 12px 14px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
+  .work-gallery__photo,
   .work-gallery__image {
     transition: none;
   }
   .work-gallery__preview:hover .work-gallery__image {
     transform: none;
-  }
-}
-@media (max-width: 575.98px) {
-  .work-gallery__grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .work-gallery__photo {
-    height: 190px;
-  }
-  .work-gallery__photo--main {
-    grid-column: 1 / -1;
-    grid-row: auto;
-    height: 310px;
   }
 }
 
@@ -716,7 +764,7 @@ async function showMore(event: MouseEvent) {
   border: 0;
   border-radius: 0;
   overflow: hidden;
-  background: #100b17;
+  background: #211914;
 }
 .work-gallery .work-gallery__dialog[open] {
   display: grid;
@@ -821,26 +869,6 @@ async function showMore(event: MouseEvent) {
   width: 100%;
   padding-inline: 8px;
 }
-.work-gallery__grid {
-  gap: 12px 0;
-  padding-block: 8px;
-}
-.work-gallery__photo {
-  border: 3px solid #291636;
-  box-shadow: 0 12px 30px #08030a55;
-}
-.work-gallery__photo:nth-child(2),
-.work-gallery__photo:nth-child(3),
-.work-gallery__photo:nth-child(2n + 5) {
-  margin-left: -24px;
-  z-index: 1;
-}
-.work-gallery__photo:nth-child(n + 4) {
-  margin-top: -22px;
-}
-.work-gallery__photo:focus-within {
-  z-index: 2;
-}
 .work-gallery__dialog :deep(.media-dialog__header) {
   position: absolute;
   inset: 0 0 auto;
@@ -865,13 +893,13 @@ async function showMore(event: MouseEvent) {
   width: 46px;
   height: 46px;
   border-radius: 50%;
-  border: 1px solid #c578df;
-  background: linear-gradient(115deg, #8033a7, #a22b87);
+  border: 1px solid #ba9268;
+  background: linear-gradient(115deg, #895f3b, #805736);
   color: #fff;
   box-shadow: 0 4px 20px #0008;
 }
 .work-gallery__dialog :deep(.media-dialog__close:hover) {
-  background: linear-gradient(115deg, #953bb3, #b83298);
+  background: linear-gradient(115deg, #996c44, #966a43);
 }
 .photo-thumbnails {
   position: absolute;
@@ -896,13 +924,13 @@ async function showMore(event: MouseEvent) {
   border: 2px solid transparent;
   border-radius: 12px;
   overflow: hidden;
-  background: #25172e;
+  background: #34271e;
   opacity: 0.65;
 }
 .photo-thumbnails button[aria-current='true'] {
-  border-color: #ff9adf;
+  border-color: #cbb8a4;
   opacity: 1;
-  box-shadow: 0 0 0 2px #ff9adf44;
+  box-shadow: 0 0 0 2px #cbb8a444;
 }
 .photo-thumbnails button:focus-visible {
   outline: 2px solid white;
@@ -917,15 +945,52 @@ async function showMore(event: MouseEvent) {
   .work-gallery__filter {
     font-size: 14px;
   }
-  .work-gallery__photo:nth-child(n) {
-    margin-left: 0;
-    margin-top: -16px;
+  .work-gallery__grid {
+    gap: 32px;
   }
-  .work-gallery__photo:first-child {
-    margin-top: 0;
+  .work-gallery__collage {
+    aspect-ratio: 0.72;
   }
-  .work-gallery__photo:nth-child(2n + 3) {
-    margin-left: -12px;
+  .work-gallery__photo:nth-child(1) {
+    grid-area: 1 / 25 / 37 / 85;
+  }
+  .work-gallery__photo:nth-child(2) {
+    grid-area: 25 / 1 / 56 / 57;
+  }
+  .work-gallery__photo:nth-child(3) {
+    grid-area: 47 / 46 / 80 / 101;
+  }
+  .work-gallery__photo:nth-child(4) {
+    grid-area: 76 / 8 / 101 / 72;
+  }
+  .work-gallery__photo:nth-child(5) {
+    grid-area: 10 / 1 / 30 / 32;
+  }
+  .work-gallery__photo:nth-child(6) {
+    grid-area: 54 / 1 / 78 / 35;
+  }
+  .work-gallery__photo:nth-child(7) {
+    grid-area: 7 / 69 / 31 / 101;
+  }
+  .work-gallery__photo:nth-child(8) {
+    grid-area: 78 / 75 / 98 / 101;
+  }
+  .work-gallery__photo:nth-child(9) {
+    grid-area: 36 / 33 / 61 / 78;
+  }
+  .work-gallery__collage--small {
+    aspect-ratio: auto;
+    flex-wrap: wrap;
+    gap: 12px 0;
+  }
+  .work-gallery__collage--small .work-gallery__photo {
+    flex-basis: 52%;
+  }
+  .work-gallery__collage--small .work-gallery__photo:only-child {
+    flex-basis: 100%;
+  }
+  .work-gallery__collage--small .work-gallery__photo:nth-child(even) {
+    margin-left: -4%;
   }
 }
 @media (orientation: landscape) and (max-height: 600px) {

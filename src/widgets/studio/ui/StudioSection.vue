@@ -16,7 +16,7 @@
 .studio {
   padding-block: 34px;
   border-block: 1px solid var(--line);
-  background: #21132f80;
+  background: #2f2a2580;
 }
 .studio__layout {
   display: grid;
