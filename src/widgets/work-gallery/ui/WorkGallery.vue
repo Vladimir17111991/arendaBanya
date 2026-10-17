@@ -108,7 +108,7 @@
         'work-gallery__dialog--swipe-close': swipeClose,
       }"
       :open="!!selectedPhoto"
-      :title="selectedPhoto?.title ?? 'Просмотр фото'"
+      title="Галерея"
       @close="closePhoto()"
       @keydown="onDialogKeydown"
     >
@@ -153,13 +153,17 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
-import { usePractice } from '../../../entities/practice/index.ts';
+import {
+  usePractice,
+  galleryCategoryLabel,
+  sortGalleryPhotos,
+} from '../../../entities/practice/index.ts';
 import { MediaDialog } from '../../../shared/ui/index.ts';
 import { createLoopCarousel, type EmblaCarouselType } from '../../../shared/lib/carousel/index.ts';
 import { createPhotoGesture } from '../model/photoGesture.ts';
 
-type PhotoFilter = 'all' | 'bath' | 'bedroom';
-const { photos, siteImages, services } = usePractice();
+type PhotoFilter = 'all' | number;
+const { photos, siteImages, categories } = usePractice();
 const content = ref<HTMLElement | null>(null);
 const swiper = ref<HTMLElement | null>(null);
 const gesture = createPhotoGesture();
@@ -250,48 +254,39 @@ onUnmounted(() => {
   photoCarousel?.destroy();
 });
 const announcement = ref('');
-const galleryPhotos = computed(() => [
-  ...(siteImages.value.studio
-    ? [
-        {
-          id: 'site-studio',
-          title: siteImages.value.studio.isDemo ? 'Пример интерьера бани' : 'Баня у Виктории',
-          url: siteImages.value.studio.url,
-          isDemo: siteImages.value.studio.isDemo,
-          objectPosition: 'center',
-          group: 'bath' as const,
-        },
-      ]
-    : []),
-  ...photos.value
-    .filter((photo) => photo.url !== siteImages.value.studio?.url)
-    .map((photo) => ({
-      ...photo,
-      group:
-        services.value.find((service) => service.id === photo.serviceId)?.rentalUnit === 'day'
-          ? ('bedroom' as const)
-          : ('bath' as const),
-    })),
-]);
+const galleryPhotos = computed(() =>
+  sortGalleryPhotos(categories.value, [
+    ...(siteImages.value.studio
+      ? [
+          {
+            id: 'site-studio',
+            title: siteImages.value.studio.isDemo ? 'Пример интерьера бани' : 'Баня у Виктории',
+            url: siteImages.value.studio.url,
+            isDemo: siteImages.value.studio.isDemo,
+            objectPosition: 'center',
+            categoryIds: categories.value[0] ? [categories.value[0].id] : [],
+          },
+        ]
+      : []),
+    ...photos.value.filter((photo) => photo.url !== siteImages.value.studio?.url),
+  ]),
+);
 const filters = computed(() =>
   [
     { id: 'all' as const, label: 'Все фото', count: galleryPhotos.value.length },
-    {
-      id: 'bath' as const,
-      label: 'Баня',
-      count: galleryPhotos.value.filter((photo) => photo.group === 'bath').length,
-    },
-    {
-      id: 'bedroom' as const,
-      label: 'Спальня',
-      count: galleryPhotos.value.filter((photo) => photo.group === 'bedroom').length,
-    },
+    ...categories.value.map((category) => ({
+      id: category.id,
+      label: galleryCategoryLabel(category),
+      count: galleryPhotos.value.filter((photo) => photo.categoryIds.includes(category.id)).length,
+    })),
   ].filter((filter) => filter.count > 0),
 );
 const filteredPhotos = computed(() =>
   activeFilter.value === 'all'
     ? galleryPhotos.value
-    : galleryPhotos.value.filter((photo) => photo.group === activeFilter.value),
+    : galleryPhotos.value.filter((photo) =>
+        photo.categoryIds.includes(activeFilter.value as number),
+      ),
 );
 const visiblePhotos = computed(() => filteredPhotos.value.slice(0, visibleCount.value));
 const photoGroups = computed(() => {

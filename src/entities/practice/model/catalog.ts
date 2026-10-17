@@ -1,6 +1,7 @@
 import { readonly, ref } from 'vue';
 import { services as demoServices } from '../config/demo.ts';
-import type { Category, ServiceDraft, WorkPhoto } from './types.ts';
+import type { Category, PhotoDraft, ServiceDraft, WorkPhoto } from './types.ts';
+import { galleryCategoryLabel } from '../lib/gallery.ts';
 
 export function createCatalog(requireAdmin: () => void, initialPhotos: readonly WorkPhoto[] = []) {
   const categories = ref<Category[]>(
@@ -16,7 +17,9 @@ export function createCatalog(requireAdmin: () => void, initialPhotos: readonly 
       details: item.details ? { ...item.details } : undefined,
     })),
   );
-  const photos = ref<WorkPhoto[]>(initialPhotos.map((photo) => ({ ...photo })));
+  const photos = ref<WorkPhoto[]>(
+    initialPhotos.map((photo) => ({ ...photo, categoryIds: [...photo.categoryIds] })),
+  );
   let nextCategoryId = Math.max(...categories.value.map((item) => item.id)) + 1;
   let nextServiceId = Math.max(...services.value.map((item) => item.id)) + 1;
   const normalize = (value: string) => value.trim().replace(/\s+/g, ' ');
@@ -53,15 +56,26 @@ export function createCatalog(requireAdmin: () => void, initialPhotos: readonly 
     requireAdmin();
     if (!categories.value.some((item) => item.id === id)) throw new Error('Категория не найдена.');
     const affected = services.value.filter((item) => item.categoryId === id);
+    const affectedPhotos = photos.value.filter((photo) => photo.categoryIds.includes(id));
     const destination = categories.value.find((item) => item.id === moveToId && item.id !== id);
-    if (affected.length && !destination)
+    if ((affected.length || affectedPhotos.length) && !destination)
       throw new Error(
-        'Выберите другую категорию для переноса вариантов аренды. Фото и брони сохранятся.',
+        'Выберите другую категорию для переноса вариантов аренды и фотографий. Брони сохранятся.',
       );
     if (destination)
       affected.forEach((item) => {
         item.categoryId = destination.id;
         item.category = destination.name;
+      });
+    if (destination)
+      affectedPhotos.forEach((photo) => {
+        photo.categoryIds = [
+          ...new Set(
+            photo.categoryIds.map((categoryId) =>
+              categoryId === id ? destination.id : categoryId,
+            ),
+          ),
+        ];
       });
     categories.value = categories.value.filter((item) => item.id !== id);
   }
@@ -148,28 +162,23 @@ export function createCatalog(requireAdmin: () => void, initialPhotos: readonly 
     if (!service) throw new Error('Вариант аренды не найден.');
     editService(id, { ...service, price, duration });
   }
-  function removeService(id: number, movePhotosToId?: number) {
+  function removeService(id: number) {
     requireAdmin();
     if (!services.value.some((item) => item.id === id))
       throw new Error('Вариант аренды не найден.');
-    const affected = photos.value.filter((item) => item.serviceId === id);
-    const destination = services.value.find((item) => item.id === movePhotosToId && item.id !== id);
-    if (affected.length && !destination)
-      throw new Error(
-        'У варианта аренды есть фото. Перенесите их к другому варианту или сначала уберите из галереи.',
-      );
-    if (destination)
-      affected.forEach((item) => {
-        item.serviceId = destination.id;
-      });
     services.value = services.value.filter((item) => item.id !== id);
   }
-  function addPhoto(photo: Omit<WorkPhoto, 'id'>) {
+  function addPhoto(photo: PhotoDraft) {
     requireAdmin();
-    if (!services.value.some((item) => item.id === photo.serviceId))
-      throw new Error('Выберите вариант аренды из списка.');
-    if (!photo.title.trim() || photo.title.trim().length > 100)
-      throw new Error('Добавьте подпись к фото, до 100 символов.');
+    if (
+      !photo.categoryIds.length ||
+      photo.categoryIds.some((id) => !categories.value.some((category) => category.id === id))
+    )
+      throw new Error('Выберите хотя бы одну категорию из списка.');
+    const selected = categories.value.filter((category) => photo.categoryIds.includes(category.id));
+    const title = photo.title?.trim() || `Фото: ${selected.map(galleryCategoryLabel).join(', ')}`;
+    if (photo.title && photo.title.trim().length > 100)
+      throw new Error('Описание фотографии — до 100 символов.');
     if (!photo.url.startsWith('blob:')) throw new Error('Выберите фотографию с устройства.');
     if (photo.beforeUrl && !photo.beforeUrl.startsWith('blob:'))
       throw new Error('Выберите фото «до» с устройства.');
@@ -177,7 +186,8 @@ export function createCatalog(requireAdmin: () => void, initialPhotos: readonly 
       throw new Error('Подпись к сравнению — до 180 символов.');
     photos.value.unshift({
       ...photo,
-      title: photo.title.trim(),
+      categoryIds: selected.map((category) => category.id),
+      title,
       comparisonNote: photo.comparisonNote?.trim(),
       id: crypto.randomUUID(),
     });

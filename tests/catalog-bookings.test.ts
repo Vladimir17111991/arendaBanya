@@ -29,7 +29,7 @@ function setup() {
 test('catalog changes preserve photo links and historical rental snapshots', () => {
   const { store, draft } = setup();
   const booking = store.book(draft);
-  store.addPhoto({ serviceId: 1, title: 'Парная', url: 'blob:fixture' });
+  store.addPhoto({ categoryIds: [1], title: 'Парная', url: 'blob:fixture' });
   const category = store.addCategory(' Дополнительно ');
   assert.throws(() => store.addCategory('дополнительно'), /уже есть/);
   store.renameCategory(1, 'Почасовой отдых');
@@ -37,7 +37,7 @@ test('catalog changes preserve photo links and historical rental snapshots', () 
   assert.throws(() => store.removeCategory(1, 1), /другую категорию/);
   store.removeCategory(1, category.id);
   assert.equal(store.services.value[0].categoryId, category.id);
-  assert.equal(store.photos.value[0].serviceId, 1);
+  assert.deepEqual(store.photos.value[0].categoryIds, [category.id]);
   const service = store.addService({
     name: 'Вечер в бане',
     categoryId: category.id,
@@ -47,9 +47,8 @@ test('catalog changes preserve photo links and historical rental snapshots', () 
     price: 0,
   });
   store.editService(service.id, { ...service, name: 'Отдых в бане', price: 80, duration: 120 });
-  assert.throws(() => store.removeService(1), /есть фото/);
-  store.removeService(1, service.id);
-  assert.equal(store.photos.value[0].serviceId, service.id);
+  store.removeService(1);
+  assert.deepEqual(store.photos.value[0].categoryIds, [category.id]);
   assert.equal(booking.service.name, 'Баня по часам');
   assert.equal(booking.service.category, 'Почасовая аренда');
   assert.equal(booking.service.duration, 120);
@@ -142,12 +141,12 @@ test('bathhouse photos survive moves and release owned URLs on removal', (contex
   const revoked: string[] = [];
   context.mock.method(URL, 'revokeObjectURL', (url: string) => revoked.push(url));
   const { store } = setup();
-  store.addPhoto({ serviceId: 1, title: ' Парная ', url: 'blob:photo' });
+  store.addPhoto({ categoryIds: [1], title: ' Парная ', url: 'blob:photo' });
   const id = store.photos.value[0].id;
   assert.equal(store.photos.value[0].title, 'Парная');
   store.removeCategory(1, 2);
-  store.removeService(1, 2);
-  assert.equal(store.photos.value[0].serviceId, 2);
+  store.removeService(1);
+  assert.deepEqual(store.photos.value[0].categoryIds, [2]);
   assert.deepEqual(revoked, []);
   store.removePhoto(id);
   assert.deepEqual(revoked, ['blob:photo']);
@@ -160,12 +159,13 @@ test('photo validation is atomic and disposal releases uploads', (context) => {
   context.mock.method(URL, 'revokeObjectURL', (url: string) => revoked.push(url));
   const { store } = setup();
   assert.throws(
-    () => store.addPhoto({ serviceId: 1, title: 'Парная', url: 'https://example.com/photo.jpg' }),
+    () =>
+      store.addPhoto({ categoryIds: [1], title: 'Парная', url: 'https://example.com/photo.jpg' }),
     /с устройства/,
   );
-  assert.throws(() => store.addPhoto({ serviceId: 1, title: '', url: 'blob:photo' }), /подпись/);
+  assert.throws(() => store.addPhoto({ categoryIds: [], url: 'blob:photo' }), /категори/);
   assert.equal(store.photos.value.length, 0);
-  store.addPhoto({ serviceId: 1, title: 'Парная', url: 'blob:photo' });
+  store.addPhoto({ categoryIds: [1], title: 'Парная', url: 'blob:photo' });
   store.dispose();
   assert.deepEqual(revoked, ['blob:photo']);
 });

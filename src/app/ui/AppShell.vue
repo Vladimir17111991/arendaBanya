@@ -16,9 +16,10 @@
     :class="{ 'practice-demo__admin container pb-5': !publicPage }"
   >
     <details v-if="!publicPage" class="practice-demo__notice mt-3">
-      <summary>Демо-режим · данные до обновления страницы</summary>
+      <summary>Клиенты, брони и фотографии · демо-режим</summary>
       <p class="mt-2 mb-0">
-        Кабинет пока без авторизации. Данные и фото сохраняются только до обновления страницы.
+        Клиенты, брони, тарифы и фотографии пока сохраняются только до обновления страницы. В
+        разделе «Отзывы» отдельно указан режим хранения; при подключённой базе он требует входа.
       </p>
     </details>
     <Transition name="page" mode="out-in" @after-enter="finishNavigation">
@@ -45,6 +46,7 @@ import { CabinetView } from '../../pages/cabinet/index.ts';
 import { BackToTop } from '../../shared/ui/index.ts';
 import { SiteFooter } from '../../widgets/site-footer/index.ts';
 import { usePractice } from '../../entities/practice/index.ts';
+import { useReviews } from '../../entities/review/index.ts';
 import { useBrowserTools } from '../providers/useBrowserTools.ts';
 import { provideSiteNavigation } from '../providers/useSiteNavigation.ts';
 import {
@@ -54,6 +56,7 @@ import {
 
 import { useNavigation } from '../../shared/routing/index.ts';
 const store = usePractice();
+const reviewStore = useReviews();
 const navigation = useNavigation();
 useBrowserTools(store, navigation);
 const { isAdmin } = store;
@@ -66,6 +69,7 @@ const { publicPage, activeSection, finishNavigation } = provideSiteNavigation(
 );
 const { contactRequest, closeContactRequest, restoreContactFocus } = provideContactRequest();
 function enterAdmin() {
+  void reviewStore.refreshAuth();
   store.switchProfile('victoria');
   navigate('cabinet', { tab: 'overview' });
 }

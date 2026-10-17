@@ -41,7 +41,10 @@ let readyFrame = 0;
 function measureMarker() {
   const link = container.value?.querySelector<HTMLElement>('[aria-current="location"]');
   visible.value = !!link;
-  if (!link?.offsetHeight) return;
+  if (!link?.offsetHeight) {
+    marker.value = { x: 0, y: 0, width: 0, height: 0 };
+    return;
+  }
   marker.value = {
     x: link.offsetLeft,
     y: link.offsetTop,

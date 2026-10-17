@@ -37,6 +37,7 @@
     <PriceEditor v-else-if="tab === 'price'" />
     <PhotosPanel v-else-if="tab === 'photos'" @open-price="tab = 'price'" />
     <SiteImagesPanel v-else-if="tab === 'site-photos'" />
+    <ReviewsPanel v-else-if="tab === 'reviews'" />
     <div v-else class="cabinet__schedule">
       <SchedulePanel @show-bookings="showBookings" />
     </div>
@@ -51,6 +52,7 @@ import { ClientsPanel } from '../../../features/manage-clients/index.ts';
 import { PriceEditor } from '../../../features/manage-catalog/index.ts';
 import { PhotosPanel } from '../../../features/manage-portfolio/index.ts';
 import { SiteImagesPanel } from '../../../features/manage-site-images/index.ts';
+import { ReviewsPanel } from '../../../features/manage-reviews/index.ts';
 import {
   useNavigation,
   type CabinetTab,
@@ -76,6 +78,7 @@ const mainTabs = [
   { id: 'price', label: 'Тарифы' },
   { id: 'photos', label: 'Галерея' },
   { id: 'site-photos', label: 'Фото сайта' },
+  { id: 'reviews', label: 'Отзывы' },
 ] satisfies { id: CabinetTab; label: string }[];
 </script>
 
@@ -172,7 +175,7 @@ const mainTabs = [
 }
 .cabinet__tabs {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 8px;
   padding: 8px;
   background: #f0edea;

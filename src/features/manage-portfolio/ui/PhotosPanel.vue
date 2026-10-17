@@ -1,19 +1,23 @@
 <template>
   <div class="photos-panel row gy-4 align-items-start">
     <div class="col-lg-5">
-      <section v-if="!services.length" class="card p-4">
-        <h2 class="display-subtitle">Сначала добавьте вариант аренды</h2>
-        <p class="my-3 small text-body-secondary">Фото можно связать с баней или проживанием.</p>
-        <BaseButton @click="emit('openPrice')">Открыть варианты аренды</BaseButton>
+      <section v-if="!categories.length" class="card p-4">
+        <h2 class="display-subtitle">Добавьте категорию</h2>
+        <p class="my-3 small text-body-secondary">Категории галереи берутся из прайса.</p>
+        <BaseButton @click="emit('openPrice')">Открыть прайс</BaseButton>
       </section>
       <form v-else ref="form" class="card p-4" @submit.prevent="publish">
-        <h2 class="display-subtitle">Добавить фото бани</h2>
-        <label for="photo-service" class="form-label mt-4">Вариант аренды</label>
-        <select id="photo-service" v-model="serviceId" class="form-select">
-          <option v-for="service in services" :key="service.id" :value="service.id">
-            {{ service.name }}
-          </option>
-        </select>
+        <h2 class="display-subtitle">Добавить фото</h2>
+        <fieldset class="photos-panel__categories mt-4">
+          <legend class="form-label">Категории</legend>
+          <div class="photos-panel__choices">
+            <label v-for="category in categories" :key="category.id" class="photos-panel__choice">
+              <input v-model="categoryIds" type="checkbox" :value="category.id" />
+              <span>{{ galleryCategoryLabel(category) }}</span>
+            </label>
+          </div>
+          <p class="small text-secondary mt-2 mb-0">Можно выбрать несколько категорий.</p>
+        </fieldset>
         <label for="gallery-photo" class="form-label mt-4">Фотография или готовый коллаж</label>
         <input
           id="gallery-photo"
@@ -22,38 +26,21 @@
           class="form-control"
           @change="upload.select"
         />
-        <p class="small text-secondary mt-2">
-          Покажите парную, комнату отдыха, спальню или участок. Снимок до 20 МБ отображается
-          целиком.
-        </p>
+        <p class="small text-secondary mt-2">Снимок до 20 МБ отображается целиком.</p>
         <img
           v-if="upload.ready.value"
           :src="upload.url.value"
-          alt="Предпросмотр фотографии бани"
+          alt="Предпросмотр фотографии"
           class="photos-panel__image mt-3"
-        />
-        <label for="photo-title" class="form-label mt-3">Подпись к фото</label>
-        <input
-          id="photo-title"
-          v-model="title"
-          class="form-control"
-          required
-          maxlength="100"
-          placeholder="Например, парная или спальня"
-        />
-        <label for="photo-note" class="form-label mt-3">Описание · необязательно</label>
-        <input
-          id="photo-note"
-          v-model="description"
-          class="form-control"
-          maxlength="180"
-          placeholder="Расскажите, что изображено на снимке"
         />
         <p v-if="error || upload.error.value" class="alert alert-warning mt-3" role="alert">
           {{ error || upload.error.value }}
         </p>
         <p v-if="message" class="small text-secondary mt-3" role="status">{{ message }}</p>
-        <BaseButton type="submit" class="mt-4 w-100" :disabled="!upload.ready.value"
+        <BaseButton
+          type="submit"
+          class="mt-4 w-100"
+          :disabled="!upload.ready.value || !categoryIds.length"
           >Добавить в галерею</BaseButton
         >
         <p class="small text-secondary mt-3 mb-0">
@@ -61,57 +48,61 @@
         </p>
       </form>
     </div>
-    <section class="col-lg-7">
-      <h2 class="display-subtitle mb-4">Галерея бани</h2>
+    <section class="col-lg-7" aria-labelledby="manage-gallery-title">
+      <h2 id="manage-gallery-title" class="display-subtitle mb-4">Галерея</h2>
       <p v-if="!photos.length" class="text-secondary">
-        Добавьте фото бани, спальни и участка — они появятся на сайте.
+        Добавьте фотографии — они появятся на сайте.
       </p>
-      <div class="row g-3">
-        <div v-for="photo in photos" :key="photo.id" class="col-md-6">
-          <article class="card p-3 h-100">
-            <img :src="photo.url" :alt="photo.title" class="photos-panel__image" loading="lazy" />
-            <p v-if="photo.isDemo" class="small text-secondary mt-3 mb-1">
-              Пример оформления · замените своим фото
-            </p>
-            <p class="small text-secondary mt-3 mb-1">
-              {{ services.find((item) => item.id === photo.serviceId)?.name }}
-            </p>
-            <h3 class="fs-6">{{ photo.title }}</h3>
-            <p v-if="photo.comparisonNote" class="small text-secondary">
-              {{ photo.comparisonNote }}
-            </p>
-            <BaseButton
-              variant="text"
-              class="mt-auto"
-              :aria-label="'Убрать фото: ' + photo.title"
-              @click="removePhoto(photo.id)"
-              >Убрать из галереи</BaseButton
-            >
-          </article>
+      <section
+        v-for="group in groups"
+        :key="group.id"
+        class="photos-panel__group"
+        :aria-labelledby="'gallery-category-' + group.id"
+      >
+        <h3 :id="'gallery-category-' + group.id" class="photos-panel__group-title">
+          {{ group.label }} <span>{{ group.photos.length }}</span>
+        </h3>
+        <div class="row g-3">
+          <div v-for="(photo, index) in group.photos" :key="photo.id" class="col-md-6">
+            <article class="card p-3 h-100 photos-panel__card">
+              <img :src="photo.url" :alt="photo.title" class="photos-panel__image" loading="lazy" />
+              <BaseButton
+                variant="text"
+                :aria-label="'Убрать фото ' + (index + 1) + ': ' + group.label"
+                @click="removePhoto(photo.id)"
+                >Убрать из галереи</BaseButton
+              >
+            </article>
+          </div>
         </div>
-      </div>
+      </section>
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { usePractice } from '../../../entities/practice/index.ts';
+import { computed, ref, watch } from 'vue';
+import {
+  usePractice,
+  galleryCategoryLabel,
+  groupGalleryPhotos,
+} from '../../../entities/practice/index.ts';
 import { BaseButton } from '../../../shared/ui/index.ts';
 import { usePhotoUpload } from '../../../shared/lib/image-upload/index.ts';
 const emit = defineEmits<{ openPrice: [] }>();
-const { services, photos, addPhoto, removePhoto } = usePractice();
-const serviceId = ref(services.value[0]?.id ?? 0);
+const { categories, photos, addPhoto, removePhoto } = usePractice();
+const categoryIds = ref<number[]>(categories.value[0] ? [categories.value[0].id] : []);
+const groups = computed(() =>
+  groupGalleryPhotos(categories.value, photos.value).filter((group) => group.photos.length),
+);
 const upload = usePhotoUpload();
-const title = ref('');
-const description = ref('');
 const error = ref('');
 const message = ref('');
 const form = ref<HTMLFormElement | null>(null);
 watch(
-  () => services.value.map((item) => item.id),
+  () => categories.value.map((item) => item.id),
   (ids) => {
-    if (!ids.includes(serviceId.value)) serviceId.value = ids[0] ?? 0;
+    categoryIds.value = categoryIds.value.filter((id) => ids.includes(id));
   },
 );
 function publish() {
@@ -119,18 +110,11 @@ function publish() {
   message.value = '';
   if (!upload.ready.value) return;
   try {
-    addPhoto({
-      serviceId: serviceId.value,
-      title: title.value,
-      url: upload.url.value,
-      comparisonNote: description.value,
-    });
+    addPhoto({ categoryIds: [...categoryIds.value], url: upload.url.value });
     upload.take();
-    title.value = '';
-    description.value = '';
     const input = form.value?.querySelector<HTMLInputElement>('input[type="file"]');
     if (input) input.value = '';
-    message.value = 'Фото добавлено в галерею бани на сайте.';
+    message.value = 'Фото добавлено в галерею.';
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : 'Не удалось добавить фото.';
   }
@@ -145,5 +129,78 @@ function publish() {
   image-orientation: from-image;
   border-radius: 14px;
   background: var(--paper, #f5f2e9);
+}
+.photos-panel__categories {
+  min-width: 0;
+}
+.photos-panel__categories legend {
+  float: none;
+  font-size: 16px;
+}
+.photos-panel__choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
+  grid-auto-rows: 1fr;
+  gap: 10px;
+}
+.photos-panel__choice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.photos-panel__choice:has(input:checked) {
+  background: var(--selected-bg);
+  border-color: var(--accent);
+}
+.photos-panel__choice input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin: 0;
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+.photos-panel__choice input:checked {
+  background: radial-gradient(circle, currentColor 0 4px, transparent 4.5px);
+}
+.photos-panel__choice input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (forced-colors: active) {
+  .photos-panel__choice input:checked {
+    background: Highlight;
+    box-shadow: inset 0 0 0 4px Canvas;
+    forced-color-adjust: none;
+  }
+}
+.photos-panel__group + .photos-panel__group {
+  margin-top: 32px;
+}
+.photos-panel__group-title {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+.photos-panel__group-title span {
+  color: var(--muted);
+  font: 14px var(--bs-body-font-family);
+}
+.photos-panel__card {
+  gap: 16px;
 }
 </style>

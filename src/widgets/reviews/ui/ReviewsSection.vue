@@ -6,7 +6,23 @@
     <p class="reviews__note">
       Поделитесь впечатлениями о нашей бане — ваш отзыв поможет другим гостям выбрать отдых.
     </p>
+    <p v-if="kind === 'demo'" class="reviews__note">
+      Демонстрационные отзывы. Изменения сохраняются только в этой вкладке до обновления.
+    </p>
+    <p v-if="publicLoading && !reviews.length" role="status">Загружаем отзывы…</p>
+    <p v-else-if="publicError" role="alert">
+      {{ publicError }}
+      <button type="button" class="btn btn-link" @click="refreshPublic">Повторить</button>
+    </p>
+    <p v-else-if="!reviews.length" class="reviews__note">
+      {{
+        kind === 'offline'
+          ? 'Приём отзывов скоро появится.'
+          : 'Пока нет опубликованных отзывов. Поделитесь первым впечатлением.'
+      }}
+    </p>
     <div
+      v-if="reviews.length"
       ref="review-track"
       class="reviews__grid"
       :class="{ 'is-dragging': dragging }"
@@ -21,11 +37,17 @@
       @focusin="interact"
     >
       <div class="reviews__track">
-        <div v-for="review in reviews" :key="review.name" class="reviews__slide">
+        <div v-for="review in reviews" :key="review.id" class="reviews__slide">
           <article class="reviews__card">
-            <span class="reviews__stars" aria-label="5 из 5 звёзд">★★★★★</span>
-            <p>{{ review.text }}</p>
             <strong class="reviews__author">{{ review.name }}</strong>
+            <span class="reviews__stars" :aria-label="`${review.rating} из 5 звёзд`"
+              >{{ '★'.repeat(review.rating) }}{{ '☆'.repeat(5 - review.rating) }}</span
+            >
+            <p>{{ review.text }}</p>
+            <blockquote v-if="review.reply" class="reviews__reply">
+              <strong>Ответ администрации</strong>
+              <p>{{ review.reply }}</p>
+            </blockquote>
           </article>
         </div>
       </div>
@@ -35,12 +57,22 @@
     </button>
     <MediaDialog :open="open" title="Ваш отзыв" class="reviews__dialog" @close="open = false">
       <form class="review-form" @submit.prevent="submit">
+        <p class="review-form__note">
+          {{
+            kind === 'offline'
+              ? 'Приём отзывов ещё не подключён. Отправка пока недоступна.'
+              : kind === 'demo'
+                ? 'Проверка формы: отзыв попадёт в демонстрационный кабинет этой вкладки.'
+                : 'Отзыв появится на сайте после проверки Викторией.'
+          }}
+        </p>
         <fieldset>
           <legend>Ваша оценка</legend>
           <div class="review-form__stars">
             <label v-for="star in 5" :key="star" :class="{ 'is-filled': star <= Number(rating) }">
               <input
                 v-model="rating"
+                :disabled="sending"
                 type="radio"
                 name="review-rating"
                 :value="star"
@@ -65,6 +97,7 @@
         <label class="review-form__field"
           >Ваше имя<input
             v-model="name"
+            :disabled="sending"
             class="form-control"
             autocomplete="name"
             maxlength="60"
@@ -74,6 +107,7 @@
         <label class="review-form__field"
           >Комментарий<textarea
             v-model="comment"
+            :disabled="sending"
             class="form-control"
             rows="4"
             minlength="10"
@@ -83,7 +117,13 @@
           />
         </label>
 
-        <button type="submit" class="btn btn-primary review-form__submit">Отправить отзыв</button>
+        <button
+          type="submit"
+          class="btn btn-primary review-form__submit"
+          :disabled="sending || !canSubmit"
+        >
+          {{ sending ? 'Отправляем…' : 'Отправить отзыв' }}
+        </button>
         <p v-if="notice" role="status" class="review-form__notice">{{ notice }}</p>
       </form>
     </MediaDialog>
@@ -93,27 +133,45 @@
 import { ref, useTemplateRef } from 'vue';
 import { MediaDialog } from '../../../shared/ui/index.ts';
 import { useReviewCarousel } from '../model/useReviewCarousel.ts';
+import { useReviews } from '../../../entities/review/index.ts';
+const store = useReviews();
+const { published: reviews, kind, canSubmit, publicLoading, publicError, refreshPublic } = store;
 const open = ref(false);
 const track = useTemplateRef<HTMLElement>('review-track');
 const name = ref('');
 const rating = ref<number | ''>('');
 const comment = ref('');
 const notice = ref('');
-function submit() {
-  notice.value = 'Отзыв не отправлен: приём отзывов ещё не подключён. Текст остался в форме.';
+const sending = ref(false);
+let submissionId = '';
+let submissionBody = '';
+async function submit() {
+  if (sending.value) return;
+  const draft = { name: name.value, rating: Number(rating.value), text: comment.value };
+  const body = JSON.stringify(draft);
+  if (!submissionId || body !== submissionBody) {
+    submissionId = crypto.randomUUID();
+    submissionBody = body;
+  }
+  sending.value = true;
+  notice.value = '';
+  try {
+    await store.submit(submissionId, draft);
+    notice.value =
+      kind === 'demo'
+        ? 'Демо-отзыв отправлен на проверку. Откройте «Кабинет → Отзывы» в этой вкладке.'
+        : 'Спасибо! Отзыв отправлен на проверку и появится после публикации.';
+    name.value = '';
+    rating.value = '';
+    comment.value = '';
+    submissionId = '';
+  } catch (error) {
+    notice.value =
+      error instanceof Error ? error.message : 'Не удалось отправить отзыв. Текст остался в форме.';
+  } finally {
+    sending.value = false;
+  }
 }
-
-const reviews = [
-  {
-    name: 'Анна',
-    text: 'Тихий вечер, тёплая парная и возможность никуда не спешить. Именно такой отдых хотелось устроить.',
-  },
-  {
-    name: 'Дмитрий',
-    text: 'Приехали небольшой компанией. Хорошо попарились и спокойно провели время вместе.',
-  },
-  { name: 'Елена', text: 'Удобно остаться с ночёвкой после бани — отдохнуть и уехать уже утром.' },
-];
 const { dragging, onWheel, advance, interact } = useReviewCarousel(open, track);
 </script>
 <style scoped>
@@ -171,6 +229,19 @@ const { dragging, onWheel, advance, interact } = useReviewCarousel(open, track);
   font-size: 17px;
   line-height: 1.75;
   margin: 8px 0 24px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.reviews__reply {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border-left: 2px solid var(--accent);
+  background: var(--control-bg);
+  border-radius: 0 12px 12px 0;
+}
+.reviews__reply p {
+  font-size: 15px;
+  margin-bottom: 0;
 }
 .reviews__label {
   margin-top: auto;
@@ -246,7 +317,9 @@ const { dragging, onWheel, advance, interact } = useReviewCarousel(open, track);
   color: var(--muted);
 }
 .review-form textarea {
-  resize: vertical;
+  height: 128px;
+  overflow-y: auto;
+  resize: none;
 }
 .review-form__submit {
   display: block;
@@ -264,7 +337,11 @@ const { dragging, onWheel, advance, interact } = useReviewCarousel(open, track);
 }
 
 .reviews__author {
-  margin-top: auto;
+  display: block;
+  margin-bottom: 8px;
+  font-size: 18px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
   color: var(--ink);
 }
 .reviews__stars {

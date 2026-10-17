@@ -2,7 +2,8 @@ import { inject, provide, type InjectionKey, type Ref } from 'vue';
 
 // Route contracts only. The app layer owns state, guards and browser history.
 export type View = 'services' | 'price' | 'works' | 'contacts' | 'access' | 'booking' | 'cabinet';
-export type CabinetTab = 'overview' | 'clients' | 'schedule' | 'price' | 'photos' | 'site-photos';
+export type CabinetTab =
+  'overview' | 'clients' | 'schedule' | 'price' | 'photos' | 'site-photos' | 'reviews';
 export interface BookingPrefill {
   clientId?: string;
   date?: string;

@@ -18,6 +18,7 @@
     "check": "oxlint . --deny-warnings && eslint . --max-warnings=0 && node --test tests/*.test.ts tests/*.test.js && vue-tsc --noEmit && vite build"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.118.0",
     "bootstrap": "5.3.8",
     "embla-carousel": "8.6.0",
     "vue": "^3.5.0"

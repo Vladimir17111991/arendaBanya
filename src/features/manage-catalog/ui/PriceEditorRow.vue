@@ -100,28 +100,9 @@
         Удалить «{{ service.name }}» из вариантов аренды и новых броней? История существующих броней
         сохранится.
       </p>
-      <template v-if="photoCount"
-        ><p class="mt-2 small text-body-secondary">
-          Связанных фото: {{ photoCount }}. Их нужно перенести к другому варианту аренды.
-        </p>
-        <label
-          :for="`move-photos-${service.id}`"
-          class="form-label mt-4 mb-2 d-block small fw-semibold"
-          >Перенести фото к варианту аренды</label
-        ><select :id="`move-photos-${service.id}`" v-model="photoDestination" class="form-select">
-          <option value="" disabled>Выберите вариант аренды</option>
-          <option v-for="item in otherServices" :key="item.id" :value="item.id">
-            {{ item.category }} · {{ item.name }}
-          </option>
-        </select>
-        <p v-if="!otherServices.length" class="mt-3 small">
-          Сначала добавьте другой вариант аренды или уберите эти фото через «Галерея бани».
-        </p></template
-      >
       <div class="mt-3 d-flex flex-wrap gap-2">
         <BaseButton
           variant="danger"
-          :disabled="photoCount > 0 && !photoDestination"
           :aria-label="`Подтвердить удаление варианта аренды: ${service.name}`"
           @click="remove"
           >Удалить из прайса</BaseButton
@@ -139,7 +120,7 @@ import { type Service, usePractice } from '../../../entities/practice/index.ts';
 import { BaseButton } from '../../../shared/ui/index.ts';
 const props = defineProps<{ service?: Service }>();
 const emit = defineEmits<{ added: [] }>();
-const { categories, services, photos, addService, editService, removeService } = usePractice();
+const { categories, addService, editService, removeService } = usePractice();
 const fieldId = computed(() => props.service?.id ?? 'new');
 const name = ref(props.service?.name ?? '');
 const description = ref(props.service?.description ?? '');
@@ -155,13 +136,6 @@ const rentalUnit = ref<'hour' | 'day'>(props.service?.rentalUnit ?? 'hour');
 const error = ref('');
 const saved = ref(false);
 const removing = ref(false);
-const photoDestination = ref<number | ''>('');
-const photoCount = computed(
-  () => photos.value.filter((item) => item.serviceId === props.service?.id).length,
-);
-const otherServices = computed(() =>
-  services.value.filter((item) => item.id !== props.service?.id),
-);
 watch(
   () => props.service?.categoryId,
   (value) => {
@@ -201,7 +175,7 @@ function remove() {
   if (!props.service) return;
   error.value = '';
   try {
-    removeService(props.service.id, photoDestination.value || undefined);
+    removeService(props.service.id);
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : 'Не удалось удалить.';
   }

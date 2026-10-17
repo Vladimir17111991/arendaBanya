@@ -76,7 +76,7 @@
                 emit('leave');
               "
             >
-              Выйти из демо
+              На сайт
             </button>
           </template>
           <template v-else>

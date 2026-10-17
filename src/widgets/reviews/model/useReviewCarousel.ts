@@ -1,4 +1,4 @@
-import { onMounted, onUnmounted, ref, type Ref } from 'vue';
+import { onUnmounted, ref, watch, type Ref } from 'vue';
 import { createLoopCarousel, type EmblaCarouselType } from '../../../shared/lib/carousel/index.ts';
 
 export function useReviewCarousel(
@@ -43,47 +43,56 @@ export function useReviewCarousel(
     }
   }
 
-  onMounted(() => {
-    if (!viewport.value) return;
-    motion = matchMedia('(prefers-reduced-motion: reduce)');
-    // Transform looping has no physical scroll edge and accepts a new touch
-    // immediately, including while the previous swipe is still settling.
-    carousel = createLoopCarousel(viewport.value);
-    carousel
-      .on('pointerDown', () => {
-        dragging.value = true;
-        interact();
-      })
-      .on('pointerUp', () => {
-        dragging.value = false;
-        interact();
-      })
-      .on('scroll', () => (moving = true))
-      .on('settle', () => (moving = false))
-      .on('reInit', () => {
-        dragging.value = false;
-        moving = false;
-      });
-    nextAt = Date.now() + 5000;
-    timer = setInterval(() => {
-      const rect = viewport.value?.getBoundingClientRect();
-      if (
-        motion.matches ||
-        dragging.value ||
-        moving ||
-        dialogOpen.value ||
-        document.hidden ||
-        viewport.value?.contains(document.activeElement) ||
-        !rect ||
-        rect.bottom < 0 ||
-        rect.top > innerHeight ||
-        Date.now() < nextAt
-      )
-        return;
-      advance(1, false);
+  watch(
+    viewport,
+    (element) => {
+      clearInterval(timer);
+      carousel?.destroy();
+      carousel = undefined;
+      dragging.value = false;
+      moving = false;
+      if (!element) return;
+      motion = matchMedia('(prefers-reduced-motion: reduce)');
+      // Transform looping has no physical scroll edge and accepts a new touch
+      // immediately, including while the previous swipe is still settling.
+      carousel = createLoopCarousel(element);
+      carousel
+        .on('pointerDown', () => {
+          dragging.value = true;
+          interact();
+        })
+        .on('pointerUp', () => {
+          dragging.value = false;
+          interact();
+        })
+        .on('scroll', () => (moving = true))
+        .on('settle', () => (moving = false))
+        .on('reInit', () => {
+          dragging.value = false;
+          moving = false;
+        });
       nextAt = Date.now() + 5000;
-    }, 500);
-  });
+      timer = setInterval(() => {
+        const rect = viewport.value?.getBoundingClientRect();
+        if (
+          motion.matches ||
+          dragging.value ||
+          moving ||
+          dialogOpen.value ||
+          document.hidden ||
+          viewport.value?.contains(document.activeElement) ||
+          !rect ||
+          rect.bottom < 0 ||
+          rect.top > innerHeight ||
+          Date.now() < nextAt
+        )
+          return;
+        advance(1, false);
+        nextAt = Date.now() + 5000;
+      }, 500);
+    },
+    { flush: 'post', immediate: true },
+  );
   onUnmounted(() => {
     clearInterval(timer);
     carousel?.destroy();

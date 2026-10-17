@@ -22,7 +22,7 @@ test('visitors cannot book, create clients or change public content', () => {
   assert.throws(() => store.addClient('Елена', '+375000000003'), /только Виктории/);
   assert.throws(() => store.updateService(1, 120, 60), /только Виктории/);
   assert.throws(
-    () => store.addPhoto({ serviceId: 1, title: 'Баня', url: 'blob:test' }),
+    () => store.addPhoto({ categoryIds: [1], title: 'Баня', url: 'blob:test' }),
     /только Виктории/,
   );
   assert.throws(() => store.removePhoto('missing'), /только Виктории/);
@@ -69,9 +69,9 @@ test('rental price changes preserve existing booking snapshots', () => {
 test('bathhouse gallery accepts a single photo and allows removal', () => {
   const store = createPracticeStore(now);
   store.switchProfile('victoria');
-  assert.throws(() => store.addPhoto({ serviceId: 99, title: 'Фото', url: 'blob:demo' }));
-  assert.throws(() => store.addPhoto({ serviceId: 1, title: ' ', url: 'blob:demo' }));
-  store.addPhoto({ serviceId: 1, title: ' Парная ', url: 'blob:demo' });
+  assert.throws(() => store.addPhoto({ categoryIds: [99], title: 'Фото', url: 'blob:demo' }));
+  assert.throws(() => store.addPhoto({ categoryIds: [], url: 'blob:demo' }));
+  store.addPhoto({ categoryIds: [1], title: ' Парная ', url: 'blob:demo' });
   const photo = store.photos.value[0]!;
   assert.equal(photo.title, 'Парная');
   assert.equal(photo.beforeUrl, undefined);

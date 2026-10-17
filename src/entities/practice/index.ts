@@ -13,12 +13,14 @@ export type {
   BookingStatus,
   BookingFilter,
   WorkPhoto,
+  PhotoDraft,
   SiteImage,
   SiteImageSlot,
   ClosedPeriod,
   CustomerSelection,
 } from './model/types.ts';
 export { services, weekdays } from './config/demo.ts';
+export { galleryCategoryLabel, groupGalleryPhotos, sortGalleryPhotos } from './lib/gallery.ts';
 export {
   prepareBooking,
   prepareClient,

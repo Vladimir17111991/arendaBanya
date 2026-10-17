@@ -60,7 +60,7 @@ export interface Booking {
 
 export interface WorkPhoto {
   id: string;
-  serviceId: number;
+  categoryIds: number[];
   title: string;
   url: string;
   isDemo?: boolean;
@@ -69,6 +69,8 @@ export interface WorkPhoto {
   comparisonNote?: string;
   demoDiptych?: boolean;
 }
+
+export type PhotoDraft = Omit<WorkPhoto, 'id' | 'title'> & { title?: string };
 
 export type SiteImageSlot = 'hero' | 'studio';
 export interface SiteImage {
