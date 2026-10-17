@@ -69,13 +69,24 @@ export function useReviewCarousel(
     clearTimeout(wheelTimer);
     wheelTimer = undefined;
     clearTimeout(touchTimer);
-    controlScroll(false);
+    const current = position();
+    const rebased = reviewLoopPosition(current, count);
+    if (step && Math.abs(rebased - current) > 0.001) {
+      // A rapid new swipe can interrupt momentum before scrollend. Give it room
+      // now, keeping the exact visible offset instead of waiting for idle.
+      controlScroll(true);
+      moveTo(rebased);
+      // Native scrolling continues, but snapping stays off until release so
+      // rebasing a partly visible card cannot pull it away from the finger.
+      controlled = false;
+    } else controlScroll(false);
     touching = true;
     nativeScrolling = true;
     interact();
   }
   function endTouch() {
     touching = false;
+    controlScroll(false);
     interact();
     scheduleTouchEnd();
   }

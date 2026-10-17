@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createRenderer, ref } from 'vue';
 import { useReviewCarousel } from '../src/widgets/reviews/model/useReviewCarousel.ts';
 
-function setup(t: TestContext) {
+function setup(t: TestContext, visibleSlides = 1) {
   t.mock.timers.enable({ apis: ['setTimeout', 'setInterval'] });
   const previous = new Map<string, PropertyDescriptor | undefined>();
   function install(name: string, value: unknown) {
@@ -34,7 +34,7 @@ function setup(t: TestContext) {
       { getBoundingClientRect: (): { left: number } => ({ left: 360 - element.scrollLeft }) },
     ],
     scrollTo: ({ left }: { left: number }) => {
-      element.scrollLeft = left;
+      element.scrollLeft = Math.max(0, Math.min((9 - visibleSlides) * 360, left));
     },
     setPointerCapture: () => {
       captures++;
@@ -137,4 +137,49 @@ test('older mobile browsers wait for momentum to finish before rebasing', (t) =>
   carousel.onScroll();
   t.mock.timers.tick(220);
   assert.equal(element.scrollLeft, 3 * 360);
+});
+
+for (const visibleSlides of [1, 2]) {
+  for (const initialDirection of [-1, 1]) {
+    test(`rapid swipes starting ${initialDirection < 0 ? 'backward' : 'forward'} stay endless with ${visibleSlides} visible review(s)`, (t) => {
+      const { carousel, element } = setup(t, visibleSlides);
+      for (const direction of [
+        initialDirection,
+        -initialDirection,
+        initialDirection,
+        -initialDirection,
+      ]) {
+        for (let swipe = 0; swipe < 15; swipe++) {
+          // A new finger lands before scrollend or the 220 ms idle fallback.
+          carousel.startTouch();
+          const from = element.scrollLeft;
+          const destination = from + direction * 360;
+          element.scrollTo({ left: destination });
+          carousel.onScroll();
+          assert.equal(element.scrollLeft, destination, 'the next swipe has room immediately');
+          carousel.endTouch();
+          t.mock.timers.tick(60);
+        }
+      }
+    });
+  }
+}
+
+test('an interrupted native snap keeps its fractional offset when the next swipe begins', (t) => {
+  const { carousel, element } = setup(t);
+  for (const [from, expected] of [
+    [6.35, 3.35],
+    [2.65, 5.65],
+  ] as const) {
+    carousel.startTouch();
+    element.scrollTo({ left: from * 360 });
+    carousel.onScroll();
+    carousel.endTouch();
+    t.mock.timers.tick(60);
+    carousel.startTouch();
+    assert.ok(Math.abs(element.scrollLeft - expected * 360) < 0.001);
+    assert.equal(element.style.scrollSnapType, 'none', 'do not snap away from the finger');
+    carousel.endTouch();
+    assert.equal(element.style.scrollSnapType, '', 'native snapping resumes on release');
+  }
 });
