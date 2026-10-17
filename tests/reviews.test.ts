@@ -287,3 +287,50 @@ test('a delayed page cannot overwrite a newer status selection', async () => {
   assert.ok(store.moderation.value.every((row) => row.status === 'published'));
   store.dispose();
 });
+
+test('clearing rejected reviews removes all pages and leaves other statuses intact', async () => {
+  const { store, repository } = await paginationFixture(14);
+  const rows = [
+    ...(await repository.listModeration('pending', 0)).reviews,
+    ...(await repository.listModeration('pending', 10)).reviews,
+  ];
+  for (const row of rows.slice(0, 12)) await repository.update(row, { status: 'rejected' });
+  await repository.update(rows[12], { status: 'published' });
+  const published = await repository.listPublic();
+  await repository.update(
+    published.find((row) => row.id === rows[12].id)!,
+    { status: 'hidden' },
+  );
+  await store.loadModeration('rejected', 2);
+  assert.equal(store.moderation.value.length, 2);
+  assert.equal(await store.clearRejected(), 12);
+  assert.equal(store.page.value, 1);
+  assert.equal(store.total.value, 0);
+  assert.deepEqual(store.moderation.value, []);
+  assert.equal((await repository.listModeration('pending', 0)).total, 1);
+  assert.equal((await repository.listModeration('published', 0)).total, 3);
+  assert.equal((await repository.listModeration('hidden', 0)).total, 1);
+  assert.equal(await store.clearRejected(), 0);
+  await store.signOut();
+  await assert.rejects(store.clearRejected(), /Войдите/);
+  store.dispose();
+});
+
+test('failed cleanup preserves the rejected queue', async () => {
+  const { repository } = await paginationFixture(1);
+  await repository.update((await repository.listModeration('pending', 0)).reviews[0], {
+    status: 'rejected',
+  });
+  const store = createReviewStore({
+    ...repository,
+    async clearRejected() {
+      throw new Error('offline');
+    },
+  });
+  await store.init();
+  await store.loadModeration('rejected');
+  await assert.rejects(store.clearRejected(), /offline/);
+  assert.equal(store.moderation.value.length, 1);
+  assert.equal(store.total.value, 1);
+  store.dispose();
+});

@@ -74,6 +74,16 @@ export function createDemoReviewRepository(): ReviewRepository {
     async isModerator() {
       return true;
     },
+    async clearRejected() {
+      let deleted = 0;
+      for (let index = rows.length - 1; index >= 0; index--) {
+        if (rows[index].status === 'rejected') {
+          rows.splice(index, 1);
+          deleted++;
+        }
+      }
+      return deleted;
+    },
     async signIn() {},
     async signOut() {},
     onAuthChange() {

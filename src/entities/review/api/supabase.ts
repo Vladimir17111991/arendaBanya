@@ -106,6 +106,17 @@ export function createSupabaseReviewRepository(url: string, publicKey: string): 
       if (error) throw new Error('Не удалось проверить права доступа. Повторите вход.');
       return Boolean(data);
     },
+    async clearRejected() {
+      const { count, error } = await client
+        .from('reviews')
+        .delete({ count: 'exact' })
+        .eq('status', 'rejected');
+      if (error || count === null)
+        throw new Error(
+          'Не удалось очистить отклонённые отзывы. Проверьте вход и настройку прав удаления в Supabase.',
+        );
+      return count;
+    },
     async signIn(email, password) {
       const { error } = await client.auth.signInWithPassword({ email: email.trim(), password });
       if (error) throw new Error('Не удалось войти. Проверьте почту, пароль и соединение.');

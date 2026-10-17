@@ -124,6 +124,12 @@ export function createReviewStore(repository?: ReviewRepository) {
     await refreshAuth();
     if (!isModerator.value) throw new Error('У этого аккаунта нет прав на модерацию отзывов.');
   }
+  async function clearRejected() {
+    if (!repository || !isModerator.value) throw new Error('Войдите в аккаунт Виктории.');
+    const deleted = await repository.clearRejected();
+    await loadModeration(status.value, 1);
+    return deleted;
+  }
   async function signOut() {
     ++authVersion;
     clearPrivate();
@@ -152,6 +158,7 @@ export function createReviewStore(repository?: ReviewRepository) {
     loadModeration,
     submit,
     update,
+    clearRejected,
     signIn,
     signOut,
     async init() {

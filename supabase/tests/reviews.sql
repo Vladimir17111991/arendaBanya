@@ -8,6 +8,7 @@ create function auth.uid() returns uuid language sql stable as $$ select nullif(
 grant usage on schema auth, public to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
 \ir ../migrations/202610170001_reviews.sql
+\ir ../migrations/202610170002_clear_rejected_reviews.sql
 insert into auth.users values ('00000000-0000-4000-8000-000000000001'), ('00000000-0000-4000-8000-000000000002');
 insert into public.review_moderators values ('00000000-0000-4000-8000-000000000001');
 
@@ -81,4 +82,35 @@ do $$ begin
   if exists(select 1 from public.reviews) then raise exception 'Hidden review visible'; end if;
 end $$;
 reset role;
-select 'Review RLS and moderation checks passed' as result;
+
+insert into public.reviews(id, name, rating, body, status) values
+  ('20000000-0000-4000-8000-000000000001', 'Rejected 1', 1, 'Rejected review one.', 'rejected'),
+  ('20000000-0000-4000-8000-000000000002', 'Rejected 2', 2, 'Rejected review two.', 'rejected'),
+  ('20000000-0000-4000-8000-000000000003', 'Pending', 3, 'Pending review stays.', 'pending'),
+  ('20000000-0000-4000-8000-000000000004', 'Published', 4, 'Published review stays.', 'published');
+set role anon;
+do $$ begin
+  begin
+    delete from public.reviews;
+    raise exception 'Guest can delete reviews';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-4000-8000-000000000002';
+do $$ declare changed integer; begin
+  delete from public.reviews;
+  get diagnostics changed = row_count;
+  if changed <> 0 then raise exception 'Ordinary account can delete reviews'; end if;
+end $$;
+set request.jwt.claim.sub = '00000000-0000-4000-8000-000000000001';
+do $$ declare changed integer; begin
+  -- Even an unfiltered delete must leave pending, published and hidden reviews intact.
+  delete from public.reviews;
+  get diagnostics changed = row_count;
+  if changed <> 2 then raise exception 'Cleanup must remove exactly two rejected reviews'; end if;
+  if (select count(*) from public.reviews) <> 3 then raise exception 'Other review statuses were deleted'; end if;
+end $$;
+reset role;
+select 'Review RLS, moderation and rejected cleanup checks passed' as result;

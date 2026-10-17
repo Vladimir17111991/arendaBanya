@@ -70,14 +70,25 @@
       </nav>
       <div class="review-management__toolbar">
         <span>{{ reviewStatusLabels[status] }} · {{ total }}</span>
-        <button
-          class="btn btn-link"
-          type="button"
-          :disabled="adminLoading || busy"
-          @click="loadModeration()"
-        >
-          Обновить
-        </button>
+        <div class="review-management__toolbar-actions">
+          <button
+            v-if="status === 'rejected' && total > 0"
+            class="btn btn-outline-primary"
+            type="button"
+            :disabled="adminLoading || busy"
+            @click="openClearConfirmation"
+          >
+            Очистить список
+          </button>
+          <button
+            class="btn btn-link"
+            type="button"
+            :disabled="adminLoading || busy"
+            @click="loadModeration()"
+          >
+            Обновить
+          </button>
+        </div>
       </div>
       <div ref="paginationTop" class="review-management__pages">
         <ReviewPagination
@@ -196,12 +207,38 @@
         @change="changePage"
       />
     </template>
+    <MediaDialog
+      :open="confirmClear"
+      title="Очистить отклонённые отзывы?"
+      class="review-management__confirm"
+      @close="!busy && (confirmClear = false)"
+    >
+      <p>
+        Будут удалены все отклонённые отзывы: {{ total }}, включая другие страницы. Восстановить их
+        нельзя.
+      </p>
+      <p v-if="error" class="review-management__notice" role="alert">{{ error }}</p>
+      <div class="review-management__actions">
+        <button type="button" class="btn btn-primary" :disabled="busy" @click="clearRejected">
+          {{ busy ? 'Удаляем…' : 'Удалить отклонённые' }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-outline-primary"
+          :disabled="busy"
+          @click="confirmClear = false"
+        >
+          Отмена
+        </button>
+      </div>
+    </MediaDialog>
   </section>
 </template>
 
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue';
 import ReviewPagination from './ReviewPagination.vue';
+import { MediaDialog } from '../../../shared/ui/index.ts';
 import {
   useReviews,
   reviewStatusLabels,
@@ -230,9 +267,11 @@ const notice = ref('');
 const replyId = ref('');
 const replyText = ref('');
 const paginationTop = ref<HTMLElement | null>(null);
+const confirmClear = ref(false);
 watch(
   isModerator,
   (allowed) => {
+    if (!allowed) confirmClear.value = false;
     replyId.value = '';
     replyText.value = '';
     if (allowed) void loadModeration();
@@ -260,6 +299,20 @@ function login() {
 }
 function logout() {
   return run(() => store.signOut());
+}
+function openClearConfirmation() {
+  error.value = '';
+  notice.value = '';
+  confirmClear.value = true;
+}
+function clearRejected() {
+  return run(async () => {
+    const deleted = await store.clearRejected();
+    confirmClear.value = false;
+    replyId.value = '';
+    replyText.value = '';
+    notice.value = `Удалено отклонённых отзывов: ${deleted}.`;
+  });
 }
 function changeStatus(next: ReviewStatus) {
   replyId.value = '';
@@ -354,6 +407,14 @@ function dateLabel(value: string) {
 }
 .review-management__toolbar {
   margin-bottom: 16px;
+}
+.review-management__toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.review-management__confirm {
+  width: min(520px, calc(100% - 24px));
 }
 .review-management__pages {
   scroll-margin-top: 16px;

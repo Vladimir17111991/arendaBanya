@@ -21,6 +21,7 @@ export interface ReviewRepository {
   listModeration(status: ReviewStatus, offset: number): Promise<ReviewPage>;
   submit(id: string, draft: ReviewDraft): Promise<void>;
   update(review: Review, patch: { status?: ReviewStatus; reply?: string }): Promise<void>;
+  clearRejected(): Promise<number>;
   isModerator(): Promise<boolean>;
   signIn(email: string, password: string): Promise<void>;
   signOut(): Promise<void>;
