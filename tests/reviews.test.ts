@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createReviewStore } from '../src/entities/review/model/store.ts';
 import { createDemoReviewRepository } from '../src/entities/review/api/demo.ts';
-import type { Review, ReviewRepository } from '../src/entities/review/model/types.ts';
+import type { ReviewPage, ReviewRepository } from '../src/entities/review/model/types.ts';
 
 const draft = { name: ' Гость ', rating: 2, text: ' Хотелось бы больше полотенец. ' };
 
@@ -64,7 +64,7 @@ test('offline mode never reports a successful submission; invalid data does not 
 });
 
 test('private queue response arriving after sign-out cannot repopulate the cabinet', async () => {
-  let resolveQueue!: (rows: Review[]) => void;
+  let resolveQueue!: (result: ReviewPage) => void;
   const base = createDemoReviewRepository();
   const repository: ReviewRepository = {
     ...base,
@@ -77,9 +77,12 @@ test('private queue response arriving after sign-out cannot repopulate the cabin
   await store.init();
   const loading = store.loadModeration();
   await store.signOut();
-  resolveQueue([
-    { ...draft, id: 'private', reply: '', status: 'pending', createdAt: '', updatedAt: '' },
-  ]);
+  resolveQueue({
+    reviews: [
+      { ...draft, id: 'private', reply: '', status: 'pending', createdAt: '', updatedAt: '' },
+    ],
+    total: 1,
+  });
   await loading;
   assert.deepEqual(store.moderation.value, []);
   assert.equal(store.isModerator.value, false);
@@ -104,7 +107,7 @@ test('ordinary signed-in account cannot load moderation or change reviews', asyn
     },
     async listModeration() {
       reads++;
-      return [];
+      return { reviews: [], total: 0 };
     },
     async update() {
       writes++;
@@ -153,5 +156,134 @@ test('a failed public refresh clears stale reviews instead of leaving a hidden r
   await store.refreshPublic();
   assert.deepEqual(store.published.value, []);
   assert.equal(store.publicError.value, 'offline');
+  store.dispose();
+});
+
+async function paginationFixture(count: number) {
+  const repository = createDemoReviewRepository();
+  for (let index = 1; index <= count; index++) await repository.submit(`review-${index}`, draft);
+  const store = createReviewStore(repository);
+  await store.init();
+  await store.loadModeration();
+  return { store, repository };
+}
+
+test('moderation pages replace ten rows, navigate both ways and reset on status change', async () => {
+  const { store } = await paginationFixture(23);
+  assert.equal(store.total.value, 23);
+  assert.equal(store.pageCount.value, 3);
+  assert.equal(store.moderation.value.length, 10);
+  const firstPageIds = store.moderation.value.map((row) => row.id);
+  await store.loadModeration('pending', 2);
+  assert.equal(store.page.value, 2);
+  assert.equal(store.moderation.value.length, 10);
+  assert.ok(store.moderation.value.every((row) => !firstPageIds.includes(row.id)));
+  const secondPageIds = store.moderation.value.map((row) => row.id);
+  await store.loadModeration();
+  assert.equal(store.page.value, 2);
+  assert.deepEqual(
+    store.moderation.value.map((row) => row.id),
+    secondPageIds,
+  );
+  await store.loadModeration('pending', 3);
+  assert.equal(store.moderation.value.length, 3);
+  await store.loadModeration('pending', 1);
+  assert.deepEqual(
+    store.moderation.value.map((row) => row.id),
+    firstPageIds,
+  );
+  await store.loadModeration('pending', 3);
+  await store.loadModeration('published');
+  assert.equal(store.page.value, 1);
+  assert.equal(store.total.value, 3);
+  assert.equal(store.pageCount.value, 1);
+  await store.signOut();
+  assert.equal(store.total.value, 0);
+  assert.equal(store.page.value, 1);
+  store.dispose();
+});
+
+test('reply preserves the page; moderating the last row returns to the preceding page', async () => {
+  const { store } = await paginationFixture(21);
+  await store.loadModeration('pending', 3);
+  await store.update(store.moderation.value[0], { reply: 'Спасибо за ваш отзыв.' });
+  assert.equal(store.page.value, 3);
+  assert.equal(store.moderation.value[0].reply, 'Спасибо за ваш отзыв.');
+  await store.update(store.moderation.value[0], { status: 'published' });
+  assert.equal(store.page.value, 2);
+  assert.equal(store.pageCount.value, 2);
+  assert.equal(store.total.value, 20);
+  assert.equal(store.moderation.value.length, 10);
+  store.dispose();
+});
+
+test('refresh recovers when other moderators empty pages or the entire queue', async () => {
+  const { store, repository } = await paginationFixture(21);
+  await store.loadModeration('pending', 3);
+  const rows = (await repository.listModeration('pending', 10)).reviews;
+  const last = (await repository.listModeration('pending', 20)).reviews;
+  for (const row of [...rows, ...last]) await repository.update(row, { status: 'rejected' });
+  await store.loadModeration();
+  assert.equal(store.page.value, 1);
+  assert.equal(store.total.value, 10);
+  for (const row of store.moderation.value) await repository.update(row, { status: 'rejected' });
+  await store.loadModeration();
+  assert.equal(store.page.value, 1);
+  assert.equal(store.total.value, 0);
+  assert.deepEqual(store.moderation.value, []);
+  store.dispose();
+});
+
+test('a failed page request preserves the displayed page and can be retried', async () => {
+  const { repository } = await paginationFixture(12);
+  let fail = false;
+  const store = createReviewStore({
+    ...repository,
+    async listModeration(status, offset) {
+      if (fail) throw new Error('offline');
+      return repository.listModeration(status, offset);
+    },
+  });
+  await store.init();
+  await store.loadModeration();
+  const original = store.moderation.value.map((row) => row.id);
+  fail = true;
+  await store.loadModeration('pending', 2);
+  assert.equal(store.page.value, 1);
+  assert.equal(store.adminError.value, 'offline');
+  assert.deepEqual(
+    store.moderation.value.map((row) => row.id),
+    original,
+  );
+  fail = false;
+  await store.loadModeration('pending', 2);
+  assert.equal(store.page.value, 2);
+  assert.equal(store.moderation.value.length, 2);
+  store.dispose();
+});
+
+test('a delayed page cannot overwrite a newer status selection', async () => {
+  const { repository } = await paginationFixture(12);
+  let resolvePage!: (result: ReviewPage) => void;
+  const store = createReviewStore({
+    ...repository,
+    listModeration(status, offset) {
+      if (status === 'pending' && offset === 10)
+        return new Promise((resolve) => {
+          resolvePage = resolve;
+        });
+      return repository.listModeration(status, offset);
+    },
+  });
+  await store.init();
+  await store.loadModeration();
+  const pending = store.loadModeration('pending', 2);
+  await store.loadModeration('published');
+  resolvePage(await repository.listModeration('pending', 10));
+  await pending;
+  assert.equal(store.status.value, 'published');
+  assert.equal(store.page.value, 1);
+  assert.equal(store.total.value, 3);
+  assert.ok(store.moderation.value.every((row) => row.status === 'published'));
   store.dispose();
 });

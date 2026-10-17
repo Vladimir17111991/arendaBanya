@@ -52,11 +52,18 @@
         </div>
       </div>
     </div>
-    <button type="button" class="btn btn-primary reviews__add" @click="open = true">
+    <button type="button" class="btn btn-primary reviews__add" @click="openForm">
       Оставить отзыв
     </button>
-    <MediaDialog :open="open" title="Ваш отзыв" class="reviews__dialog" @close="open = false">
-      <form class="review-form" @submit.prevent="submit">
+    <MediaDialog
+      :open="open"
+      :title="submitted ? 'Спасибо за отзыв!' : 'Ваш отзыв'"
+      class="reviews__dialog"
+      :class="{ 'reviews__dialog--success': submitted }"
+      @close="closeDialog"
+    >
+      <p v-if="submitted" class="review-success" role="status">Мы ценим ваше мнение.</p>
+      <form v-else class="review-form" @submit.prevent="submit">
         <p class="review-form__note">
           {{
             kind === 'offline'
@@ -130,7 +137,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue';
+import { onUnmounted, ref, useTemplateRef } from 'vue';
 import { MediaDialog } from '../../../shared/ui/index.ts';
 import { useReviewCarousel } from '../model/useReviewCarousel.ts';
 import { useReviews } from '../../../entities/review/index.ts';
@@ -143,6 +150,23 @@ const rating = ref<number | ''>('');
 const comment = ref('');
 const notice = ref('');
 const sending = ref(false);
+const submitted = ref(false);
+let closeTimer: ReturnType<typeof setTimeout> | undefined;
+let disposed = false;
+function closeDialog() {
+  clearTimeout(closeTimer);
+  open.value = false;
+}
+function openForm() {
+  clearTimeout(closeTimer);
+  submitted.value = false;
+  notice.value = '';
+  open.value = true;
+}
+onUnmounted(() => {
+  disposed = true;
+  clearTimeout(closeTimer);
+});
 let submissionId = '';
 let submissionBody = '';
 async function submit() {
@@ -157,10 +181,11 @@ async function submit() {
   notice.value = '';
   try {
     await store.submit(submissionId, draft);
-    notice.value =
-      kind === 'demo'
-        ? 'Демо-отзыв отправлен на проверку. Откройте «Кабинет → Отзывы» в этой вкладке.'
-        : 'Спасибо! Отзыв отправлен на проверку и появится после публикации.';
+    if (disposed) return;
+    submitted.value = true;
+    open.value = true;
+    clearTimeout(closeTimer);
+    closeTimer = setTimeout(closeDialog, 3000);
     name.value = '';
     rating.value = '';
     comment.value = '';
@@ -259,6 +284,16 @@ const { dragging, onWheel, advance, interact } = useReviewCarousel(open, track);
 }
 .reviews__dialog {
   width: min(560px, calc(100% - 24px));
+}
+.reviews__dialog--success {
+  width: min(440px, calc(100% - 24px));
+}
+.review-success {
+  margin: 0;
+  padding: 12px 8px 16px;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.6;
 }
 .review-form {
   padding: 8px;

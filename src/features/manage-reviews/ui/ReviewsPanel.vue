@@ -9,7 +9,7 @@
         v-if="isModerator && kind === 'remote'"
         class="btn btn-outline-primary"
         type="button"
-        :disabled="busy"
+        :disabled="busy || adminLoading"
         @click="logout"
       >
         Выйти из отзывов
@@ -36,7 +36,7 @@
           type="email"
           autocomplete="username"
           required
-          :disabled="busy"
+          :disabled="busy || adminLoading"
       /></label>
       <label
         >Пароль<input
@@ -45,9 +45,9 @@
           type="password"
           autocomplete="current-password"
           required
-          :disabled="busy"
+          :disabled="busy || adminLoading"
       /></label>
-      <button class="btn btn-primary" type="submit" :disabled="busy">
+      <button class="btn btn-primary" type="submit" :disabled="busy || adminLoading">
         {{ busy ? 'Входим…' : 'Войти' }}
       </button>
     </form>
@@ -62,14 +62,14 @@
           :key="key"
           type="button"
           :aria-pressed="status === key"
-          :disabled="busy"
+          :disabled="busy || adminLoading"
           @click="changeStatus(key)"
         >
           {{ label }}
         </button>
       </nav>
       <div class="review-management__toolbar">
-        <span>{{ reviewStatusLabels[status] }}</span>
+        <span>{{ reviewStatusLabels[status] }} · {{ total }}</span>
         <button
           class="btn btn-link"
           type="button"
@@ -78,6 +78,17 @@
         >
           Обновить
         </button>
+      </div>
+      <div ref="paginationTop" class="review-management__pages">
+        <ReviewPagination
+          v-if="pageCount > 1"
+          :page="page"
+          :page-count="pageCount"
+          :total="total"
+          :disabled="adminLoading || busy"
+          label="Страницы отзывов сверху"
+          @change="changePage"
+        />
       </div>
       <p v-if="adminLoading && !moderation.length" role="status">Загружаем отзывы…</p>
       <p v-else-if="!moderation.length && !adminError" class="review-management__empty">
@@ -101,7 +112,7 @@
             v-if="review.status === 'pending' || review.status === 'hidden'"
             class="btn btn-primary"
             type="button"
-            :disabled="busy"
+            :disabled="busy || adminLoading"
             @click="save(review, { status: 'published' })"
           >
             {{ review.status === 'hidden' ? 'Вернуть на сайт' : 'Опубликовать' }}
@@ -110,7 +121,7 @@
             v-if="review.status === 'pending'"
             class="btn btn-outline-primary"
             type="button"
-            :disabled="busy"
+            :disabled="busy || adminLoading"
             @click="save(review, { status: 'rejected' })"
           >
             Отклонить
@@ -119,7 +130,7 @@
             v-if="review.status === 'published'"
             class="btn btn-outline-primary"
             type="button"
-            :disabled="busy"
+            :disabled="busy || adminLoading"
             @click="save(review, { status: 'hidden' })"
           >
             Скрыть с сайта
@@ -128,12 +139,17 @@
             v-if="review.status === 'rejected'"
             class="btn btn-outline-primary"
             type="button"
-            :disabled="busy"
+            :disabled="busy || adminLoading"
             @click="save(review, { status: 'pending' })"
           >
             Вернуть на проверку
           </button>
-          <button class="btn btn-link" type="button" :disabled="busy" @click="startReply(review)">
+          <button
+            class="btn btn-link"
+            type="button"
+            :disabled="busy || adminLoading"
+            @click="startReply(review)"
+          >
             {{ review.reply ? 'Изменить ответ' : 'Ответить' }}
           </button>
         </div>
@@ -149,35 +165,43 @@
             class="form-control"
             rows="4"
             maxlength="1500"
-            :disabled="busy"
+            :disabled="busy || adminLoading"
           />
           <small
             >Ответ будет виден вместе с опубликованным отзывом. Чтобы убрать ответ, сохраните пустое
             поле.</small
           >
           <div class="review-management__actions">
-            <button class="btn btn-primary" type="submit" :disabled="busy">Сохранить ответ</button>
-            <button class="btn btn-link" type="button" :disabled="busy" @click="replyId = ''">
+            <button class="btn btn-primary" type="submit" :disabled="busy || adminLoading">
+              Сохранить ответ
+            </button>
+            <button
+              class="btn btn-link"
+              type="button"
+              :disabled="busy || adminLoading"
+              @click="replyId = ''"
+            >
               Отмена
             </button>
           </div>
         </form>
       </article>
-      <button
-        v-if="hasMore"
-        class="btn btn-outline-primary"
-        type="button"
+      <ReviewPagination
+        v-if="pageCount > 1 && moderation.length"
+        :page="page"
+        :page-count="pageCount"
+        :total="total"
         :disabled="adminLoading || busy"
-        @click="loadModeration(status, true)"
-      >
-        Ещё отзывы
-      </button>
+        label="Страницы отзывов снизу"
+        @change="changePage"
+      />
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { nextTick, ref, watch } from 'vue';
+import ReviewPagination from './ReviewPagination.vue';
 import {
   useReviews,
   reviewStatusLabels,
@@ -193,7 +217,9 @@ const {
   adminError,
   moderation,
   status,
-  hasMore,
+  page,
+  total,
+  pageCount,
   loadModeration,
 } = store;
 const email = ref('');
@@ -203,6 +229,7 @@ const error = ref('');
 const notice = ref('');
 const replyId = ref('');
 const replyText = ref('');
+const paginationTop = ref<HTMLElement | null>(null);
 watch(
   isModerator,
   (allowed) => {
@@ -238,7 +265,21 @@ function changeStatus(next: ReviewStatus) {
   replyId.value = '';
   replyText.value = '';
   notice.value = '';
-  void loadModeration(next);
+  void loadModeration(next, 1);
+}
+async function scrollToPagination() {
+  await nextTick();
+  paginationTop.value
+    ?.querySelector<HTMLButtonElement>('[aria-current="page"]')
+    ?.focus({ preventScroll: true });
+  paginationTop.value?.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+async function changePage(next: number) {
+  if (adminLoading.value || busy.value) return;
+  replyId.value = '';
+  replyText.value = '';
+  notice.value = '';
+  if (await loadModeration(status.value, next)) await scrollToPagination();
 }
 function startReply(review: Review) {
   replyId.value = review.id;
@@ -246,10 +287,12 @@ function startReply(review: Review) {
 }
 function save(review: Review, patch: { status?: ReviewStatus; reply?: string }) {
   return run(async () => {
+    const previousPage = page.value;
     await store.update(review, patch);
     replyId.value = '';
     replyText.value = '';
     notice.value = patch.reply !== undefined ? 'Ответ сохранён.' : 'Статус отзыва изменён.';
+    if (page.value !== previousPage) await scrollToPagination();
   });
 }
 function dateLabel(value: string) {
@@ -311,6 +354,9 @@ function dateLabel(value: string) {
 }
 .review-management__toolbar {
   margin-bottom: 16px;
+}
+.review-management__pages {
+  scroll-margin-top: 16px;
 }
 .review-management__filters button {
   padding: 10px 14px;

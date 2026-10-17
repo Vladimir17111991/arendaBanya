@@ -13,7 +13,9 @@ export function createReviewStore(repository?: ReviewRepository) {
   const adminError = ref('');
   const adminLoading = ref(false);
   const status = ref<ReviewStatus>('pending');
-  const hasMore = ref(false);
+  const page = ref(1);
+  const total = ref(0);
+  const pageCount = computed(() => Math.max(1, Math.ceil(total.value / REVIEW_PAGE_SIZE)));
   let authVersion = 0;
   let listVersion = 0;
   let publicVersion = 0;
@@ -21,7 +23,8 @@ export function createReviewStore(repository?: ReviewRepository) {
   function clearPrivate() {
     ++listVersion;
     moderation.value = [];
-    hasMore.value = false;
+    page.value = 1;
+    total.value = 0;
     adminLoading.value = false;
     authLoading.value = false;
     isModerator.value = false;
@@ -59,19 +62,39 @@ export function createReviewStore(repository?: ReviewRepository) {
       if (version === authVersion) authLoading.value = false;
     }
   }
-  async function loadModeration(nextStatus = status.value, more = false) {
+  async function loadModeration(
+    nextStatus = status.value,
+    targetPage = nextStatus === status.value ? page.value : 1,
+  ) {
     if (!repository || !isModerator.value) return;
     const version = ++listVersion;
-    const offset = more && nextStatus === status.value ? moderation.value.length : 0;
+    let requested = Number.isSafeInteger(targetPage) ? Math.max(1, targetPage) : 1;
+    if (nextStatus !== status.value) {
+      moderation.value = [];
+      total.value = 0;
+      page.value = 1;
+    }
     status.value = nextStatus;
-    if (!offset) moderation.value = [];
     adminLoading.value = true;
     adminError.value = '';
     try {
-      const data = await repository.listModeration(nextStatus, offset);
-      if (version !== listVersion || !isModerator.value) return;
-      moderation.value = offset ? [...moderation.value, ...data] : data;
-      hasMore.value = data.length === REVIEW_PAGE_SIZE;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const result = await repository.listModeration(
+          nextStatus,
+          (requested - 1) * REVIEW_PAGE_SIZE,
+        );
+        if (version !== listVersion || !isModerator.value) return;
+        const lastPage = Math.max(1, Math.ceil(result.total / REVIEW_PAGE_SIZE));
+        if (requested > lastPage) {
+          requested = lastPage;
+          continue;
+        }
+        moderation.value = result.reviews;
+        total.value = result.total;
+        page.value = requested;
+        return true;
+      }
+      throw new Error('Список отзывов изменился. Обновите страницу отзывов.');
     } catch (error) {
       if (version === listVersion) adminError.value = message(error);
     } finally {
@@ -120,7 +143,9 @@ export function createReviewStore(repository?: ReviewRepository) {
     adminLoading: readonly(adminLoading),
     adminError: readonly(adminError),
     status: readonly(status),
-    hasMore: readonly(hasMore),
+    page: readonly(page),
+    total: readonly(total),
+    pageCount,
     canSubmit: computed(() => Boolean(repository)),
     refreshPublic,
     refreshAuth,

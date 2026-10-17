@@ -41,10 +41,11 @@ export function createDemoReviewRepository(): ReviewRepository {
       return rows.filter((row) => row.status === 'published').map((row) => ({ ...row }));
     },
     async listModeration(status, offset) {
-      return rows
-        .filter((row) => row.status === status)
-        .slice(offset, offset + REVIEW_PAGE_SIZE)
-        .map((row) => ({ ...row }));
+      const matching = rows.filter((row) => row.status === status);
+      return {
+        reviews: matching.slice(offset, offset + REVIEW_PAGE_SIZE).map((row) => ({ ...row })),
+        total: matching.length,
+      };
     },
     async submit(id, draft) {
       if (rows.some((row) => row.id === id)) return;

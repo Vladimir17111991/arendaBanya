@@ -47,16 +47,26 @@ export function createSupabaseReviewRepository(url: string, publicKey: string): 
       return (data as ReviewRow[]).map(fromRow);
     },
     async listModeration(status, offset) {
-      const { data, error } = await client
+      const { data, error, count } = await client
         .from('reviews')
-        .select(fields)
+        .select(fields, { count: 'exact' })
         .eq('status', status)
         .order('created_at', { ascending: false })
         .order('id')
         .range(offset, offset + REVIEW_PAGE_SIZE - 1);
+      // A moderator may empty the last page between requests. PostgREST returns
+      // 416 for that range; recover the count so the store can select a valid page.
+      if (error?.code === 'PGRST103') {
+        const remaining = await client
+          .from('reviews')
+          .select('id', { count: 'exact', head: true })
+          .eq('status', status);
+        if (!remaining.error && remaining.count !== null)
+          return { reviews: [], total: remaining.count };
+      }
       if (error)
         throw new Error('Не удалось загрузить очередь. Проверьте вход и повторите попытку.');
-      return (data as ReviewRow[]).map(fromRow);
+      return { reviews: (data as ReviewRow[]).map(fromRow), total: count ?? 0 };
     },
     async submit(id, draft) {
       const { error } = await client.rpc('submit_review', {

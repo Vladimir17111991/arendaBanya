@@ -11,10 +11,14 @@ export interface Review extends ReviewDraft {
   createdAt: string;
   updatedAt: string;
 }
+export interface ReviewPage {
+  reviews: Review[];
+  total: number;
+}
 export interface ReviewRepository {
   kind: 'demo' | 'remote' | 'offline';
   listPublic(): Promise<Review[]>;
-  listModeration(status: ReviewStatus, offset: number): Promise<Review[]>;
+  listModeration(status: ReviewStatus, offset: number): Promise<ReviewPage>;
   submit(id: string, draft: ReviewDraft): Promise<void>;
   update(review: Review, patch: { status?: ReviewStatus; reply?: string }): Promise<void>;
   isModerator(): Promise<boolean>;
@@ -23,7 +27,7 @@ export interface ReviewRepository {
   onAuthChange(listener: () => void): () => void;
 }
 
-export const REVIEW_PAGE_SIZE = 20;
+export const REVIEW_PAGE_SIZE = 10;
 export const reviewStatusLabels: Record<ReviewStatus, string> = {
   pending: 'На проверке',
   published: 'Опубликованные',
