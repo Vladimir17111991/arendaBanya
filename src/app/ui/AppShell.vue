@@ -27,19 +27,7 @@
       <CabinetView v-else key="admin" />
     </Transition>
   </main>
-  <footer v-if="publicPage" class="site-footer">
-    <nav class="container site-footer__navigation" aria-label="Навигация внизу страницы">
-      <SectionLink
-        v-for="link in publicSectionLinks"
-        :key="link.section"
-        :to="link.section"
-        class="btn btn-primary section-button"
-        :aria-current="activeSection === link.section ? 'location' : undefined"
-      >
-        {{ link.label }}
-      </SectionLink>
-    </nav>
-  </footer>
+  <SiteFooter v-if="publicPage" :active-section="activeSection" />
   <BackToTop :mobile-hidden="publicPage" />
   <ContactRequestDialog
     :request="contactRequest"
@@ -54,7 +42,8 @@ import { AppHeader } from '../../widgets/site-header/index.ts';
 import { ServicesView } from '../../pages/home/index.ts';
 import { BookingView } from '../../pages/booking/index.ts';
 import { CabinetView } from '../../pages/cabinet/index.ts';
-import { BackToTop, SectionLink } from '../../shared/ui/index.ts';
+import { BackToTop } from '../../shared/ui/index.ts';
+import { SiteFooter } from '../../widgets/site-footer/index.ts';
 import { usePractice } from '../../entities/practice/index.ts';
 import { useBrowserTools } from '../providers/useBrowserTools.ts';
 import { provideSiteNavigation } from '../providers/useSiteNavigation.ts';
@@ -63,7 +52,7 @@ import {
   ContactRequestDialog,
 } from '../../features/contact-specialist/index.ts';
 
-import { publicSectionLinks, useNavigation } from '../../shared/routing/index.ts';
+import { useNavigation } from '../../shared/routing/index.ts';
 const store = usePractice();
 const navigation = useNavigation();
 useBrowserTools(store, navigation);
@@ -87,28 +76,6 @@ function leaveAdmin() {
 </script>
 
 <style scoped>
-.site-footer {
-  position: relative;
-  z-index: 1;
-  border-top: 1px solid var(--line);
-  padding-block: 28px;
-  background: var(--cream);
-}
-.site-footer__navigation {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px;
-}
-.site-footer__navigation [aria-current='location'] {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-}
-@media (max-width: 767.98px) {
-  .site-footer {
-    padding-bottom: calc(88px + env(safe-area-inset-bottom));
-  }
-}
 .skip-link {
   left: 1rem;
   top: -100px;

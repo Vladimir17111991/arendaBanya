@@ -4,3 +4,4 @@ export { default as ContactLink } from './ui/ContactLink.vue';
 export { default as MobileContactBar } from './ui/MobileContactBar.vue';
 
 export { default as ContactForm } from './ui/ContactForm.vue';
+export { default as ContactChannels } from './ui/ContactChannels.vue';

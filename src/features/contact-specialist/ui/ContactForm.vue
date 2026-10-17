@@ -1,16 +1,6 @@
 <template>
   <div class="contact-form">
-    <div class="contact-form__channels" aria-label="Социальные сети и мессенджеры">
-      <button
-        v-for="channel in ['Instagram', 'Telegram', 'Viber']"
-        :key="channel"
-        type="button"
-        class="contact-form__channel"
-        @click="notice = 'Ссылка на ' + channel + ' появится после подключения контактов.'"
-      >
-        {{ channel }}
-      </button>
-    </div>
+    <ContactChannels />
 
     <form @submit.prevent="submit">
       <div class="contact-form__fields">
@@ -43,6 +33,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { PhoneInput } from '../../../shared/ui/index.ts';
+import ContactChannels from './ContactChannels.vue';
 const name = ref('');
 const phone = ref('');
 const message = ref('');
@@ -59,22 +50,6 @@ function submit() {
 .contact-form form {
   display: grid;
   gap: 22px;
-}
-.contact-form__channels {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-.contact-form__channel {
-  min-height: 48px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: var(--ink);
-  background: var(--control-bg);
-  font-size: 15px;
-}
-.contact-form__channel:hover {
-  border-color: var(--accent);
 }
 .contact-form__hint {
   color: var(--muted);
@@ -125,12 +100,6 @@ function submit() {
 @media (max-width: 575.98px) {
   .contact-form__fields {
     grid-template-columns: 1fr;
-  }
-  .contact-form__channels {
-    gap: 6px;
-  }
-  .contact-form__channel {
-    font-size: 13px;
   }
 }
 </style>

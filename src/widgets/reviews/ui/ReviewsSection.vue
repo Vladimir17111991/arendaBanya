@@ -19,6 +19,11 @@
       @pointerup="endDrag"
       @pointercancel="endDrag"
       @lostpointercapture="endDrag"
+      @touchstart.passive="startTouch"
+      @touchend.passive="endTouch"
+      @touchcancel.passive="endTouch"
+      @scroll.passive="onScroll"
+      @scrollend="finishTouchScroll"
       @keydown.left.prevent="advance(-1)"
       @keydown.right.prevent="advance(1)"
       @wheel="onWheel"
@@ -121,11 +126,19 @@ const reviews = [
   { name: 'Елена', text: 'Удобно остаться с ночёвкой после бани — отдохнуть и уехать уже утром.' },
 ];
 const slides = [...reviews, ...reviews, ...reviews];
-const { dragging, startDrag, moveDrag, endDrag, onWheel, advance, interact } = useReviewCarousel(
-  reviews.length,
-  open,
-  track,
-);
+const {
+  dragging,
+  startDrag,
+  moveDrag,
+  endDrag,
+  startTouch,
+  endTouch,
+  onScroll,
+  finishTouchScroll,
+  onWheel,
+  advance,
+  interact,
+} = useReviewCarousel(reviews.length, open, track);
 </script>
 <style scoped>
 .reviews__note {
@@ -135,12 +148,19 @@ const { dragging, startDrag, moveDrag, endDrag, onWheel, advance, interact } = u
 .reviews__grid {
   display: flex;
   position: relative;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
   cursor: grab;
   user-select: none;
-  touch-action: pan-y pinch-zoom;
+  touch-action: pan-x pan-y pinch-zoom;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
   gap: 20px;
   border-radius: 24px;
+}
+.reviews__grid::-webkit-scrollbar {
+  display: none;
 }
 .reviews__grid:focus-visible {
   outline: 2px solid var(--accent);
@@ -150,6 +170,8 @@ const { dragging, startDrag, moveDrag, endDrag, onWheel, advance, interact } = u
   cursor: grabbing;
 }
 .reviews__card {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
   flex: 0 0 100%;
   box-sizing: border-box;
   display: flex;
