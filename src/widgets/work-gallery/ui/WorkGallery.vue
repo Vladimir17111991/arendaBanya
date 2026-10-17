@@ -124,8 +124,15 @@
         @pointercancel="cancelGesture"
         @lostpointercapture="gesture.cancel()"
       >
-        <div v-for="photo in filteredPhotos" :key="photo.id" class="photo-swiper__slide">
-          <img :src="photo.url" :alt="photo.title" draggable="false" class="photo-swiper__image" />
+        <div class="photo-swiper__track">
+          <div v-for="photo in filteredPhotos" :key="photo.id" class="photo-swiper__slide">
+            <img
+              :src="photo.url"
+              :alt="photo.title"
+              draggable="false"
+              class="photo-swiper__image"
+            />
+          </div>
         </div>
       </div>
       <nav ref="thumbnails" class="photo-thumbnails" aria-label="Выбрать фотографию">
@@ -145,9 +152,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue';
 import { usePractice } from '../../../entities/practice/index.ts';
 import { MediaDialog } from '../../../shared/ui/index.ts';
+import { createLoopCarousel, type EmblaCarouselType } from '../../../shared/lib/carousel/index.ts';
 import { createPhotoGesture } from '../model/photoGesture.ts';
 
 type PhotoFilter = 'all' | 'bath' | 'bedroom';
@@ -155,8 +163,7 @@ const { photos, siteImages, services } = usePractice();
 const content = ref<HTMLElement | null>(null);
 const swiper = ref<HTMLElement | null>(null);
 const gesture = createPhotoGesture();
-let startScroll = 0;
-let startIndex = 0;
+let photoCarousel: EmblaCarouselType | undefined;
 function point(event: PointerEvent) {
   return { id: event.pointerId, x: event.clientX, y: event.clientY };
 }
@@ -168,26 +175,17 @@ function startGesture(event: PointerEvent) {
     return;
   }
   if (event.button !== 0) return;
-  // Stop an unfinished slide animation so the next gesture acts immediately.
-  startScroll = element.scrollLeft;
-  startIndex = Math.round(startScroll / element.clientWidth);
-  element.scrollTo({ left: startScroll, behavior: 'instant' });
   gesture.begin(point(event));
   element.setPointerCapture(event.pointerId);
 }
 function moveGesture(event: PointerEvent) {
-  const movement = gesture.move(point(event));
-  if (movement?.axis === 'x' && swiper.value) swiper.value.scrollLeft = startScroll - movement.dx;
+  // Embla owns horizontal motion; this gesture only handles dismissal and taps.
+  gesture.move(point(event));
 }
 function settlePhoto(index: number) {
-  const element = swiper.value;
-  if (!element) return;
+  if (!photoCarousel || closing.value) return;
   const target = Math.max(0, Math.min(filteredPhotos.value.length - 1, index));
-  selectedId.value = filteredPhotos.value[target]?.id ?? null;
-  element.scrollTo({
-    left: target * element.clientWidth,
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-  });
+  photoCarousel.scrollTo(target, matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 function endGesture(event: PointerEvent) {
   const movement = gesture.end(point(event));
@@ -204,12 +202,9 @@ function endGesture(event: PointerEvent) {
       return;
     }
   }
-  const step = movement.axis === 'x' && Math.abs(movement.dx) > 40 ? (movement.dx < 0 ? 1 : -1) : 0;
-  settlePhoto(startIndex + step);
 }
 function cancelGesture() {
   gesture.cancel();
-  settlePhoto(startIndex);
 }
 const collageSize = 9;
 const visibleCount = ref(collageSize);
@@ -217,6 +212,11 @@ const activeFilter = ref<PhotoFilter>('all');
 const selectedId = ref<string | null>(null);
 const thumbnails = ref<HTMLElement | null>(null);
 watch(selectedId, async () => {
+  if (!selectedId.value) {
+    photoCarousel?.destroy();
+    photoCarousel = undefined;
+    gesture.cancel();
+  }
   await nextTick();
   centerThumbnail();
 });
@@ -245,7 +245,10 @@ function closePhoto(fromSwipe = false) {
     matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 260,
   );
 }
-onUnmounted(() => clearTimeout(closeTimer));
+onUnmounted(() => {
+  clearTimeout(closeTimer);
+  photoCarousel?.destroy();
+});
 const announcement = ref('');
 const galleryPhotos = computed(() => [
   ...(siteImages.value.studio
@@ -320,33 +323,23 @@ watch(
   },
   { flush: 'sync' },
 );
-let resizeObserver: ResizeObserver | undefined;
-let measuredWidth = 0;
-onMounted(() => {
-  resizeObserver = new ResizeObserver(() => {
-    const element = swiper.value;
-    if (!element?.clientWidth || selectedIndex.value < 0) return;
-    measuredWidth = element.clientWidth;
-    element.scrollTo({ left: selectedIndex.value * measuredWidth, behavior: 'instant' });
-    centerThumbnail();
-  });
-  if (swiper.value) resizeObserver.observe(swiper.value);
-});
-onUnmounted(() => resizeObserver?.disconnect());
 async function openPhoto(id: string) {
   selectedId.value = id;
   await nextTick();
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-  swiper.value?.scrollTo({
-    left: selectedIndex.value * swiper.value.clientWidth,
-    behavior: 'instant',
+  if (!swiper.value || selectedId.value !== id || closing.value) return;
+  photoCarousel?.destroy();
+  photoCarousel = createLoopCarousel(swiper.value, { startIndex: selectedIndex.value });
+  photoCarousel.on('select', (api) => {
+    selectedId.value = filteredPhotos.value[api.selectedScrollSnap()]?.id ?? null;
   });
+  photoCarousel.on('reInit', centerThumbnail);
 }
 function movePhoto(direction: number) {
-  if (selectedIndex.value < 0 || filteredPhotos.value.length < 2) return;
-  const index =
-    (selectedIndex.value + direction + filteredPhotos.value.length) % filteredPhotos.value.length;
-  settlePhoto(index);
+  if (!photoCarousel || closing.value) return;
+  const jump = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (direction > 0) photoCarousel.scrollNext(jump);
+  else photoCarousel.scrollPrev(jump);
 }
 function onDialogKeydown(event: KeyboardEvent) {
   if (event.altKey || event.ctrlKey || event.metaKey || !selectedPhoto.value) return;
@@ -793,16 +786,15 @@ async function showMore(event: MouseEvent) {
   position: absolute;
   inset: max(64px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
     calc(92px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
-  display: flex;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: hidden;
   touch-action: pinch-zoom;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
 }
-.photo-swiper::-webkit-scrollbar {
-  display: none;
+.photo-swiper__track {
+  display: flex;
+  width: 100%;
+  height: 100%;
 }
 .photo-swiper__slide {
   flex: 0 0 100%;

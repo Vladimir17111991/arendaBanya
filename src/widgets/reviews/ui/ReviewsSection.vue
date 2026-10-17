@@ -14,32 +14,21 @@
       role="region"
       aria-roledescription="карусель"
       aria-label="Отзывы гостей"
-      @pointerdown="startDrag"
-      @pointermove="moveDrag"
-      @pointerup="endDrag"
-      @pointercancel="endDrag"
-      @lostpointercapture="endDrag"
-      @touchstart.passive="startTouch"
-      @touchend.passive="endTouch"
-      @touchcancel.passive="endTouch"
-      @scroll.passive="onScroll"
-      @scrollend="finishTouchScroll"
       @keydown.left.prevent="advance(-1)"
       @keydown.right.prevent="advance(1)"
       @wheel="onWheel"
       @keydown="interact"
       @focusin="interact"
     >
-      <article
-        v-for="(review, index) in slides"
-        :key="index"
-        class="reviews__card"
-        :aria-hidden="index < reviews.length || index >= reviews.length * 2"
-      >
-        <span class="reviews__stars" aria-label="5 из 5 звёзд">★★★★★</span>
-        <p>{{ review.text }}</p>
-        <strong class="reviews__author">{{ review.name }}</strong>
-      </article>
+      <div class="reviews__track">
+        <div v-for="review in reviews" :key="review.name" class="reviews__slide">
+          <article class="reviews__card">
+            <span class="reviews__stars" aria-label="5 из 5 звёзд">★★★★★</span>
+            <p>{{ review.text }}</p>
+            <strong class="reviews__author">{{ review.name }}</strong>
+          </article>
+        </div>
+      </div>
     </div>
     <button type="button" class="btn btn-primary reviews__add" @click="open = true">
       Оставить отзыв
@@ -125,20 +114,7 @@ const reviews = [
   },
   { name: 'Елена', text: 'Удобно остаться с ночёвкой после бани — отдохнуть и уехать уже утром.' },
 ];
-const slides = [...reviews, ...reviews, ...reviews];
-const {
-  dragging,
-  startDrag,
-  moveDrag,
-  endDrag,
-  startTouch,
-  endTouch,
-  onScroll,
-  finishTouchScroll,
-  onWheel,
-  advance,
-  interact,
-} = useReviewCarousel(reviews.length, open, track);
+const { dragging, onWheel, advance, interact } = useReviewCarousel(open, track);
 </script>
 <style scoped>
 .reviews__note {
@@ -146,21 +122,22 @@ const {
   margin: 18px 0 28px;
 }
 .reviews__grid {
-  display: flex;
   position: relative;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   cursor: grab;
   user-select: none;
-  touch-action: pan-x pan-y pinch-zoom;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  overscroll-behavior-x: contain;
-  gap: 20px;
+  touch-action: pan-y pinch-zoom;
   border-radius: 24px;
 }
-.reviews__grid::-webkit-scrollbar {
-  display: none;
+.reviews__track {
+  display: flex;
+  touch-action: pan-y pinch-zoom;
+  margin-left: -20px;
+}
+.reviews__slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  padding-left: 20px;
 }
 .reviews__grid:focus-visible {
   outline: 2px solid var(--accent);
@@ -170,9 +147,7 @@ const {
   cursor: grabbing;
 }
 .reviews__card {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  flex: 0 0 100%;
+  height: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -182,8 +157,8 @@ const {
   background: var(--surface-raised);
 }
 @media (min-width: 768px) {
-  .reviews__card {
-    flex-basis: calc((100% - 20px) / 2);
+  .reviews__slide {
+    flex-basis: 50%;
   }
 }
 .reviews__quote {

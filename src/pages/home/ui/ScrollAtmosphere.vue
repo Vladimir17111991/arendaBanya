@@ -15,75 +15,53 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
+import {
+  atmosphereAt,
+  atmosphereStages,
+  sectionLayoutTop,
+  type AtmosphereStop,
+} from '../model/scrollAtmosphere.ts';
 
 const background = ref<HTMLElement | null>(null);
-const stages = [
-  { id: 'home', x: -8, y: -10, turn: -16, amber: 0.76, copper: 0.45, honey: 0.28 },
-  { id: 'work-gallery', x: 14, y: 14, turn: 12, amber: 0.58, copper: 0.8, honey: 0.25 },
-  { id: 'price-list', x: -12, y: -5, turn: -10, amber: 0.82, copper: 0.35, honey: 0.65 },
-  { id: 'availability', x: 10, y: 12, turn: 18, amber: 0.65, copper: 0.72, honey: 0.3 },
-  { id: 'contacts', x: -6, y: -12, turn: -6, amber: 0.75, copper: 0.62, honey: 0.45 },
-];
 let frame = 0;
 let resizeObserver: ResizeObserver | undefined;
 let motion: MediaQueryList | undefined;
-let stops: number[] = [];
+let stops: AtmosphereStop[] = [];
 
-function paint(first: (typeof stages)[number], last = first, progress = 0) {
+function paint(state = atmosphereAt(stops, window.scrollY)) {
   const style = background.value?.style;
   if (!style) return;
-  const mix = (key: 'x' | 'y' | 'turn' | 'amber' | 'copper' | 'honey') =>
-    first[key] + (last[key] - first[key]) * progress;
-  style.setProperty('--flow-x', `${mix('x').toFixed(2)}vw`);
-  style.setProperty('--flow-y', `${mix('y').toFixed(2)}vh`);
-  style.setProperty('--flow-turn', `${mix('turn').toFixed(2)}deg`);
-  style.setProperty('--amber-strength', mix('amber').toFixed(3));
-  style.setProperty('--copper-strength', mix('copper').toFixed(3));
-  style.setProperty('--honey-strength', mix('honey').toFixed(3));
+  style.setProperty('--flow-x', `${state.x.toFixed(2)}vw`);
+  style.setProperty('--flow-y', `${state.y.toFixed(2)}lvh`);
+  style.setProperty('--flow-turn', `${state.turn.toFixed(2)}deg`);
+  style.setProperty('--amber-strength', state.amber.toFixed(3));
+  style.setProperty('--copper-strength', state.copper.toFixed(3));
+  style.setProperty('--honey-strength', state.honey.toFixed(3));
 }
 function update() {
   frame = 0;
   if (document.hidden) return;
-  if (motion?.matches || stops.length < 2) {
-    paint(stages[0]!);
-    return;
-  }
-  const position = window.scrollY;
-  const next = stops.findIndex((stop) => stop > position);
-  if (next < 0) {
-    paint(stages[stages.length - 1]!);
-    return;
-  }
-  if (next === 0) {
-    paint(stages[0]!);
-    return;
-  }
-  const start = stops[next - 1] ?? 0;
-  const end = stops[next] ?? start;
-  const progress = Math.min(1, Math.max(0, (position - start) / Math.max(1, end - start)));
-  paint(stages[next - 1]!, stages[next]!, progress);
+  paint(motion?.matches ? atmosphereStages[0]! : undefined);
 }
 function scheduleUpdate() {
   if (!frame && !document.hidden && !motion?.matches) frame = window.requestAnimationFrame(update);
 }
 function measure() {
   const parent = background.value?.parentElement;
-  const limit = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-  stops = stages.map(({ id }, index) => {
-    const section = parent?.querySelector<HTMLElement>(`#${id}`);
-    return index === 0
-      ? 0
-      : Math.min(
-          limit,
-          Math.max(
-            0,
-            (section?.getBoundingClientRect().top ?? 0) +
-              window.scrollY -
-              window.innerHeight * 0.25,
-          ),
-        );
-  });
-  if (motion?.matches) paint(stages[0]!);
+  // The stable large viewport does not change as the phone's address bar hides.
+  const height = background.value?.clientHeight || window.innerHeight;
+  const limit = Math.max(0, document.documentElement.scrollHeight - height);
+  stops = atmosphereStages
+    .flatMap((stage, index) => {
+      const section = parent?.querySelector<HTMLElement>(`#${stage.id}`);
+      if (!section) return [];
+      const top =
+        index === 0 ? 0 : Math.min(limit, Math.max(0, sectionLayoutTop(section) - height * 0.25));
+      return [{ top, stage }];
+    })
+    .sort((a, b) => a.top - b.top)
+    .filter((stop, index, list) => !index || stop.top > list[index - 1]!.top);
+  if (motion?.matches) paint(atmosphereStages[0]!);
   else scheduleUpdate();
 }
 function syncMotion() {
@@ -93,7 +71,7 @@ function syncMotion() {
     window.cancelAnimationFrame(frame);
     frame = 0;
   }
-  if (motion?.matches) paint(stages[0]!);
+  if (motion?.matches) paint(atmosphereStages[0]!);
   else if (!document.hidden) measure();
 }
 onMounted(() => {
@@ -127,7 +105,9 @@ onUnmounted(() => {
   --copper-strength: 0.45;
   --honey-strength: 0.28;
   position: fixed;
-  inset: 0;
+  inset: 0 0 auto;
+  height: 100vh;
+  height: 100lvh;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
