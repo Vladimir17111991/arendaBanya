@@ -63,6 +63,31 @@ test('offline mode never reports a successful submission; invalid data does not 
   store.dispose();
 });
 
+test('rejecting one hidden review preserves other reviews and can be returned to moderation', async () => {
+  const store = createReviewStore(createDemoReviewRepository());
+  await store.init();
+  const first = store.published.value[0];
+  const second = store.published.value[1];
+  await store.update(first, { status: 'hidden' });
+  await store.update(second, { status: 'hidden' });
+  await store.loadModeration('hidden');
+  const hidden = store.moderation.value.find((review) => review.id === first.id)!;
+  await store.update(hidden, { status: 'rejected' });
+  assert.deepEqual(store.moderation.value.map((review) => review.id), [second.id]);
+  assert.equal(store.total.value, 1);
+  assert.equal(store.published.value.some((review) => review.id === first.id), false);
+  await store.loadModeration('rejected');
+  assert.equal(store.moderation.value.length, 1);
+  const rejected = store.moderation.value[0];
+  assert.equal(rejected.id, first.id);
+  assert.equal(rejected.text, first.text);
+  assert.equal(rejected.rating, first.rating);
+  await store.update(rejected, { status: 'pending' });
+  await store.loadModeration('pending');
+  assert.equal(store.moderation.value[0]?.id, first.id);
+  store.dispose();
+});
+
 test('private queue response arriving after sign-out cannot repopulate the cabinet', async () => {
   let resolveQueue!: (result: ReviewPage) => void;
   const base = createDemoReviewRepository();

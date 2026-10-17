@@ -51,7 +51,7 @@ export function canChangeReviewStatus(from: ReviewStatus, to: ReviewStatus): boo
   const transitions: Record<ReviewStatus, ReviewStatus[]> = {
     pending: ['published', 'rejected'],
     published: ['hidden'],
-    hidden: ['published'],
+    hidden: ['published', 'rejected'],
     rejected: ['pending'],
   };
   return from === to || transitions[from].includes(to);

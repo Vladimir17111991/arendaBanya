@@ -129,7 +129,7 @@
             {{ review.status === 'hidden' ? 'Вернуть на сайт' : 'Опубликовать' }}
           </button>
           <button
-            v-if="review.status === 'pending'"
+            v-if="review.status === 'pending' || review.status === 'hidden'"
             class="btn btn-outline-primary"
             type="button"
             :disabled="busy || adminLoading"

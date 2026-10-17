@@ -9,6 +9,7 @@ grant usage on schema auth, public to anon, authenticated;
 grant execute on function auth.uid() to anon, authenticated;
 \ir ../migrations/202610170001_reviews.sql
 \ir ../migrations/202610170002_clear_rejected_reviews.sql
+\ir ../migrations/202610170003_reject_hidden_reviews.sql
 insert into auth.users values ('00000000-0000-4000-8000-000000000001'), ('00000000-0000-4000-8000-000000000002');
 insert into public.review_moderators values ('00000000-0000-4000-8000-000000000001');
 
@@ -81,6 +82,33 @@ set role anon;
 do $$ begin
   if exists(select 1 from public.reviews) then raise exception 'Hidden review visible'; end if;
 end $$;
+reset role;
+
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-4000-8000-000000000001';
+update public.reviews set status = 'rejected' where status = 'hidden';
+do $$ begin
+  if (select status from public.reviews limit 1) <> 'rejected' then raise exception 'Hidden review cannot be rejected'; end if;
+  if (select body from public.reviews limit 1) <> 'More towels please.' then raise exception 'Original opinion changed'; end if;
+end $$;
+reset role;
+set role anon;
+do $$ begin
+  if exists(select 1 from public.reviews) then raise exception 'Rejected review visible'; end if;
+end $$;
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = '00000000-0000-4000-8000-000000000001';
+update public.reviews set status = 'pending';
+update public.reviews set status = 'published';
+do $$ begin
+  begin
+    update public.reviews set status = 'rejected';
+    raise exception 'Published review must be hidden before rejection';
+  exception when check_violation then null;
+  end;
+end $$;
+update public.reviews set status = 'hidden';
 reset role;
 
 insert into public.reviews(id, name, rating, body, status) values
