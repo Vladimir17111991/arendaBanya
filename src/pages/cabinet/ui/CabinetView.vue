@@ -2,8 +2,7 @@
   <section class="cabinet pt-3">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
       <div>
-        <p class="cabinet__eyebrow mb-2 d-none d-sm-block">ЛИЧНЫЙ КАБИНЕТ</p>
-        <h1 class="cabinet__title mb-1">Управление баней</h1>
+        <h1 class="cabinet__title mb-1">Личный кабинет</h1>
         <p class="small text-muted mb-0 d-none d-sm-block">
           Клиенты, брони и фотографии бани — всё под рукой.
         </p>
@@ -83,12 +82,6 @@ const mainTabs = [
 </script>
 
 <style scoped>
-.cabinet__eyebrow {
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-}
 .cabinet__title {
   font-family: var(--display);
   font-size: clamp(26px, 3vw, 38px);
